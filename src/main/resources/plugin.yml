@@ -1,0 +1,6 @@
+name: ParfaitAuth
+main: hmhmmhm.ParfaitAuth.ParfaitAuthPlugin
+version: "1.0.0"
+author: hmhmmhm
+api: ["1.0.0"]
+website: https://github.com/HmHmmHm
