@@ -1,0 +1,4 @@
+{
+	"status-start-get-account-data": "* 유저 정보를 서버에 전송 요청합니다...",
+	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!"
+}

@@ -30,6 +30,8 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 	@Override
 	public void onEnable() {
+		this.checkCompatibility();
+
 		this.getDataFolder().mkdirs();
 		this.loadResources();
 		this.loadCommands();
@@ -47,6 +49,18 @@ public class ParfaitAuthPlugin extends PluginBase {
 					return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 플러그인이 서버와 호환되는지 확인합니다.
+	 */
+	private void checkCompatibility() {
+		// MongoDBLib이 없는 경우
+		if (this.getServer().getPluginManager().getPlugin("MongoDBLib") == null) {
+			this.getLogger().critical(this.getMessage("error-no-exist-mongodb"));
+			this.getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
 	}
 
 	/**
