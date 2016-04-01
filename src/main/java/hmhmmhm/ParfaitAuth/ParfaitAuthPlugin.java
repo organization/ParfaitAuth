@@ -1,8 +1,6 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.io.File;
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -15,7 +13,6 @@ import hmhmmhm.ParfaitAuth.Commands.AuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangeNickCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangePasswordCommand;
 import hmhmmhm.ParfaitAuth.Commands.FindAccountCommand;
-import hmhmmhm.ParfaitAuth.Commands.LanguageCommand;
 import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
@@ -26,21 +23,10 @@ public class ParfaitAuthPlugin extends PluginBase {
 	private LinkedHashMap<String, Object> commandMap = new LinkedHashMap<String, Object>();
 
 	/**
-	 * 플러그인 언어 메시지 파일의 버전을 나타냅니다. 개발자는 향후 메시지 내용이 변경되면 이 숫자를 올려줘야합니다!
+	 * 플러그인 언어 메시지 파일의 버전을 나타냅니다.
+	 * 개발자는 향후 메시지 내용이 변경되면 이 숫자를 올려줘야합니다!
 	 */
 	final int languageFileVersion = 1;
-
-	@Override
-	public void onLoad() {
-		Calendar calendar = Calendar.getInstance();
-		Timestamp currentTimestamp = new Timestamp(calendar.getTime().getTime());
-
-		this.getLogger().info("long:" + String.valueOf(calendar.getTime().getTime()));
-		this.getLogger().info("current timestamp:" + currentTimestamp.toString());
-
-		Timestamp parseTimestamp = Timestamp.valueOf(currentTimestamp.toString());
-		this.getLogger().info("parse timestamp:" + parseTimestamp.toString());
-	}
 
 	@Override
 	public void onEnable() {
@@ -114,7 +100,6 @@ public class ParfaitAuthPlugin extends PluginBase {
 		this.commandMap.put("ChangeNickCommand", new ChangeNickCommand(this));
 		this.commandMap.put("ChangePasswordCommand", new ChangePasswordCommand(this));
 		this.commandMap.put("FindAccountCommand", new FindAccountCommand(this));
-		this.commandMap.put("LanguageCommand", new LanguageCommand(this));
 		this.commandMap.put("LoginCommand", new LoginCommand(this));
 		this.commandMap.put("RegisterCommand", new RegisterCommand(this));
 		this.commandMap.put("UnregisterCommand", new UnregisterCommand(this));

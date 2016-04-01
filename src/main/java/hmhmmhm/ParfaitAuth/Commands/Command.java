@@ -28,7 +28,6 @@ abstract public class Command {
 
 	protected boolean registerCommand() {
 		SimpleCommandMap commandMap = this.getServer().getCommandMap();
-
 		PluginCommand<Plugin> command = new PluginCommand<>(this.commandName, this.plugin);
 		command.setDescription(this.commandDescription);
 		command.setPermission(this.permissionName);
