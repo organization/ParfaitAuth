@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class AuthCommand extends Command {
+public class AuthCommand extends ParfaitAuthCommand {
 	public AuthCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-auth";
-		this.permissionName = "commands-auth-permission";
-		this.commandDescription = "commands-auth-description";
-		this.commandUsage = "commands-auth-usage";
-		this.registerCommand();
+		this.load("auth", false);
 	}
 
 	@Override

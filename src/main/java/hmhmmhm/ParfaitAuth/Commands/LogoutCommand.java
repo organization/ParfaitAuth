@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class LogoutCommand extends Command{
+public class LogoutCommand extends ParfaitAuthCommand {
 	public LogoutCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-logout";
-		this.permissionName = "commands-logout-permission";
-		this.commandDescription = "commands-logout-description";
-		this.commandUsage = "commands-logout-usage";
-		this.registerCommand();
+		this.load("logout", false);
 	}
 
 	@Override

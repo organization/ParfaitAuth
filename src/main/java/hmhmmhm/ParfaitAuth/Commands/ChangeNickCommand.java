@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class ChangeNickCommand extends Command{
+public class ChangeNickCommand extends ParfaitAuthCommand {
 	public ChangeNickCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-changenick";
-		this.permissionName = "commands-changenick-permission";
-		this.commandDescription = "commands-changenick-description";
-		this.commandUsage = "commands-changenick-usage";
-		this.registerCommand();
+		this.load("changenick", false);
 	}
 
 	@Override

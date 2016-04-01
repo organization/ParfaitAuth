@@ -7,13 +7,13 @@ import org.bson.Document;
 
 public class Account {
 	/* 계정 필수 정보들을 별도로 변수로 보관합니다. */
-	public UUID uuid;
-	public String id;
-	public String password;
-	public String lastIp;
-	public String lastDate;
-	public String nickname;
-	public String logined;
+	public UUID uuid = null;
+	public String id = null;
+	public String password = null;
+	public String lastIp = null;
+	public String lastDate = null;
+	public String nickname = null;
+	public String logined = null;
 
 	/* 계정 Document 에 남은 추가적인 정보들을 보관합니다. */
 	public LinkedHashMap<String, Object> additionalData = new LinkedHashMap<String, Object>();
@@ -31,23 +31,42 @@ public class Account {
 		this.lastDate = (String) document.get("id");
 		this.nickname = (String) document.get("nickname");
 		this.logined = (String) document.get("logined");
+
+		// TODO additionalData
 	}
 
 	/**
 	 * 계정정보를 BSON 문서로 반환합니다.
+	 * 
 	 * @return Document
 	 */
 	public Document convertToDocument() {
 		Document document = new Document();
 
+		if (this.uuid == null | this.nickname == null)
+			return null;
+
 		document.put("uuid", this.uuid);
-		document.put("id", this.id);
-		document.put("password", this.password);
-		document.put("lastIp", this.lastIp);
-		document.put("lastDate", this.lastDate);
 		document.put("nickname", this.nickname);
-		document.put("logined", this.logined);
-		document.put("additionalData", this.additionalData);
+
+		if (this.id != null)
+			document.put("id", this.id);
+
+		if (this.password != null)
+			document.put("password", this.password);
+
+		if (this.lastIp != null)
+			document.put("lastIp", this.lastIp);
+
+		if (this.lastDate != null)
+			document.put("lastDate", this.lastDate);
+
+		if (this.logined != null)
+			document.put("logined", this.logined);
+
+		// TODO additionalData
+		if (this.logined != null)
+			document.put("additionalData", this.additionalData);
 
 		return document;
 	}

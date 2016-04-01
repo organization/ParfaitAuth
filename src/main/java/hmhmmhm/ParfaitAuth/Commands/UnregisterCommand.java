@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class UnregisterCommand extends Command {
+public class UnregisterCommand extends ParfaitAuthCommand {
 	public UnregisterCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-unregister";
-		this.permissionName = "commands-unregister-permission";
-		this.commandDescription = "commands-unregister-description";
-		this.commandUsage = "commands-unregister-usage";
-		this.registerCommand();
+		this.load("unregister", false);
 	}
 
 	@Override

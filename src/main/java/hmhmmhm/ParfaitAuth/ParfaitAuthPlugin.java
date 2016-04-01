@@ -1,6 +1,8 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.io.File;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -29,9 +31,20 @@ public class ParfaitAuthPlugin extends PluginBase {
 	final int languageFileVersion = 1;
 
 	@Override
+	public void onLoad() {
+		Calendar calendar = Calendar.getInstance();
+		Timestamp currentTimestamp = new Timestamp(calendar.getTime().getTime());
+
+		this.getLogger().info("long:" + String.valueOf(calendar.getTime().getTime()));
+		this.getLogger().info("current timestamp:" + currentTimestamp.toString());
+
+		Timestamp parseTimestamp = Timestamp.valueOf(currentTimestamp.toString());
+		this.getLogger().info("parse timestamp:" + parseTimestamp.toString());
+	}
+
+	@Override
 	public void onEnable() {
 		this.checkCompatibility();
-
 		this.getDataFolder().mkdirs();
 		this.loadResources();
 		this.loadCommands();

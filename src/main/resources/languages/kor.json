@@ -1,4 +1,44 @@
 {
 	"status-start-get-account-data": "* 유저 정보를 서버에 전송 요청합니다...",
-	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!"
+	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
+
+	"commands-auth": "인증",
+	"commands-auth-permission": "parfaitauth.commands.auth",
+	"commands-auth-description": "인증체계와 관련된 설명을 표시합니다.",
+	"commands-auth-usage": "/인증",
+
+	"commands-login": "로그인",
+	"commands-login-permission": "parfaitauth.commands.login",
+	"commands-login-description": "해당IP에서 아이디계정으로 로그인합니다.",
+	"commands-login-usage": "/로그인 아이디 암호",
+
+	"commands-logout": "로그아웃",
+	"commands-logout-permission": "parfaitauth.commands.logout",
+	"commands-logout-description": "해당IP에서 아이디계정을 로그아웃합니다.",
+	"commands-logout-usage": "/로그아웃 아이디 암호",
+
+	"commands-register": "가입",
+	"commands-register-permission": "parfaitauth.commands.register",
+	"commands-register-description": "아이디계정을 생성합니다.",
+	"commands-register-usage": "/가입 아이디 암호",
+
+	"commands-unregister": "탈퇴",
+	"commands-unregister-permission": "parfaitauth.commands.unregister",
+	"commands-unregister-description": "아이디계정을 삭제합니다.",
+	"commands-unregister-usage": "/탈퇴 아이디 암호",
+
+	"commands-findaccount": "계정찾기",
+	"commands-findaccount-permission": "parfaitauth.commands.findaccount",
+	"commands-findaccount-description": "아이디계정을 잊었을때 검색합니다.",
+	"commands-findaccount-usage": "/계정찾기 이메일@이메일주소",
+
+	"commands-changepassword": "비밀번호변경",
+	"commands-changepassword-permission": "parfaitauth.commands.changepassword",
+	"commands-changepassword-description": "아이디계정의 비밀번호를 바꿉니다.",
+	"commands-changepassword-usage": "/비밀번호변경 새비밀번호",
+
+	"commands-changenick": "닉네임변경",
+	"commands-changenick-permission": "parfaitauth.commands.changenick",
+	"commands-changenick-description": "아이디계정의 닉네임을 변경합니다.",
+	"commands-changenick-usage": "/인증 닉네임변경 새닉네임"
 }

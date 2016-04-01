@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class ChangePasswordCommand extends Command {
+public class ChangePasswordCommand extends ParfaitAuthCommand {
 	public ChangePasswordCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-changepassword";
-		this.permissionName = "commands-changepassword-permission";
-		this.commandDescription = "commands-changepassword-description";
-		this.commandUsage = "commands-changepassword-usage";
-		this.registerCommand();
+		this.load("changepassword", false);
 	}
 
 	@Override

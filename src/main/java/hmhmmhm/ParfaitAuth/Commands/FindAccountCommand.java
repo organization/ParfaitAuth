@@ -3,15 +3,10 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
-public class FindAccountCommand extends Command {
+public class FindAccountCommand extends ParfaitAuthCommand {
 	public FindAccountCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
-
-		this.commandName = "commands-findaccount";
-		this.permissionName = "commands-findaccount-permission";
-		this.commandDescription = "commands-findaccount-description";
-		this.commandUsage = "commands-findaccount-usage";
-		this.registerCommand();
+		this.load("findaccount", false);
 	}
 
 	@Override
