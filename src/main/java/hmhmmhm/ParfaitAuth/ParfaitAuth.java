@@ -1,17 +1,16 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
-
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
 import mongodblib.MongoDBLib;
-import mongodblib.MongoDBLibPlugin;
 
 public class ParfaitAuth {
 	public static String parfaitAuthCollectionName = "hmhmmhm.ParfaitAuth";
@@ -44,12 +43,12 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
-		FindIterable<Document> iterable = db.getCollection(ParfaitAuth.accountCollectionName)
-				.find(new Document("_id", uuid.toString()));
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
+				.find(new Document("_id", uuid.toString())).into(new ArrayList<Document>());
 
 		// _id는 겹칠 수 없기에 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
-		Document accountDocument = iterable.first();
+		Document accountDocument = (documents.size() == 0) ? null : documents.get(0);
 
 		if (accountDocument == null)
 			return null;
@@ -68,12 +67,12 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
-		FindIterable<Document> iterable = db.getCollection(ParfaitAuth.accountCollectionName)
-				.find(new Document("nickname", nickname));
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
+				.find(new Document("nickname", nickname)).into(new ArrayList<Document>());
 
 		// 닉네임은 겹치지 않게 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
-		Document accountDocument = iterable.first();
+		Document accountDocument = (documents.size() == 0) ? null : documents.get(0);
 
 		if (accountDocument == null)
 			return null;
@@ -101,7 +100,7 @@ public class ParfaitAuth {
 		if (ParfaitAuth.getAccount(uuid) != null)
 			return ParfaitAuth.ALREADY_EXIST_ACCOUNT;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
+		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
 
 		Account account = new Account();
@@ -131,7 +130,7 @@ public class ParfaitAuth {
 		if (ParfaitAuth.getAccount(uuid) == null)
 			return ParfaitAuth.NOT_EXIST_ACCOUNT;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
+		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
 
 		collection.deleteOne(new Document("_id", uuid.toString()));
@@ -154,10 +153,11 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
+		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
 
-		UpdateResult result = collection.updateOne(new Document("_id", uuid.toString()), document);
+		UpdateResult result = collection.updateOne(new Document("_id", uuid.toString()),
+				new Document("$set", document));
 		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.USER_DATA_NOT_EXIST;
 	}
 
@@ -177,17 +177,18 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
+		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
-		FindIterable<Document> iterable = collection.find(new Document("_id", "serverstate"));
-		Document serverstate = iterable.first();
+		List<Document> documents = collection.find(new Document("_id", "serverstate")).into(new ArrayList<Document>());
+		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
-		if ((int) serverstate.get("initVersion") > ParfaitAuth.UPDATED_DATABASE)
-			return ParfaitAuth.CAUTION_PLUGIN_IS_OUTDATE;
+		if (serverstate != null)
+			if ((int) serverstate.get("initVersion") > ParfaitAuth.UPDATED_DATABASE)
+				return ParfaitAuth.CAUTION_PLUGIN_IS_OUTDATE;
 
 		if (serverstate == null || serverstate.get("initVersion") == null
-				|| (int) serverstate.get("initVersion") < ParfaitAuth.UPDATED_DATABASE) {
+				|| (int) serverstate.get("initVersion") < ParfaitAuth.DATABASE_VERSION) {
 			Document document = new Document();
 			document.put("_id", "serverstate");
 			document.put("initVersion", ParfaitAuth.DATABASE_VERSION);
@@ -200,8 +201,9 @@ public class ParfaitAuth {
 			collection.insertOne(document);
 		}
 
-		if ((int) serverstate.get("initVersion") < ParfaitAuth.UPDATED_DATABASE)
-			return ParfaitAuth.UPDATED_DATABASE;
+		if (serverstate != null)
+			if ((int) serverstate.get("initVersion") < ParfaitAuth.DATABASE_VERSION)
+				return ParfaitAuth.UPDATED_DATABASE;
 
 		return ParfaitAuth.SUCCESS;
 	}
@@ -223,12 +225,12 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
-		FindIterable<Document> iterable = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
-				.find(new Document("_id", "serverstate"));
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
+				.find(new Document("_id", "serverstate")).into(new ArrayList<Document>());
 
 		// _id는 겹칠 수 없기에 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
-		Document serverstate = iterable.first();
+		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
 		if (serverstate == null)
 			return ParfaitAuth.SERVERSTATE_IS_NULL;
@@ -237,7 +239,7 @@ public class ParfaitAuth {
 		int currentTimestamp = (int) Calendar.getInstance().getTime().getTime();
 		int diff = serverTimestamp - currentTimestamp;
 
-		// System.out.println("[DEBUG] show diff:" + (diff % 60) + "\r\n");
+		// System.out.println("[DEBUG] show diff:" + (diff % 60));
 		// 10초마다 서버핑을 보내게 처리하며
 		// 20초이상 서버핑 업데이트가 이뤄지지 않았으면 사망처리합니다.
 		// ( 즉 서버가 갑자기 크래시되도 10초안에 다른서버 접속이 허용됩니다. )
@@ -249,20 +251,12 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
-		MongoDatabase db = MongoDBLib.getClient().getDatabase(MongoDBLibPlugin.getPlugin().getDBLibConfig().dbName);
+		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
-		// _id는 겹칠 수 없기에 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
-		FindIterable<Document> iterable = collection.find(new Document("_id", "serverstate"));
-		Document serverstate = iterable.first();
-
-		if (serverstate == null)
-			return ParfaitAuth.SERVERSTATE_IS_NULL;
-
-		int currentTimestamp = (int) Calendar.getInstance().getTime().getTime();
-		serverstate.replace(uuid.toString(), currentTimestamp);
-
-		UpdateResult result = collection.updateOne(new Document("_id", "serverstate"), serverstate);
+		String currentTimestamp = String.valueOf(Calendar.getInstance().getTime().getTime());
+		UpdateResult result = collection.updateOne(new Document("_id", "serverstate"),
+				new Document("$set", new Document(uuid.toString(), currentTimestamp)));
 		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
 	}
 
@@ -272,6 +266,10 @@ public class ParfaitAuth {
 	 * @return Boolean
 	 */
 	public static boolean checkClientOnline() {
-		return MongoDBLib.getClient() != null ? true : false;
+		try {
+			return MongoDBLib.getClient().getAddress() != null ? true : false;
+		} catch (IllegalStateException e) {
+			return false;
+		}
 	}
 }

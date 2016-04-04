@@ -3,6 +3,7 @@ package hmhmmhm.ParfaitAuth;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
@@ -16,6 +17,7 @@ import hmhmmhm.ParfaitAuth.Commands.FindAccountCommand;
 import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
+import hmhmmhm.ParfaitAuth.Tasks.UpdateServerStatusTask;
 
 public class ParfaitAuthPlugin extends PluginBase {
 	private Config settings;
@@ -32,15 +34,25 @@ public class ParfaitAuthPlugin extends PluginBase {
 		this.checkCompatibility(); // 호환성체크
 		this.loadResources(); // 기본파일 불러오기
 		this.loadCommands(); // 명령어 불러오기
-
-		// TODO 몽고 DBLIB최우선으로 활성화되게 플러그인 변경!
-		// this.initialDatabase(); // 데이터베이스 체크
+		this.initialDatabase(); // 데이터베이스 체크
 		this.getServer().getPluginManager().registerEvents(new EventHandler(this), this);
+		this.getServer().getScheduler()
+				.scheduleRepeatingTask(new UpdateServerStatusTask((UUID) this.settings.get("server-uuid")), 200);
 	}
 
 	private void initialDatabase() {
 		switch (ParfaitAuth.initialDatabase()) {
 		case ParfaitAuth.CLIENT_IS_DEAD:
+			this.getLogger().emergency(this.getMessage("caution-client-is-dead"));
+			break;
+		case ParfaitAuth.CAUTION_PLUGIN_IS_OUTDATE:
+			this.getLogger().info(this.getMessage("caution-plugin-is-outdate"));
+			break;
+		case ParfaitAuth.UPDATED_DATABASE:
+			this.getLogger().info(this.getMessage("status-database-was-updated"));
+			break;
+		case ParfaitAuth.SUCCESS:
+			this.getLogger().info(this.getMessage("status-database-check-all-green"));
 			break;
 		}
 	}
@@ -76,9 +88,10 @@ public class ParfaitAuthPlugin extends PluginBase {
 	private void loadResources() {
 		this.getDataFolder().mkdirs();
 
-		// 기본설정 JSON을 서버에 복사합니다.
-		this.saveResource("settings.json");
-		this.settings = new Config(new File(this.getDataFolder(), "settings.json"), Config.JSON);
+		// 기본설정 JSON을 서버에 저장합니다.
+		LinkedHashMap<String, Object> defaultMap = new LinkedHashMap<String, Object>();
+		defaultMap.put("server-uuid", this.getServer().getServerUniqueId());
+		this.settings = new Config(new File(this.getDataFolder(), "settings.json"), Config.JSON, defaultMap);
 
 		// 언어자료를 불러옵니다.
 		this.loadLanguage(false);
