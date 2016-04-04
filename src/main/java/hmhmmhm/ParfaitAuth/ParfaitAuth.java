@@ -90,7 +90,7 @@ public class ParfaitAuth {
 	 * 
 	 * @param uuid
 	 * @param nickname
-	 * @return int
+	 * @return integer
 	 */
 	public static int addAccount(UUID uuid, String nickname) {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
@@ -120,7 +120,7 @@ public class ParfaitAuth {
 	 * 자료를 성공적으로 삭제했으면 ParfaitAuth.SUCCESS 이 반환됩니다.
 	 * 
 	 * @param uuid
-	 * @return int
+	 * @return integer
 	 */
 	public static int deleteAccount(UUID uuid) {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
@@ -170,7 +170,7 @@ public class ParfaitAuth {
 	 * DB 기반자료를 업데이트 했을 때 ParfaitAuth.UPDATED_DATABASE<br>
 	 * 기반자료가 이미 존재하면 ParfaitAuth.SUCCESS 이 반환됩니다.
 	 * 
-	 * @return int
+	 * @return integer
 	 */
 	public static int initialDatabase() {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
@@ -216,7 +216,7 @@ public class ParfaitAuth {
 	 * 서버상태가 오프라인이면 ParfaitAuth.SERVERSTATE_IS_RED 이 반환됩니다.
 	 * 
 	 * @param uuid
-	 * @return int
+	 * @return integer
 	 */
 	public static int getServerStatus(UUID uuid) {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환

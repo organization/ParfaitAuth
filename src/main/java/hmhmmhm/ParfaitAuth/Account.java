@@ -1,6 +1,7 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.bson.Document;
@@ -32,7 +33,22 @@ public class Account {
 		this.nickname = (String) document.get("nickname");
 		this.logined = (String) document.get("logined");
 
-		// TODO additionalData
+		for (Entry<String, Object> entry : document.entrySet()) {
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			switch (key) {
+			case "_id":
+			case "uuid":
+			case "id":
+			case "password":
+			case "lastIp":
+			case "lastDate":
+			case "nickname":
+			case "logined":
+				continue;
+			}
+			additionalData.put(key, value);
+		}
 	}
 
 	/**
@@ -64,10 +80,12 @@ public class Account {
 		if (this.logined != null)
 			document.put("logined", this.logined);
 
-		// TODO additionalData
-		if (this.logined != null)
-			document.put("additionalData", this.additionalData);
-
+		for(Entry<String, Object> entry : this.additionalData.entrySet()){
+			String key = entry.getKey();
+			Object value = entry.getValue();
+			document.put(key, value);
+		}
+		
 		return document;
 	}
 }

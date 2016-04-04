@@ -23,18 +23,26 @@ public class ParfaitAuthPlugin extends PluginBase {
 	private LinkedHashMap<String, Object> commandMap = new LinkedHashMap<String, Object>();
 
 	/**
-	 * 플러그인 언어 메시지 파일의 버전을 나타냅니다.
-	 * 개발자는 향후 메시지 내용이 변경되면 이 숫자를 올려줘야합니다!
+	 * 플러그인 언어 메시지 파일의 버전을 나타냅니다. 개발자는 향후 메시지 내용이 변경되면 이 숫자를 올려줘야합니다!
 	 */
 	final int languageFileVersion = 1;
 
 	@Override
 	public void onEnable() {
-		this.checkCompatibility();
-		this.getDataFolder().mkdirs();
-		this.loadResources();
-		this.loadCommands();
+		this.checkCompatibility(); // 호환성체크
+		this.loadResources(); // 기본파일 불러오기
+		this.loadCommands(); // 명령어 불러오기
+
+		// TODO 몽고 DBLIB최우선으로 활성화되게 플러그인 변경!
+		// this.initialDatabase(); // 데이터베이스 체크
 		this.getServer().getPluginManager().registerEvents(new EventHandler(this), this);
+	}
+
+	private void initialDatabase() {
+		switch (ParfaitAuth.initialDatabase()) {
+		case ParfaitAuth.CLIENT_IS_DEAD:
+			break;
+		}
 	}
 
 	@Override
@@ -66,6 +74,8 @@ public class ParfaitAuthPlugin extends PluginBase {
 	 * 플러그인의 설정과 언어자료를 불러옵니다.
 	 */
 	private void loadResources() {
+		this.getDataFolder().mkdirs();
+
 		// 기본설정 JSON을 서버에 복사합니다.
 		this.saveResource("settings.json");
 		this.settings = new Config(new File(this.getDataFolder(), "settings.json"), Config.JSON);
