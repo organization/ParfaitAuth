@@ -1,8 +1,12 @@
 {
 	"status-start-get-account-data": "* 유저 정보를 서버에 전송 요청합니다...",
+	"status-start-register-account": "* 계정 등록을 서버에 요청 중 입니다...",
 	"status-database-was-updated": "DB 기반정보가 자동으로 업데이트되었습니다!",
 	"status-database-check-all-green": "DB 기반정보 체크완료! 계정연동 정상작동중!",
+	"status-new-message-task-now-working": "이전 메시지목록보기가 중단되고 새메시지를 출력합니다...",
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
+	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
+	"error-this-account-id-already-exist": "* 이 아이디는 이미 가입되어 있습니다. 가입불가능!",
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
 
@@ -10,6 +14,7 @@
 	"commands-auth-permission": "parfaitauth.commands.auth",
 	"commands-auth-description": "인증체계와 관련된 설명을 표시합니다.",
 	"commands-auth-usage": "/인증",
+	"commands-auth-sub-info": "안내",
 
 	"commands-login": "로그인",
 	"commands-login-permission": "parfaitauth.commands.login",
@@ -25,6 +30,11 @@
 	"commands-register-permission": "parfaitauth.commands.register",
 	"commands-register-description": "아이디계정을 생성합니다.",
 	"commands-register-usage": "/가입 아이디 암호",
+	
+	"commands-register-help-1": "* /가입 계정명 암호",
+	"commands-register-help-2": "* 계정명은 영어만 입력가능하며 최소 4자리 이상이여야 합니다.",
+	"commands-register-help-3": "* 암호는 영어와 특수문자 숫자로 가능하며, 6자리 이상이여야 합니다.",
+	"commands-register-help-4": "* 이미 가입된 계정명일 경우 가입이 거부될 수 있습니다.",
 
 	"commands-unregister": "탈퇴",
 	"commands-unregister-permission": "parfaitauth.commands.unregister",
@@ -44,5 +54,28 @@
 	"commands-changenick": "닉네임변경",
 	"commands-changenick-permission": "parfaitauth.commands.changenick",
 	"commands-changenick-description": "아이디계정의 닉네임을 변경합니다.",
-	"commands-changenick-usage": "/인증 닉네임변경 새닉네임"
+	"commands-changenick-usage": "/인증 닉네임변경 새닉네임",
+	
+	"authcommand-info-1": "* 이 서버는 ParfaitAuth 프로그램의 인증체계를 사용합니다.",
+	"authcommand-info-2": "* 인증과정에서 여러분이 접속하고 있는 위치의 IP와",
+	"authcommand-info-3": "* 마인크래프트 앱이 제공하는 난수식별자를 수집하며,",
+	"authcommand-info-4": "* 서버는 이 정보를 이용해서 여러분을 식별합니다.",
+	"authcommand-info-5": "* 수집된 정보는 식별용으로만 사용되며 공개되지 않습니다.",
+	"authcommand-info-6": "* 별도 가입 없이도 이 게임서버를 즐길 수 있지만,",
+	"authcommand-info-7": "* 이 경우 기기가 바뀌거나, 마인크래프트 앱을 재설치하거나",
+	"authcommand-info-8": "* 접속환경이 바뀌는 경우 식별정보가 사라집니다.",
+	"authcommand-info-9": "* 따라서 장기간 이용하려하는 경우에는",
+	"authcommand-info-10": "* 당신은 별도로 가입과 로그인을 해야합니다.",
+	"authcommand-info-11": "* 인증명령어는 /인증 이며 입력시",
+	"authcommand-info-12": "* 명령어 목록을 확인하실 수 있습니다.",
+	
+	"authcommand-commandlist-1": "* 인증에 쓰이는 명령어 목록을 출력합니다.",
+	"authcommand-commandlist-2": "* (인증체계에 대한 설명은 /인증 안내 를 입력해주세요.)",
+	"authcommand-commandlist-3": "* <>는 빼고 입력하셔야합니다! - 뒤에 오는 것은 설명입니다.",
+	"authcommand-commandlist-4": "/로그인 <아이디> <암호> - 로그인 진행",
+	"authcommand-commandlist-5": "/가입 <원하는아이디> <원하는암호> - 아이디 생성",
+	"authcommand-commandlist-6": "/탈퇴 <아이디> <암호> - 아이디 삭제",
+	"authcommand-commandlist-7": "/계정찾기 <이메일@이메일주소> - 아이디 찾기",
+	"authcommand-commandlist-8": "/비밀번호변경 <새비밀번호> - 비밀번호 변경",
+	"authcommand-commandlist-9": "/닉네임변경 <새닉네임> - 닉네임을 바꿉니다."
 }

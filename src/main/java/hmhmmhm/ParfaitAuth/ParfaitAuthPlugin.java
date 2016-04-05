@@ -15,6 +15,7 @@ import hmhmmhm.ParfaitAuth.Commands.ChangeNickCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangePasswordCommand;
 import hmhmmhm.ParfaitAuth.Commands.FindAccountCommand;
 import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
+import hmhmmhm.ParfaitAuth.Commands.ParfaitAuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateServerStatusTask;
@@ -22,7 +23,9 @@ import hmhmmhm.ParfaitAuth.Tasks.UpdateServerStatusTask;
 public class ParfaitAuthPlugin extends PluginBase {
 	private Config settings;
 	private Config language;
+	private Config randomName;
 	private LinkedHashMap<String, Object> commandMap = new LinkedHashMap<String, Object>();
+	private static ParfaitAuthPlugin plugin;
 
 	/**
 	 * 플러그인 언어 메시지 파일의 버전을 나타냅니다. 개발자는 향후 메시지 내용이 변경되면 이 숫자를 올려줘야합니다!
@@ -31,13 +34,19 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 	@Override
 	public void onEnable() {
+		ParfaitAuthPlugin.plugin = this;
+
 		this.checkCompatibility(); // 호환성체크
 		this.loadResources(); // 기본파일 불러오기
 		this.loadCommands(); // 명령어 불러오기
 		this.initialDatabase(); // 데이터베이스 체크
+
+		// 이벤트 핸들러 등록
 		this.getServer().getPluginManager().registerEvents(new EventHandler(this), this);
-		this.getServer().getScheduler()
-				.scheduleRepeatingTask(new UpdateServerStatusTask((UUID) this.settings.get("server-uuid")), 200);
+
+		// DB에 서버 상태갱신
+		this.getServer().getScheduler().scheduleRepeatingTask(
+				new UpdateServerStatusTask(UUID.fromString((String) this.settings.get("server-uuid"))), 200);
 	}
 
 	private void initialDatabase() {
@@ -90,8 +99,11 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 		// 기본설정 JSON을 서버에 저장합니다.
 		LinkedHashMap<String, Object> defaultMap = new LinkedHashMap<String, Object>();
-		defaultMap.put("server-uuid", this.getServer().getServerUniqueId());
+		defaultMap.put("server-uuid", this.getServer().getServerUniqueId().toString());
 		this.settings = new Config(new File(this.getDataFolder(), "settings.json"), Config.JSON, defaultMap);
+
+		// 랜덤 닉네임 목록을 불러옵니다.
+		this.loadRandomName();
 
 		// 언어자료를 불러옵니다.
 		this.loadLanguage(false);
@@ -113,6 +125,12 @@ public class ParfaitAuthPlugin extends PluginBase {
 			this.language = new Config(new File(this.getDataFolder().getAbsolutePath() + "/languages/eng.json"),
 					Config.JSON);
 		}
+	}
+
+	private void loadRandomName() {
+		this.saveResource("randomname.json");
+		this.randomName = new Config(new File(this.getDataFolder().getAbsolutePath() + "/randomname.json"),
+				Config.JSON);
 	}
 
 	/**
@@ -146,7 +164,25 @@ public class ParfaitAuthPlugin extends PluginBase {
 		return this.language;
 	}
 
+	/**
+	 * 랜덤닉네임 목록을 가져옵니다.
+	 * 
+	 * @return Config
+	 */
+	public Config getRandomName() {
+		return this.randomName;
+	}
+
 	public String getMessage(String key) {
 		return (String) this.language.get(key);
 	}
+
+	public ParfaitAuthCommand getCommandClass(String key) {
+		return (ParfaitAuthCommand) this.commandMap.get(key);
+	}
+
+	public static ParfaitAuthPlugin getPlugin() {
+		return plugin;
+	}
+
 }

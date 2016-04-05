@@ -1,8 +1,11 @@
 package hmhmmhm.ParfaitAuth;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 import org.bson.Document;
@@ -10,6 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
+import cn.nukkit.utils.Config;
 import mongodblib.MongoDBLib;
 
 public class ParfaitAuth {
@@ -70,6 +74,30 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
 				.find(new Document("nickname", nickname)).into(new ArrayList<Document>());
+
+		// 닉네임은 겹치지 않게 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
+		Document accountDocument = (documents.size() == 0) ? null : documents.get(0);
+
+		if (accountDocument == null)
+			return null;
+
+		return new Account(accountDocument);
+	}
+
+	/**
+	 * 유저의 아이디를 검색해서 유저 계정자료를 얻어옵니다.
+	 * 
+	 * @param nickname
+	 * @return Account | null
+	 */
+	public static Account getAccountById(String id) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName).find(new Document("id", id))
+				.into(new ArrayList<Document>());
 
 		// 닉네임은 겹치지 않게 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
 		Document accountDocument = (documents.size() == 0) ? null : documents.get(0);
@@ -261,6 +289,23 @@ public class ParfaitAuth {
 	}
 
 	/**
+	 * 랜덤하면서 겹치지 않는 닉네임을 가져옵니다.
+	 * @return
+	 */
+	public static String getRandomName() {
+		int index = 123512321;
+
+		Config randomName = ParfaitAuthPlugin.getPlugin().getRandomName();
+		ArrayList names = (ArrayList) randomName.get("names");
+
+		int size = names.size();
+		int name_number = index / size;
+		int name_index = index - (size * name_number);
+		
+		return "*" + names.get(name_index) + "_" + name_number;
+	}
+
+	/**
 	 * 클라이언트가 온라인 상태인지 확인합니다.
 	 * 
 	 * @return Boolean
@@ -271,5 +316,24 @@ public class ParfaitAuth {
 		} catch (IllegalStateException e) {
 			return false;
 		}
+	}
+
+	public static String hash(String str) {
+		String SHA = "";
+		try {
+			MessageDigest sh = MessageDigest.getInstance("SHA-256");
+			sh.update(str.getBytes());
+			byte byteData[] = sh.digest();
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < byteData.length; i++) {
+				sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+			}
+			SHA = sb.toString();
+
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			SHA = str;
+		}
+		return SHA;
 	}
 }
