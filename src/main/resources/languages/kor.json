@@ -4,9 +4,15 @@
 	"status-database-was-updated": "DB 기반정보가 자동으로 업데이트되었습니다!",
 	"status-database-check-all-green": "DB 기반정보 체크완료! 계정연동 정상작동중!",
 	"status-new-message-task-now-working": "이전 메시지목록보기가 중단되고 새메시지를 출력합니다...",
+
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
 	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
-	"error-this-account-id-already-exist": "* 이 아이디는 이미 가입되어 있습니다. 가입불가능!",
+	"error-this-account-id-already-exist": "* 이미 이 UUID를 사용하는 아이디 계정이 존재합니다. 계정 추가생성 불가!",
+	"error-uuid-account-not-exist": "* UUID계정이 발급되지 않았습니다. 재접속해보세요.",
+	"error-uuid-account-not-exist-user-founded": "예외상황 발생! UUID가 초기생성되지 않은 유저가 탐지됨, DB상태 확인바람",
+	"error-db-connect-unstable": "DB서버와의 연결이 불안정합니다. 잠시후 다시 시도해주세요.",
+	"error-db-cant-find-your-account": "DB서버에서 유저의 정보가 확인되지 않습니다. 재접속해보세요.",
+
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
 
@@ -30,7 +36,7 @@
 	"commands-register-permission": "parfaitauth.commands.register",
 	"commands-register-description": "아이디계정을 생성합니다.",
 	"commands-register-usage": "/가입 아이디 암호",
-	
+
 	"commands-register-help-1": "* /가입 계정명 암호",
 	"commands-register-help-2": "* 계정명은 영어만 입력가능하며 최소 4자리 이상이여야 합니다.",
 	"commands-register-help-3": "* 암호는 영어와 특수문자 숫자로 가능하며, 6자리 이상이여야 합니다.",
@@ -54,8 +60,8 @@
 	"commands-changenick": "닉네임변경",
 	"commands-changenick-permission": "parfaitauth.commands.changenick",
 	"commands-changenick-description": "아이디계정의 닉네임을 변경합니다.",
-	"commands-changenick-usage": "/인증 닉네임변경 새닉네임",
-	
+	"commands-changenick-usage": "/닉네임변경 새닉네임",
+
 	"authcommand-info-1": "* 이 서버는 ParfaitAuth 프로그램의 인증체계를 사용합니다.",
 	"authcommand-info-2": "* 인증과정에서 여러분이 접속하고 있는 위치의 IP와",
 	"authcommand-info-3": "* 마인크래프트 앱이 제공하는 난수식별자를 수집하며,",
@@ -68,7 +74,7 @@
 	"authcommand-info-10": "* 당신은 별도로 가입과 로그인을 해야합니다.",
 	"authcommand-info-11": "* 인증명령어는 /인증 이며 입력시",
 	"authcommand-info-12": "* 명령어 목록을 확인하실 수 있습니다.",
-	
+
 	"authcommand-commandlist-1": "* 인증에 쓰이는 명령어 목록을 출력합니다.",
 	"authcommand-commandlist-2": "* (인증체계에 대한 설명은 /인증 안내 를 입력해주세요.)",
 	"authcommand-commandlist-3": "* <>는 빼고 입력하셔야합니다! - 뒤에 오는 것은 설명입니다.",

@@ -6,6 +6,7 @@ import cn.nukkit.Server;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.scheduler.Task;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
+import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
 public class UpdateServerStatusTask extends Task {
 	public static UUID uuid;
