@@ -5,6 +5,7 @@ import java.util.UUID;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.scheduler.Task;
+import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 
 public class RequestAccountRegisterTaskFallback extends Task {
@@ -25,13 +26,13 @@ public class RequestAccountRegisterTaskFallback extends Task {
 
 		if (nowTaskUUID.toString() == this.taskUUID.toString()) {
 			RegisterCommand.taskMap.remove(this.username);
-			
+
 			Player player = Server.getInstance().getPlayer(username);
 
 			if (!(player instanceof Player))
 				return;
-			
-			// 요청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
+
+			player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("error-db-request-in-progress"));
 		}
 	}
 }

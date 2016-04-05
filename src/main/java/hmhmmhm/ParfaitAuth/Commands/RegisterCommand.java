@@ -72,7 +72,8 @@ public class RegisterCommand extends ParfaitAuthCommand {
 		if (!(player instanceof Player))
 			return;
 
-		// TODO 계정관련 이벤트처리 혹은 로그인처리
+		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("success-account-was-created"));
+		ParfaitAuth.authorizationID(player, account, true, true);
 	}
 
 	public static void registerFailCallback(String username, int result) {

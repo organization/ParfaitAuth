@@ -12,9 +12,12 @@
 	"error-uuid-account-not-exist-user-founded": "예외상황 발생! UUID가 초기생성되지 않은 유저가 탐지됨, DB상태 확인바람",
 	"error-db-connect-unstable": "DB서버와의 연결이 불안정합니다. 잠시후 다시 시도해주세요.",
 	"error-db-cant-find-your-account": "DB서버에서 유저의 정보가 확인되지 않습니다. 재접속해보세요.",
+	"error-db-request-in-progress": "요청 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
+
+	"success-account-was-created": "* 계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
