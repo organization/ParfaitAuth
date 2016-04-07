@@ -45,13 +45,13 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			String userIp = ((Player) sender).getAddress();
 			String nickname = ((Player) sender).getName();
 			String timestamp = String.valueOf(Calendar.getInstance().getTime().getTime());
-			UUID serverUUID = UUID.fromString((String) ParfaitAuthPlugin.getPlugin().getSettings().get("server-uuid"));
+			UUID serverUUID = ParfaitAuth.getParfaitAuthUUID();
 			UUID uuid = ((Player) sender).getUniqueId();
 			UUID taskUUID = UUID.randomUUID();
 
 			// 유저에게 비동기 인증 시작 메시지 전송
 			sender.sendMessage(this.getMessage("status-start-register-account"));
-			this.taskMap.put(sender.getName(), taskUUID);
+			RegisterCommand.taskMap.put(sender.getName(), taskUUID);
 
 			// 아래부터 비동기처리화
 			this.getServer().getScheduler().scheduleAsyncTask(

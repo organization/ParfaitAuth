@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -18,6 +20,8 @@ import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
+import hmhmmhm.ParfaitAuth.Tasks.RetryAuthAlreadyLoginedAccountTask;
+import hmhmmhm.ParfaitAuth.Tasks.UpdateAccountTask;
 import mongodblib.MongoDBLib;
 
 public class ParfaitAuth {
@@ -41,8 +45,8 @@ public class ParfaitAuth {
 	final static public int SERVERSTATE_IS_RED = 10;
 
 	public static LinkedHashMap<UUID, Player> unauthorised = new LinkedHashMap<UUID, Player>();
-	public static LinkedHashMap<UUID, Player> authorisedUUID = new LinkedHashMap<UUID, Player>();
-	public static LinkedHashMap<UUID, Player> authorisedID = new LinkedHashMap<UUID, Player>();
+	public static LinkedHashMap<UUID, Account> authorisedUUID = new LinkedHashMap<UUID, Account>();
+	public static LinkedHashMap<UUID, Account> authorisedID = new LinkedHashMap<UUID, Account>();
 
 	/* unauthorized_1141 과 같은 닉네임 생성시 사용되는 인덱스 입니다. */
 	public static int unauthorizedUserCount = 0;
@@ -201,6 +205,17 @@ public class ParfaitAuth {
 	}
 
 	/**
+	 * 계정정보를 비동기로 DB에 갱신합니다.<br>
+	 * 연결상태가 양호할때만 쓰는게 좋습니다.
+	 * 
+	 * @param uuid
+	 * @param document
+	 */
+	public static void updateAccountAsync(UUID uuid, Document document) {
+		Server.getInstance().getScheduler().scheduleAsyncTask(new UpdateAccountTask(uuid, document));
+	}
+
+	/**
 	 * 데이터베이스 기반정보를 데이터베이스에 입력합니다.<br>
 	 * 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
 	 * <br>
@@ -294,7 +309,7 @@ public class ParfaitAuth {
 
 		long serverTimestamp = Long.valueOf(serverstate.get(uuid.toString()).toString());
 		long currentTimestamp = Calendar.getInstance().getTime().getTime();
-		long diff = currentTimestamp - serverTimestamp;
+		long diff = TimeUnit.MILLISECONDS.toSeconds(currentTimestamp - serverTimestamp);
 
 		// System.out.println("[DEBUG] show serverTimestamp:" +
 		// serverTimestamp);
@@ -304,7 +319,7 @@ public class ParfaitAuth {
 		// 10초마다 서버핑을 보내게 처리하며
 		// 20초이상 서버핑 업데이트가 이뤄지지 않았으면 사망처리합니다.
 		// ( 즉 서버가 갑자기 크래시되도 10초안에 다른서버 접속이 허용됩니다. )
-		return ((diff % 60) >= 20) ? ParfaitAuth.SERVERSTATE_IS_GREEN : ParfaitAuth.SERVERSTATE_IS_RED;
+		return (diff >= 20) ? ParfaitAuth.SERVERSTATE_IS_GREEN : ParfaitAuth.SERVERSTATE_IS_RED;
 	}
 
 	public static int updateServerStatus(UUID uuid) {
@@ -348,13 +363,13 @@ public class ParfaitAuth {
 	 * @param id
 	 * @param pw
 	 */
-	public static void preAuthorizationID(Player player, String id, String pw) {
+	public static void preAuthorizationID(Player player, String id, String pw, boolean pwCheckPassForce) {
 		if (player == null || !player.isConnected())
 			return;
 		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-id-account-data"));
 
-		Server.getInstance().getScheduler()
-				.scheduleAsyncTask(new CheckAuthorizationIDTask(player.getName(), player.getUniqueId(), id, pw));
+		Server.getInstance().getScheduler().scheduleAsyncTask(new CheckAuthorizationIDTask(player.getName(), id, pw,
+				ParfaitAuth.getParfaitAuthUUID(), pwCheckPassForce));
 	}
 
 	/**
@@ -386,20 +401,27 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static boolean authorizationID(Player player, Account accountData, boolean ipForce, boolean loginedForce) {
-		// loginedForce는 인증서버의 오프라인 유무를 사전검사한 것입니다.
-		if (!loginedForce) {
+		// loginedForce의 용도는 통상적으로는
+		// 인증서버의 오프라인 유무를 사전검사해서
+		// 이전 인증서버가 사망시 로그인 여부를 따지지 않기 위해 쓰입니다.
+
+		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+
+		// 이전 인증서버가 살아있고 현재 접속중이며, 접속했던 서버가 이서버가 아닐때
+		if (!loginedForce && !(accountData.logined == ParfaitAuth.getParfaitAuthUUID().toString())) {
 			// accountData상 이미 로그인 중일 경우
 			// 이 경우에 이전 서버가 크래시되었다면 10초 안에 복구될 것이고,
 			// 단순히 자료전송이 늦는거면 5초 안에 복구될 것..
 
-			// RetryAuthAlreadyLoginedAccountTask
-			// TODO * 해당 계정정보는 현재 DB에서 정보가 사용되고 있습니다!
-			// TODO * 5초 뒤에 DB에 인증요청을 다시 보냅니다...
+			// 자동로그인 혹은 명령어 입력시 불편함을 덜하기 위해서
+			// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
 
-			// TODO 3번 반복하고 여전하면 인증실패로 간주하고 재접속유도
+			player.sendMessage(plugin.getMessage("error-that-account-already-used-by-db"));
+			player.sendMessage(plugin.getMessage("error-will-be-retry-in-3-seconds"));
 
-			// TODO * 계정에 접근할 수 없습니다! 재접속 해주세요!
-			// TODO * 계정이 타인에의해 접속되어있는 것일 수도 있습니다.
+			Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(
+					new RetryAuthAlreadyLoginedAccountTask(player.getName(), accountData.id), 60, 60);
+			return false;
 		}
 
 		if (!ipForce) {
@@ -422,7 +444,7 @@ public class ParfaitAuth {
 			// TODO * 아이디 계정으로 자동 로그인 되었습니다.
 			// TODO * 해당 위치에서 더이상 사용을 원하지 않으면 /로그아웃 해주세요!
 		}
-		// TODO * /인증안내 /인증 을 통해 자세한 정보를 확인가능합니다.
+		player.sendMessage(plugin.getMessage("info-you-can-use-auth-command"));
 
 		return true;
 	}
@@ -435,8 +457,12 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static boolean authorizationUUID(Player player, Account accountData) {
-		// TODO 임시 UUID 계정으로 자동 로그인 되었습니다.
-		// TODO (/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)
+		ParfaitAuth.unauthorised.remove(player.getUniqueId());
+		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
+
+		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+		player.sendMessage(plugin.getMessage("success-uuid-account-login-complete"));
+		player.sendMessage(plugin.getMessage("info-you-can-use-auth-command"));
 		return true;
 	}
 
@@ -534,5 +560,9 @@ public class ParfaitAuth {
 			SHA = str;
 		}
 		return SHA;
+	}
+
+	public static UUID getParfaitAuthUUID() {
+		return UUID.fromString((String) ParfaitAuthPlugin.getPlugin().getSettings().get("server-uuid"));
 	}
 }

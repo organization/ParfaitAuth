@@ -184,5 +184,4 @@ public class ParfaitAuthPlugin extends PluginBase {
 	public static ParfaitAuthPlugin getPlugin() {
 		return plugin;
 	}
-
 }
