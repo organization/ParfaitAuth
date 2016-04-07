@@ -25,12 +25,18 @@
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
 	"caution-if-you-are-missmatch-pw-five-time-willbe-ban": "* 주의! 로그인에 5번이상 실패할 경우 30분간 서버접근이 차단됩니다!",
+	"caution-account-founded-but-your-new-ip": "* 아이디계정이 확인되었으나, 새 IP가 감지되었습니다.",
+	"caution-you-need-to-run-login-command": "* /로그인 <아이디> <비밀번호> 를 진행하셔야합니다.",
+	"caution-requesting-for-temp-uuid-account": "* 인증전까지 사용될 임시 UUID 계정을 발급 요청중...",
 
 	"success-id-account-was-created": "* ID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 	"success-uuid-account-was-created": "* UUID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 	"success-uuid-account-login-complete": "* 임시 UUID 계정으로 자동 로그인 되었습니다.",
+	"success-id-account-was-logined": "* 아이디 계정으로 로그인 되었습니다.",
+	"success-id-account-was-auto-logined": "* 아이디 계정으로 자동 로그인 되었습니다",
 
 	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
+	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",

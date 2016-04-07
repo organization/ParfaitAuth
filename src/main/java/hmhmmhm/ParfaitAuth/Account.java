@@ -9,15 +9,27 @@ import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
 
+import cn.nukkit.Player;
+
 public class Account {
 	/* 계정 필수 정보들을 별도로 변수로 보관합니다. */
 
 	public UUID uuid = null;
+	public Object _id = null;
 	public String id = null;
 	public String password = null;
 	public String lastIp = null;
 	public String lastDate = null;
 	public String nickname = null;
+	public int accountType = 0;
+
+	/* 계정 유형 목록 */
+	final static int TYPE_DEFAULT = 0; // 서버기본모드만 가능
+	final static int TYPE_GUEST = 1; // 어드벤쳐모드 가능
+	final static int TYPE_NORMAL = 2; // 생존모드 가능
+	final static int TYPE_BUILDER = 3; // 창조모드 가능
+	final static int TYPE_OVER_POWER = 4; // 밴처리가능
+	final static int TYPE_ADMIN = 5; // 모든권한가능
 
 	/**
 	 * banned is have the when he released.<br>
@@ -57,6 +69,7 @@ public class Account {
 		String uuidString = (String) document.get("uuid");
 
 		this.uuid = UUID.fromString(uuidString);
+		this._id = document.get("_id");
 		this.id = (String) document.get("id");
 		this.password = (String) document.get("password");
 		this.lastIp = (String) document.get("lastIp");
@@ -64,6 +77,7 @@ public class Account {
 		this.nickname = (String) document.get("nickname");
 		this.logined = (String) document.get("logined");
 		this.banned = (String) document.get("banned");
+		this.accountType = (int) document.get("accountType");
 
 		for (Entry<String, Object> entry : document.entrySet()) {
 			String key = entry.getKey();
@@ -78,6 +92,7 @@ public class Account {
 			case "nickname":
 			case "logined":
 			case "banned":
+			case "accountType":
 				continue;
 			}
 			additionalData.put(key, value);
@@ -95,6 +110,7 @@ public class Account {
 		if (this.uuid == null || this.nickname == null)
 			return null;
 
+		document.put("_id", this._id);
 		document.put("uuid", this.uuid);
 		document.put("nickname", this.nickname);
 		document.put("id", this.id);
@@ -103,6 +119,7 @@ public class Account {
 		document.put("lastDate", this.lastDate);
 		document.put("logined", this.logined);
 		document.put("banned", this.logined);
+		document.put("accountType", this.accountType);
 
 		for (Entry<String, Object> entry : this.additionalData.entrySet()) {
 			String key = entry.getKey();
@@ -111,6 +128,34 @@ public class Account {
 		}
 
 		return document;
+	}
+
+	/**
+	 * 로그인 했을때 갱신되어야할 정보들을<br>
+	 * 함수호출시 자동으로 갱신처리 해줍니다.
+	 * 
+	 * @param player
+	 */
+	public void login(Player player) {
+		this.setModified();
+		this.uuid = player.getUniqueId();
+		this.lastIp = player.getAddress();
+		this.lastDate = String.valueOf(Calendar.getInstance().getTime().getTime());
+		this.logined = ParfaitAuth.getParfaitAuthUUID().toString();
+		this.upload();
+	}
+
+	/**
+	 * 로그아웃 했을때 갱신되어야할 정보들을<br>
+	 * 함수호출시 자동으로 갱신처리 해줍니다.
+	 * 
+	 * @param removeIpData
+	 */
+	public void logout(boolean removeIpData) {
+		this.setModified();
+		if (removeIpData)
+			this.lastIp = null;
+		this.logined = null;
 	}
 
 	/**

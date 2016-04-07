@@ -20,6 +20,7 @@ import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
+import hmhmmhm.ParfaitAuth.Tasks.CreateNewUUIDAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.RetryAuthAlreadyLoginedAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateAccountTask;
 import mongodblib.MongoDBLib;
@@ -201,6 +202,29 @@ public class ParfaitAuth {
 
 		UpdateResult result = collection.updateOne(new Document("uuid", uuid.toString()),
 				new Document("$set", document));
+		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.USER_DATA_NOT_EXIST;
+	}
+
+	/**
+	 * _id정보로 계정정보를 갱신합니다. 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
+	 * <br>
+	 * 클라이언트가 오프라인상태일때 ParfaitAuth.CLIENT_IS_DEAD<br>
+	 * 가입된 계정이 없을때 ParfaitAuth.USER_DATA_NOT_EXIST<br>
+	 * 자료를 성공적으로 갱신했으면 ParfaitAuth.SUCCESS 이 반환됩니다.
+	 * 
+	 * @param uuid
+	 * @param document
+	 * @return int
+	 */
+	public static int updateAccount_id(Object _id, Document document) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
+
+		UpdateResult result = collection.updateOne(new Document("_id", _id), new Document("$set", document));
 		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.USER_DATA_NOT_EXIST;
 	}
 
@@ -413,36 +437,39 @@ public class ParfaitAuth {
 			// 이 경우에 이전 서버가 크래시되었다면 10초 안에 복구될 것이고,
 			// 단순히 자료전송이 늦는거면 5초 안에 복구될 것..
 
-			// 자동로그인 혹은 명령어 입력시 불편함을 덜하기 위해서
-			// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
-
 			player.sendMessage(plugin.getMessage("error-that-account-already-used-by-db"));
 			player.sendMessage(plugin.getMessage("error-will-be-retry-in-3-seconds"));
 
+			// 자동로그인 혹은 명령어 입력시 불편함을 덜하기 위해서
+			// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
 			Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(
 					new RetryAuthAlreadyLoginedAccountTask(player.getName(), accountData.id), 60, 60);
 			return false;
 		}
 
-		if (!ipForce) {
-			// IP가 이전과 다른 경우
-			// TODO * 아이디계정이 확인되었으나, 새 IP가 감지되었습니다.
-			// TODO * /로그인 <아이디> <비밀번호> 를 진행하셔야합니다.
-			// TODO * 인증전까지 사용될 임시 UUID 계정을 발급 요청중...
+		// IP가 이전과 다른 경우
+		if (!ipForce && ((accountData.lastIp != null) && (player.getAddress() != accountData.lastIp))) {
+			player.sendMessage(plugin.getMessage("caution-account-founded-but-your-new-ip"));
+			player.sendMessage(plugin.getMessage("caution-you-need-to-run-login-command"));
+			player.sendMessage(plugin.getMessage("caution-requesting-for-temp-uuid-account"));
 
-			// TODO 이전계정의 UUID 정보말소 후 업데이트처리
-			// TODO CreateNewUUIDAccountTask(oldAccountData)
+			// 이전계정의 UUID 정보말소
+			accountData.uuid = null;
+			Server.getInstance().getScheduler().scheduleAsyncTask(new CreateNewUUIDAccountTask(accountData));
+			return false;
 		}
 
-		// lastIP 업데이트
-		// logined 업데이트
-		// lastDate 업데이트
+		accountData.login(player);
+
+		ParfaitAuth.unauthorised.remove(player.getUniqueId());
+		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
+		ParfaitAuth.authorisedID.put(player.getUniqueId(), accountData);
 
 		if (!ipForce) {
-			// TODO * 아이디 계정으로 로그인 되었습니다.
+			player.sendMessage(plugin.getMessage("success-id-account-was-logined"));
 		} else {
-			// TODO * 아이디 계정으로 자동 로그인 되었습니다.
-			// TODO * 해당 위치에서 더이상 사용을 원하지 않으면 /로그아웃 해주세요!
+			player.sendMessage(plugin.getMessage("success-id-account-was-auto-logined"));
+			player.sendMessage(plugin.getMessage("info-you-can-use-logout-command"));
 		}
 		player.sendMessage(plugin.getMessage("info-you-can-use-auth-command"));
 
@@ -474,15 +501,19 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static void release(UUID uuid, Account accountData, boolean async, boolean logout) {
-		// 아래는 예외처리도 같이해야함
+		ParfaitAuth.unauthorised.remove(uuid);
+		ParfaitAuth.authorisedID.remove(uuid);
+		ParfaitAuth.authorisedUUID.remove(uuid);
 
-		// TODO accountData 의 logined를 null 처리합니다.
+		// accountData 의 logined를 null 처리합니다.
+		accountData.logout(logout);
 
-		if (logout) {
-			// TODO accountData 의 lastIp를 null 처리
+		// 서버에 계정정보 업데이트
+		if (async) {
+			accountData.upload();
+		} else {
+			ParfaitAuth.updateAccount(uuid, accountData.convertToDocument());
 		}
-
-		// TODO 서버에 계정정보 업데이트
 	}
 
 	/**

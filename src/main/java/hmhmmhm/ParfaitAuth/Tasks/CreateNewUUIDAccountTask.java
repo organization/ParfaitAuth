@@ -13,6 +13,7 @@ public class CreateNewUUIDAccountTask extends AsyncTask {
 	private UUID uuid;
 	private String username;
 	private Account account = null;
+	private Account oldAccountData = null;
 	private int result;
 
 	public CreateNewUUIDAccountTask(UUID uuid, String username) {
@@ -20,8 +21,15 @@ public class CreateNewUUIDAccountTask extends AsyncTask {
 		this.username = username;
 	}
 
+	public CreateNewUUIDAccountTask(Account oldAccountData) {
+		this.oldAccountData = oldAccountData;
+	}
+
 	@Override
 	public void onRun() {
+		if (this.oldAccountData != null)
+			ParfaitAuth.updateAccount_id(oldAccountData._id, oldAccountData.convertToDocument());
+
 		this.result = ParfaitAuth.addAccount(this.uuid, ParfaitAuth.getRandomName());
 		this.account = ParfaitAuth.getAccount(this.uuid);
 	}
