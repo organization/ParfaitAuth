@@ -72,7 +72,7 @@ public class RegisterCommand extends ParfaitAuthCommand {
 		if (!(player instanceof Player))
 			return;
 
-		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("success-account-was-created"));
+		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("success-id-account-was-created"));
 		ParfaitAuth.authorizationID(player, account, true, true);
 	}
 

@@ -1,5 +1,6 @@
 {
-	"status-start-get-account-data": "* 유저 정보를 서버에 전송 요청합니다...",
+	"status-start-get-account-data": "* 계정 정보를 서버에 전송 요청합니다...",
+	"status-start-get-id-account-data": "* ID 게정 정보를 서버에 전송 요청합니다...",
 	"status-start-register-account": "* 계정 등록을 서버에 요청 중 입니다...",
 	"status-database-was-updated": "DB 기반정보가 자동으로 업데이트되었습니다!",
 	"status-database-check-all-green": "DB 기반정보 체크완료! 계정연동 정상작동중!",
@@ -17,7 +18,8 @@
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
 
-	"success-account-was-created": "* 계정생성에 성공했습니다! 자동으로 로그인 진행중..",
+	"success-id-account-was-created": "* ID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
+	"success-uuid-account-was-created": "* UUID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",

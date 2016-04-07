@@ -14,7 +14,10 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.utils.Config;
+import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
+import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
 import mongodblib.MongoDBLib;
 
 public class ParfaitAuth {
@@ -327,19 +330,14 @@ public class ParfaitAuth {
 	 * @param player
 	 */
 	public static void unauthorizedAccess(Player player) {
+		if (player == null || !player.isConnected())
+			return;
+
 		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-account-data"));
 		ParfaitAuth.unauthorised.put(player.getUniqueId(), player);
 
-		// 아래 싹 다 비동기로 처리
-		// CheckUnauthorizedAccessTask
-		// TODO UUID로 계정정보를 찾습니다.
-		// TODO ID가 포함된 정보일 경우 authorizationID를 돌리고,
-		// TODO ID가 미포함인 정보일 경우 authorizationUUID를 돌립니다.
-
-		// TODO 계정정보가 존재하지 않으면 계정을 생성합니다.
-		// CreateNewUUIDAccountTask
-		// TODO 임시 UUID 계정이 생성 되었습니다!
-		// TODO 반환된 정보로 authorizationUUID를 돌립니다.
+		Server.getInstance().getScheduler()
+				.scheduleAsyncTask(new CheckUnauthorizedAccessTask(player.getUniqueId(), player.getName()));
 	}
 
 	/**
@@ -351,30 +349,33 @@ public class ParfaitAuth {
 	 * @param pw
 	 */
 	public static void preAuthorizationID(Player player, String id, String pw) {
-		// 아래 싹 다 비동기로 처리
-		// CheckAuthorizationIDTask
-		// TODO UUID로 현재 사용 중인 어카운트 정보를 받습니다.
-		// TODO ID로 요청받은 어카운트 정보를 찾습니다.
+		if (player == null || !player.isConnected())
+			return;
+		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-id-account-data"));
 
-		// 계정을 찾을 수 없거나 비밀번호가 틀린경우
-		// TODO 어카운트 정보가 없으면 찾을 수 없다고 합니다.
-		// TODO 어카운트 비밀번호 해시가 안 맞으면 비밀번호가 틀리다고 합니다.
+		Server.getInstance().getScheduler()
+				.scheduleAsyncTask(new CheckAuthorizationIDTask(player.getName(), player.getUniqueId(), id, pw));
+	}
 
-		// 브루트포스가 5회 이상이면
-		// TODO additionalData 의 auth_bruteforce 를 삭제처리합니다.
-		// TODO 해당 유저를 킥처리합니다.
-		// TODO 해당 아이피를 차단처리합니다.
+	/**
+	 * 계정정보를 확인해서 ID인증 혹은 UUID인증을 거칩니다
+	 * 
+	 * @param player
+	 * @param accountData
+	 * @return
+	 */
+	public static boolean authorization(Player player, Account accountData) {
+		if (accountData == null)
+			return false;
+		if (player == null || !player.isConnected())
+			return false;
 
-		// 브루트포스가 5회 미만이면
-		// TODO 해당 UUID계정의 additionalData에 'auth_bruteforce'를 +1한 후 계정정보
-		// 업데이트합니다.
-		// TODO 5번 이상 틀리면 30분간 서버접근이 차단된다는 경고를 띄웁니다.
-
-		// 계정을 찾았고 비밀번호가 맞는 경우
-		// TODO logined가 이 서버일 경우 이 서버가 크래시되었던 것으로 간주하고 로그인포스 true 처리.
-		// TODO logined가 null나 false가 아닌 경우 해당 서버의 핑상태를 확인후 죽었으면 로그인포스를
-		// true처리합니다.
-		// TODO authorizationID 를 호출합니다.
+		if (accountData.id != null) {
+			ParfaitAuth.authorizationID(player, accountData, false, false);
+		} else {
+			ParfaitAuth.authorizationUUID(player, accountData);
+		}
+		return true;
 	}
 
 	/**
