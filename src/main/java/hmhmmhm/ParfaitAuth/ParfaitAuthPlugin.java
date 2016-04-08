@@ -47,9 +47,6 @@ public class ParfaitAuthPlugin extends PluginBase {
 		// DB에 서버 상태갱신
 		this.getServer().getScheduler().scheduleRepeatingTask(
 				new UpdateServerStatusTask(UUID.fromString((String) this.settings.get("server-uuid"))), 200);
-
-		// TODO ACTIVATE TEST CODE
-		Notification.push("thetest?", "it might be converted json file");
 	}
 
 	private void initialDatabase() {

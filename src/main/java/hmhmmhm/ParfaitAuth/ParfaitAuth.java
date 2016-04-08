@@ -15,6 +15,7 @@ import org.bson.Document;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
+import com.mongodb.util.JSON;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -304,6 +305,16 @@ public class ParfaitAuth {
 		return ParfaitAuth.SUCCESS;
 	}
 
+	/**
+	 * 자료를 활성화된 모든서버에 전송합니다.<br>
+	 * 식별자를 통해서 자료전달자간 서로 식별해야합니다.
+	 * 
+	 * @param serverDocument
+	 * @param serverUUID
+	 * @param identifier
+	 * @param object
+	 * @return
+	 */
 	public static int pushNotification(Document serverDocument, String serverUUID, String identifier, Object object) {
 		String updated = (String) serverDocument.get("updated");
 
@@ -332,6 +343,65 @@ public class ParfaitAuth {
 
 		UpdateResult result = collection.updateOne(new Document("_id", serverUUID), new Document("$set", serverstate));
 		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
+	}
+
+	public static void pullNotification() {
+		UUID serverUUID = ParfaitAuth.getParfaitAuthUUID();
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
+
+		List<Document> documents = collection.find(new Document("_id", serverUUID)).into(new ArrayList<Document>());
+		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
+
+		// 서버상태문서가 없으면 넘김
+		if (serverstate == null)
+			return;
+
+		int index = (int) serverstate.get("index");
+
+		// 인덱스가 0이면 넘김
+		if (index == 0)
+			return;
+
+		for (int i = 0; i <= index; i++) {
+			// 문서 아닐 경우 넘김
+			Object value = serverstate.get("push-" + index);
+			if (value == null || !(value instanceof Document))
+				continue;
+
+			Document document = (Document) value;
+			for (Entry<String, Object> entry : document.entrySet()) {
+				String identifier = entry.getKey();
+				String json = (String) entry.getValue();
+
+				// JSON이 아닌 손상된 자료인 경우
+				if (identifier == null || json == null)
+					continue;
+
+				Object object = JSON.parse(json);
+
+				// TODO 이벤트처리해야함 identifier identifier
+			}
+		}
+	}
+
+	/**
+	 * DB에 있는 서버상태문서를 UUID를 이용해 찾습니다.
+	 * 
+	 * @param uuid
+	 * @return
+	 */
+	public static Document getServerDocument(String uuid) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
+				.find(new Document("_id", uuid)).into(new ArrayList<Document>());
+
+		return (documents.size() == 0) ? null : documents.get(0);
 	}
 
 	/**
