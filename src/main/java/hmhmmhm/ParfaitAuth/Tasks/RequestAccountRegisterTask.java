@@ -17,8 +17,9 @@ public class RequestAccountRegisterTask extends AsyncTask {
 	public static final int CLIENT_IS_DEAD = 0;
 	public static final int SUCCESS = 1;
 	public static final int ID_ACCOUNT_ALREADY_EXIST = 2;
-	public static final int UUID_ACCOUNT_NOT_EXIST = 3;
-	public static final int USER_DATA_NOT_EXIST = 4;
+	public static final int NAME_ACCOUNT_ALREADY_EXIST = 3;
+	public static final int UUID_ACCOUNT_NOT_EXIST = 4;
+	public static final int USER_DATA_NOT_EXIST = 5;
 
 	public RequestAccountRegisterTask(String id, String pw, UUID uuid, UUID taskUUID, String timestamp, String userIp,
 			UUID serverUUID, String nickname) {
@@ -36,9 +37,16 @@ public class RequestAccountRegisterTask extends AsyncTask {
 	public void onRun() {
 		Account idAccountCheck = ParfaitAuth.getAccountById(id);
 		Account uuidAccountCheck = ParfaitAuth.getAccount(uuid);
+		Account nameAccountCheck = ParfaitAuth.getAccountByNickName(this.nickname);
 
 		// 아이디 계정이 이미 존재하는 경우
 		if (idAccountCheck != null) {
+			this.resultState = RequestAccountRegisterTask.ID_ACCOUNT_ALREADY_EXIST;
+			return;
+		}
+
+		// 닉네임이 이미 존재하는 경우
+		if (nameAccountCheck != null) {
 			this.resultState = RequestAccountRegisterTask.ID_ACCOUNT_ALREADY_EXIST;
 			return;
 		}

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -281,7 +282,6 @@ public class ParfaitAuth {
 			serverstate_document.put("initTime", (new Timestamp(timestamp)).toString());
 			serverstate_document.put("initTimestamp", String.valueOf(timestamp));
 			insertDocuments.add(serverstate_document);
-
 		}
 
 		// nameindex
@@ -304,6 +304,59 @@ public class ParfaitAuth {
 		return ParfaitAuth.SUCCESS;
 	}
 
+	public static int pushNotification(Document serverDocument, String serverUUID, String identifier, Object object) {
+		String updated = (String) serverDocument.get("updated");
+
+		// 해당 타임스탬프가 존재하지 않는다면 넘김
+		if (updated == null)
+			return ParfaitAuth.SERVERSTATE_IS_NULL;
+
+		long timestamp = Long.valueOf(updated);
+		if (!ParfaitAuth.checkServerPingGreen(timestamp))
+			return ParfaitAuth.SERVERSTATE_IS_NULL;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
+
+		List<Document> documents = collection.find(new Document("_id", serverUUID)).into(new ArrayList<Document>());
+		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
+
+		// 서버상태문서가 없으면 넘김
+		if (serverstate == null)
+			return ParfaitAuth.SERVERSTATE_IS_NULL;
+
+		// 인덱스에 맞춰서 push-*로 문서 넣고 인덱스 올리고 업로드.
+		int index = (int) serverstate.get("index");
+		serverstate.put("push-" + index, new Document(identifier, object));
+		serverstate.put("index", ++index);
+
+		UpdateResult result = collection.updateOne(new Document("_id", serverUUID), new Document("$set", serverstate));
+		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
+	}
+
+	/**
+	 * DB에 있는 서버상태문서들을 가져옵니다.
+	 * 
+	 * @return ArrayList
+	 */
+	public static LinkedHashMap<String, Document> getAllServers() {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName).find()
+				.into(new ArrayList<Document>());
+
+		LinkedHashMap<String, Document> foundedDocuments = new LinkedHashMap<String, Document>();
+		for (Document document : documents) {
+			if (document.get("updated") == null || document.get("index") == null)
+				continue;
+			foundedDocuments.put((String) document.get("_id"), document);
+		}
+		return foundedDocuments;
+	}
+
 	/**
 	 * 서버의 UUID를 받아서 해당 서버와 DB의 연결상태를 확인합니다.<br>
 	 * 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
@@ -323,27 +376,33 @@ public class ParfaitAuth {
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
-				.find(new Document("_id", "serverstate")).into(new ArrayList<Document>());
+				.find(new Document("_id", uuid.toString())).into(new ArrayList<Document>());
 
 		// _id는 겹칠 수 없기에 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
-		if (serverstate == null)
+		if (serverstate == null || serverstate.get("updated") == null)
 			return ParfaitAuth.SERVERSTATE_IS_NULL;
 
-		long serverTimestamp = Long.valueOf(serverstate.get(uuid.toString()).toString());
-		long currentTimestamp = Calendar.getInstance().getTime().getTime();
-		long diff = TimeUnit.MILLISECONDS.toSeconds(currentTimestamp - serverTimestamp);
+		long serverTimestamp = Long.valueOf((String) serverstate.get("updated"));
 
-		// System.out.println("[DEBUG] show serverTimestamp:" +
-		// serverTimestamp);
-		// System.out.println("[DEBUG] show currentTimestamp:" +
-		// currentTimestamp);
-		// System.out.println("[DEBUG] show diff:" + (diff % 60));
 		// 10초마다 서버핑을 보내게 처리하며
 		// 20초이상 서버핑 업데이트가 이뤄지지 않았으면 사망처리합니다.
 		// ( 즉 서버가 갑자기 크래시되도 10초안에 다른서버 접속이 허용됩니다. )
-		return (diff >= 20) ? ParfaitAuth.SERVERSTATE_IS_GREEN : ParfaitAuth.SERVERSTATE_IS_RED;
+		return (ParfaitAuth.checkServerPingGreen(serverTimestamp)) ? ParfaitAuth.SERVERSTATE_IS_GREEN
+				: ParfaitAuth.SERVERSTATE_IS_RED;
+	}
+
+	/**
+	 * 서버의 타임스탬프 핑을 현재와 비교해서 20초가 지났는지 확인합니다.
+	 * 
+	 * @param serverTimestamp
+	 * @return boolean
+	 */
+	public static boolean checkServerPingGreen(long serverTimestamp) {
+		long currentTimestamp = Calendar.getInstance().getTime().getTime();
+		long diff = TimeUnit.MILLISECONDS.toSeconds(currentTimestamp - serverTimestamp);
+		return (diff >= 20) ? false : true;
 	}
 
 	public static int updateServerStatus(UUID uuid) {
@@ -355,9 +414,27 @@ public class ParfaitAuth {
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
 		String currentTimestamp = String.valueOf(Calendar.getInstance().getTime().getTime());
-		UpdateResult result = collection.updateOne(new Document("_id", "serverstate"),
-				new Document("$set", new Document(uuid.toString(), currentTimestamp)));
-		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
+
+		// 서버 상태모음 문서 찾아오기
+		ArrayList<Document> documents = collection.find(new Document("_id", uuid.toString()))
+				.into(new ArrayList<Document>());
+		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
+
+		if (serverstate == null || !(serverstate instanceof Document)) {
+			// 내 서버상태 문서 없으면 생성
+			serverstate = new Document("_id", uuid.toString()).append("updated", currentTimestamp).append("index", 0);
+			collection.insertOne(serverstate);
+			return ParfaitAuth.SUCCESS;
+		} else {
+			// 내 서버상태 문서 타임스탬프 갱신처리
+			serverstate.put("updated", currentTimestamp);
+
+			UpdateResult result = collection.updateOne(new Document("_id", uuid.toString()),
+					new Document("$set", serverstate));
+
+			return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
+		}
+
 	}
 
 	/**
@@ -595,5 +672,82 @@ public class ParfaitAuth {
 
 	public static UUID getParfaitAuthUUID() {
 		return UUID.fromString((String) ParfaitAuthPlugin.getPlugin().getSettings().get("server-uuid"));
+	}
+
+	/**
+	 * 해당 문자열을 아이디로 사용가능한지 확인합니다.
+	 * 
+	 * @param id
+	 * @return boolean
+	 */
+	public static boolean checkRightId(String id) {
+		int len = id.length();
+
+		if (len > 16 || len < 3)
+			return false;
+
+		for (int i = 0; i < len; i++) {
+			char c = id.charAt(i);
+			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+				continue;
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 해당 문자열을 닉네임으로 사용가능한지 확인합니다.
+	 * 
+	 * @param id
+	 * @return boolean
+	 */
+	public static boolean checkRightName(String name) {
+		int len = name.length();
+
+		if (len > 10 || len < 2)
+			return false;
+
+		for (int i = 0; i < len; i++) {
+			char c = name.charAt(i);
+			if (c == '*' || c == '@' || c == '#')
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 해당 문자열을 닉네임으로 사용가능한지 확인합니다.
+	 * 
+	 * @param id
+	 * @return boolean
+	 */
+	public static boolean checkRightPassword(String pw) {
+		int len = pw.length();
+
+		if (len > 40 || len < 6)
+			return false;
+		return true;
+	}
+
+	/**
+	 * 해당 닉네임의 복잡도를 반환합니다.<br>
+	 * 차단처리 하기 힘든 닉네임 검색시 사용됩니다.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static int getNickNameDifficult(String name) {
+		int count = 0;
+		int len = name.length();
+
+		if (len > 10)
+			count += (len - 10);
+
+		for (int i = 0; i < len; i++) {
+			char c = name.charAt(i);
+			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'))
+				count++;
+		}
+		return count;
 	}
 }

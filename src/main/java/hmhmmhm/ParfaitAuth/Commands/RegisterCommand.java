@@ -32,18 +32,19 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			}
 
 			// 입력한 계정명이나 암호가 잘못되거나 없을 경우
-			if (args[0] == null || args[1] == null || args.length != 2 || args[0].length() < 4
-					|| args[1].length() < 6) {
+			if (args[0] == null || args[1] == null || args[2] == null || args.length != 3
+					|| !ParfaitAuth.checkRightId(args[0]) || ParfaitAuth.checkRightPassword(args[1])
+					|| ParfaitAuth.checkRightName(args[2])) {
 				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, "commands-register-help-"), 40);
+						.scheduleRepeatingTask(new SendMessageTask(sender, "commands-register-help-"), 20);
 				return true;
 			}
 
 			// 비동기 처리위한 자료 별도 수집
 			String id = args[0];
 			String pw = ParfaitAuth.hash(args[1]);
+			String nickname = args[2];
 			String userIp = ((Player) sender).getAddress();
-			String nickname = ((Player) sender).getName();
 			String timestamp = String.valueOf(Calendar.getInstance().getTime().getTime());
 			UUID serverUUID = ParfaitAuth.getParfaitAuthUUID();
 			UUID uuid = ((Player) sender).getUniqueId();
@@ -88,6 +89,9 @@ public class RegisterCommand extends ParfaitAuthCommand {
 		switch (result) {
 		case RequestAccountRegisterTask.ID_ACCOUNT_ALREADY_EXIST:
 			player.sendMessage(plugin.getMessage("error-this-account-id-already-exist"));
+			break;
+		case RequestAccountRegisterTask.NAME_ACCOUNT_ALREADY_EXIST:
+			player.sendMessage(plugin.getMessage("error-this-account-name-already-exist"));
 			break;
 		case RequestAccountRegisterTask.UUID_ACCOUNT_NOT_EXIST:
 			player.sendMessage(plugin.getMessage("error-uuid-account-not-exist"));

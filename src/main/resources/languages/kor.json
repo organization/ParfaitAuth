@@ -8,7 +8,8 @@
 
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
 	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
-	"error-this-account-id-already-exist": "* 이미 이 UUID를 사용하는 아이디 계정이 존재합니다. 계정 추가생성 불가!",
+	"error-this-account-id-already-exist": "* 이미 이 아이디를 사용하는 계정이 존재합니다. 계정 추가생성 불가!",
+	"error-this-account-name-already-exist": "* 이미 이 닉네임을 사용하는 계정이 존재합니다. 계정 추가생성 불가!",
 	"error-uuid-account-not-exist": "* UUID계정이 발급되지 않았습니다. 재접속해보세요.",
 	"error-uuid-account-not-exist-user-founded": "예외상황 발생! UUID가 초기생성되지 않은 유저가 탐지됨, DB상태 확인바람",
 	"error-db-connect-unstable": "* DB서버와의 연결이 불안정합니다. 잠시후 다시 시도해주세요.",
@@ -59,10 +60,11 @@
 	"commands-register-description": "아이디계정을 생성합니다.",
 	"commands-register-usage": "/가입 아이디 암호",
 
-	"commands-register-help-1": "* /가입 계정명 암호",
-	"commands-register-help-2": "* 계정명은 영어만 입력가능하며 최소 4자리 이상이여야 합니다.",
-	"commands-register-help-3": "* 암호는 영어와 특수문자 숫자로 가능하며, 6자리 이상이여야 합니다.",
+	"commands-register-help-1": "* /가입 계정명 암호 닉네임",
+	"commands-register-help-2": "* 아이디는 영어와 숫자 _로 가능하며, 3~15자리여야합니다.",
+	"commands-register-help-3": "* 닉네임엔 일부문자 * @ # 만 사용불가능하며 2~10여야합니다.",
 	"commands-register-help-4": "* 이미 가입된 계정명일 경우 가입이 거부될 수 있습니다.",
+	"commands-register-help-5": "* 비밀번호는 6~40자까지 사용가능합니다.",
 
 	"commands-unregister": "탈퇴",
 	"commands-unregister-permission": "parfaitauth.commands.unregister",
@@ -101,7 +103,7 @@
 	"authcommand-commandlist-2": "* (인증체계에 대한 설명은 /인증 안내 를 입력해주세요.)",
 	"authcommand-commandlist-3": "* <>는 빼고 입력하셔야합니다! - 뒤에 오는 것은 설명입니다.",
 	"authcommand-commandlist-4": "/로그인 <아이디> <암호> - 로그인 진행",
-	"authcommand-commandlist-5": "/가입 <원하는아이디> <원하는암호> - 아이디 생성",
+	"authcommand-commandlist-5": "/가입 <아이디> <암호> <닉네임> - 아이디 생성",
 	"authcommand-commandlist-6": "/탈퇴 <아이디> <암호> - 아이디 삭제",
 	"authcommand-commandlist-7": "/계정찾기 <이메일@이메일주소> - 아이디 찾기",
 	"authcommand-commandlist-8": "/비밀번호변경 <새비밀번호> - 비밀번호 변경",
