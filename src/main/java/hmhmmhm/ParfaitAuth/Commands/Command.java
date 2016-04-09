@@ -48,9 +48,7 @@ abstract public class Command {
 		return this.plugin.getMessage(key);
 	}
 
-	public boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args) {
-		return false;
-	}
+	public abstract boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args);
 
 	public Server getServer() {
 		return this.server;

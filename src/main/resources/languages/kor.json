@@ -86,6 +86,90 @@
 	"commands-changenick-description": "아이디계정의 닉네임을 변경합니다.",
 	"commands-changenick-usage": "/닉네임변경 새닉네임",
 
+	"commands-howtoban": "밴처리",
+	"commands-howtoban-permission": "parfaitauth.commands.howtoban",
+	"commands-howtoban-description": "밴처리에 필요한 밴처리 명령어를 표시합니다.",
+	"commands-howtoban-usage": "/밴처리",
+	
+	"commands-howtoban-help-1": "* 밴처리에 필요한 밴처리 명령어를 표시합니다.",
+	"commands-howtoban-help-2": "* 명령어: /a /f /b /i /s /r",
+	"commands-howtoban-help-3": "* (약어: account find ban ip subnet release)",
+	"commands-howtoban-help-4": "* (번역: 계정검색 검색 계정밴 아이피밴 서브넷밴 밴해제)",
+	"commands-howtoban-help-5": "* (식별번호는 @숫자 와 같이 적습니다!)"
+	
+	"commands-account": "계정",
+	"commands-account-permission": "parfaitauth.commands.account",
+	"commands-account-description": "계정관리에 필요한 관리용 명령어를 표시합니다.",
+	"commands-account-usage": "/계정",
+	
+	"commands-account-help-1": "* 계정관리에 필요한 관리용 명령어를 표시합니다.",
+	"commands-account-help-2": "* /계정 유형 <아이디> <유형지정>",
+	"commands-account-help-3": "* /계정 접속 <아이디> - 해당 계정에 접속합니다.",
+	"commands-account-help-4": "* /계정 삭제 <아이디> - 해당 계정을 삭제합니다.",
+	"commands-account-help-5": "* /계정 통계 - 계정과 관련된 통계를 수집합니다.",
+	
+	"commands-account-info": "a",
+	"commands-account-info-permission": "parfaitauth.commands.account-info",
+	"commands-account-info-description": "밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
+	"commands-account-info-usage": "/a <필터> <검색어>",
+	
+	"commands-account-info-help-1": "* /a <필터> <검색어>",
+	"commands-account-info-help-2": "* 밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
+	"commands-account-info-help-3": "* (사용가능필터, 아이디, 닉네임, 식별번호)",
+	"commands-account-info-help-4": "* (아이디 혹은 닉네임을 정확하게 입력해야합니다.)",
+	
+	"commands-account-find": "f",
+	"commands-account-find-permission": "parfaitauth.commands.account-find",
+	"commands-account-find-description": "밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
+	"commands-account-find-usage": "/f <필터> <검색어>",
+	
+	"commands-account-find-help-1": "* /f <필터> <검색어>",
+	"commands-account-find-help-2": "* 밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
+	"commands-account-find-help-3": "* (사용가능필터: 아이디, 닉네임, 채팅, 나감, 접속, 복잡닉)",
+	
+	"commands-ban-account": "b",
+	"commands-ban-account-permission": "parfaitauth.commands.ban-account",
+	"commands-ban-account-description": "해당 유저의 계정을 차단합니다.",
+	"commands-ban-account-usage": "/b <식별번호|아이디> <기간> <사유>",
+	
+	"commands-ban-account-help-1": "* /b <식별번호|아이디> <기간> <사유>",
+	"commands-ban-account-help-2": "* 해당 유저의 계정을 차단합니다.",
+	"commands-ban-account-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
+	"commands-ban-account-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
+	"commands-ban-account-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
+	
+	"commands-ban-ipaddress": "i",
+	"commands-ban-ipaddress-permission": "parfaitauth.commands.ban-ipaddress",
+	"commands-ban-ipaddress-description": "해당 아이피 혹은 유저의 아이피를 차단합니다.",
+	"commands-ban-ipaddress-usage": "/i <식별번호|아이피> <기간> <사유>",
+	
+	"commands-ban-ipaddress-help-1": "* /i <식별번호|아이피> <기간> <사유>",
+	"commands-ban-ipaddress-help-2": "* 해당 아이피 혹은 유저의 아이피를 차단합니다.",
+	"commands-ban-ipaddress-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
+	"commands-ban-ipaddress-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
+	"commands-ban-ipaddress-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
+	
+	"commands-ban-subnet": "s",
+	"commands-ban-subnet-permission": "parfaitauth.commands.ban-subnet",
+	"commands-ban-subnet-description": "해당 서브넷 혹은 유저의 서브넷을 차단합니다.",
+	"commands-ban-subnet-usage": "/s <식별번호|서브넷> <기간> <사유>",
+	
+	"commands-ban-subnet-help-1": "* /s <식별번호|서브넷> <기간> <사유>",
+	"commands-ban-subnet-help-2": "* 해당 서브넷 혹은 유저의 서브넷을 차단합니다.",
+	"commands-ban-subnet-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
+	"commands-ban-subnet-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
+	"commands-ban-subnet-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
+	
+	"commands-ban-release": "r",
+	"commands-ban-release-permission": "parfaitauth.commands.ban-release",
+	"commands-ban-release-description": "해당 유저의 계정정보를 찾고 차단을 해제합니다.",
+	"commands-ban-release-usage": "/r <필터> <검색어> <사유>",
+	
+	"commands-ban-release-help-1": "* /r <필터> <검색어> <사유>",
+	"commands-ban-release-help-2": "* 해당 유저의 계정정보를 찾고 차단을 해제합니다.",
+	"commands-ban-release-help-3": "* (사용가능필터, 아이디, 닉네임, 식별번호, 아이피, 서브넷)",
+	"commands-ban-release-help-4": "* (검색어를 정확하게 입력해야합니다.)",
+	
 	"authcommand-info-1": "* 이 서버는 ParfaitAuth 프로그램의 인증체계를 사용합니다.",
 	"authcommand-info-2": "* 인증과정에서 여러분이 접속하고 있는 위치의 IP와",
 	"authcommand-info-3": "* 마인크래프트 앱이 제공하는 난수식별자를 수집하며,",
@@ -102,10 +186,10 @@
 	"authcommand-commandlist-1": "* 인증에 쓰이는 명령어 목록을 출력합니다.",
 	"authcommand-commandlist-2": "* (인증체계에 대한 설명은 /인증 안내 를 입력해주세요.)",
 	"authcommand-commandlist-3": "* <>는 빼고 입력하셔야합니다! - 뒤에 오는 것은 설명입니다.",
-	"authcommand-commandlist-4": "/로그인 <아이디> <암호> - 로그인 진행",
-	"authcommand-commandlist-5": "/가입 <아이디> <암호> <닉네임> - 아이디 생성",
-	"authcommand-commandlist-6": "/탈퇴 <아이디> <암호> - 아이디 삭제",
-	"authcommand-commandlist-7": "/계정찾기 <이메일@이메일주소> - 아이디 찾기",
-	"authcommand-commandlist-8": "/비밀번호변경 <새비밀번호> - 비밀번호 변경",
-	"authcommand-commandlist-9": "/닉네임변경 <새닉네임> - 닉네임을 바꿉니다."
+	"authcommand-commandlist-4": "* /로그인 <아이디> <암호> - 로그인 진행",
+	"authcommand-commandlist-5": "* /가입 <아이디> <암호> <닉네임> - 아이디 생성",
+	"authcommand-commandlist-6": "* /탈퇴 <아이디> <암호> - 아이디 삭제",
+	"authcommand-commandlist-7": "* /계정찾기 <이메일@이메일주소> - 아이디 찾기",
+	"authcommand-commandlist-8": "* /비밀번호변경 <새비밀번호> - 비밀번호 변경",
+	"authcommand-commandlist-9": "* /닉네임변경 <새닉네임> - 닉네임을 바꿉니다.",
 }

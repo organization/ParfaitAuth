@@ -8,6 +8,8 @@ import org.bson.Document;
 import com.mongodb.util.JSON;
 
 import cn.nukkit.Server;
+import cn.nukkit.event.Event;
+import hmhmmhm.ParfaitAuth.Events.NotificationSendEvent;
 import hmhmmhm.ParfaitAuth.Tasks.NotificationPushTask;
 
 public class Notification {
@@ -31,6 +33,12 @@ public class Notification {
 	 * @param async
 	 */
 	public static void push(String identifier, Object object, boolean async) {
+		Event event = new NotificationSendEvent(identifier, object);
+		Server.getInstance().getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
+			return;
+
 		if (async) {
 			Server.getInstance().getScheduler().scheduleAsyncTask(new NotificationPushTask(identifier, object));
 		} else {
@@ -61,6 +69,12 @@ public class Notification {
 	 * @param async
 	 */
 	public static void push(String serveruuid, String identifier, Object object, boolean async) {
+		Event event = new NotificationSendEvent(serveruuid, identifier, object);
+		Server.getInstance().getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
+			return;
+
 		if (async) {
 			Server.getInstance().getScheduler()
 					.scheduleAsyncTask(new NotificationPushTask(serveruuid, identifier, object));
