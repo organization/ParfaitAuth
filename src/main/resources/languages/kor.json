@@ -22,6 +22,7 @@
 	"error-cant-use-that-account": "* 해당계정을 사용할 수 없습니다! 재접속 해주세요!",
 	"error-taht-account-might-be-already-used": "* 계정이 타인에 의해 접속되어있는 것일 수도 있습니다.",
 	"error-if-auth-server-has-problem-will-be-fixed": "인증서버의 연결문제라면 20초 안에 복구 될 것입니다.",
+	"error-please-login-first": "* ID계정으로 로그인을 먼저 해주세요.",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
@@ -38,6 +39,8 @@
 
 	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
 	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
+	
+	"kick-successfully-logout": "로그아웃처리되었습니다."
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
@@ -95,12 +98,16 @@
 	"commands-howtoban-help-2": "* 명령어: /a /f /b /i /s /r",
 	"commands-howtoban-help-3": "* (약어: account find ban ip subnet release)",
 	"commands-howtoban-help-4": "* (번역: 계정검색 검색 계정밴 아이피밴 서브넷밴 밴해제)",
-	"commands-howtoban-help-5": "* (식별번호는 @숫자 와 같이 적습니다!)"
+	"commands-howtoban-help-5": "* (식별번호는 @숫자 와 같이 적습니다!)",
 	
 	"commands-account": "계정",
 	"commands-account-permission": "parfaitauth.commands.account",
 	"commands-account-description": "계정관리에 필요한 관리용 명령어를 표시합니다.",
 	"commands-account-usage": "/계정",
+	"commands-account-sub-type": "유형",
+	"commands-account-sub-login": "접속",
+	"commands-account-sub-del": "삭제",
+	"commands-account-sub-stat": "통계",
 	
 	"commands-account-help-1": "* 계정관리에 필요한 관리용 명령어를 표시합니다.",
 	"commands-account-help-2": "* /계정 유형 <아이디> <유형지정>",
@@ -113,6 +120,10 @@
 	"commands-account-info-description": "밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
 	"commands-account-info-usage": "/a <필터> <검색어>",
 	
+	"commands-account-info-sub-id": "아이디",
+	"commands-account-info-sub-nick": "닉네임",
+	"commands-account-info-sub-identy": "식별번호",
+	
 	"commands-account-info-help-1": "* /a <필터> <검색어>",
 	"commands-account-info-help-2": "* 밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
 	"commands-account-info-help-3": "* (사용가능필터, 아이디, 닉네임, 식별번호)",
@@ -122,6 +133,13 @@
 	"commands-account-find-permission": "parfaitauth.commands.account-find",
 	"commands-account-find-description": "밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
 	"commands-account-find-usage": "/f <필터> <검색어>",
+	
+	"commands-account-find-sub-id": "아이디",
+	"commands-account-find-sub-nick": "닉",
+	"commands-account-find-sub-chat": "채팅",
+	"commands-account-find-sub-logout": "나감",
+	"commands-account-find-sub-login": "접속",
+	"commands-account-find-sub-diff": "복잡닉",
 	
 	"commands-account-find-help-1": "* /f <필터> <검색어>",
 	"commands-account-find-help-2": "* 밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
@@ -164,6 +182,12 @@
 	"commands-ban-release-permission": "parfaitauth.commands.ban-release",
 	"commands-ban-release-description": "해당 유저의 계정정보를 찾고 차단을 해제합니다.",
 	"commands-ban-release-usage": "/r <필터> <검색어> <사유>",
+	
+	"commands-ban-release-sub-id": "아이디",
+	"commands-ban-release-sub-identy": "식별번호",
+	"commands-ban-release-sub-nick": "닉네임",
+	"commands-ban-release-sub-ip": "아이피",
+	"commands-ban-release-sub-subnet": "서브넷",
 	
 	"commands-ban-release-help-1": "* /r <필터> <검색어> <사유>",
 	"commands-ban-release-help-2": "* 해당 유저의 계정정보를 찾고 차단을 해제합니다.",

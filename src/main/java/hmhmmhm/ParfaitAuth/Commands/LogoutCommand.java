@@ -1,6 +1,9 @@
 package hmhmmhm.ParfaitAuth.Commands;
 
+import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import hmhmmhm.ParfaitAuth.Account;
+import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
 public class LogoutCommand extends ParfaitAuthCommand {
@@ -12,7 +15,19 @@ public class LogoutCommand extends ParfaitAuthCommand {
 	@Override
 	public boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args) {
 		if (command.getName().toLowerCase() == this.commandName) {
-			// TODO
+			if (!(sender instanceof Player)) {
+				sender.sendMessage(this.getMessage("error-in-game-user-only"));
+				return true;
+			}
+
+			if (ParfaitAuth.authorisedID.get((Player) sender) == null) {
+				sender.sendMessage(this.getMessage("error-please-login-first"));
+				return true;
+			}
+
+			Account accountData = ParfaitAuth.authorisedID.get((Player) sender);
+			((Player) sender).kick(this.getMessage("kick-successfully-logout"));
+			ParfaitAuth.release(((Player) sender).getUniqueId(), accountData, true, true);
 			return true;
 		}
 		return false;
