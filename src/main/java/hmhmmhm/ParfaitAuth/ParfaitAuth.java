@@ -19,7 +19,9 @@ import com.mongodb.util.JSON;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.event.Event;
 import cn.nukkit.utils.Config;
+import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
 import hmhmmhm.ParfaitAuth.Tasks.CreateNewUUIDAccountTask;
@@ -345,7 +347,7 @@ public class ParfaitAuth {
 		return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
 	}
 
-	public static void pullNotification() {
+	public static ArrayList<Event> pullNotification() {
 		UUID serverUUID = ParfaitAuth.getParfaitAuthUUID();
 
 		MongoDatabase db = MongoDBLib.getDatabase();
@@ -356,13 +358,16 @@ public class ParfaitAuth {
 
 		// 서버상태문서가 없으면 넘김
 		if (serverstate == null)
-			return;
+			return null;
 
 		int index = (int) serverstate.get("index");
 
 		// 인덱스가 0이면 넘김
 		if (index == 0)
-			return;
+			return null;
+
+		// 밚환할 이벤트 모음
+		ArrayList<Event> events = new ArrayList<Event>();
 
 		for (int i = 0; i <= index; i++) {
 			// 문서 아닐 경우 넘김
@@ -380,10 +385,11 @@ public class ParfaitAuth {
 					continue;
 
 				Object object = JSON.parse(json);
-
-				// TODO 이벤트처리해야함 identifier identifier
+				events.add(new NotificationReceiveEvent(identifier, object));
 			}
 		}
+
+		return events;
 	}
 
 	/**

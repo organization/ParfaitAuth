@@ -1,13 +1,17 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-import java.util.UUID;
 
+import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.event.Event;
 import cn.nukkit.plugin.PluginBase;
+import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
 import hmhmmhm.ParfaitAuth.EventHandler;
 import hmhmmhm.ParfaitAuth.Commands.AuthCommand;
@@ -18,7 +22,6 @@ import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
 import hmhmmhm.ParfaitAuth.Commands.ParfaitAuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
-import hmhmmhm.ParfaitAuth.Tasks.UpdateServerStatusTask;
 
 public class ParfaitAuthPlugin extends PluginBase {
 	private Config settings;
@@ -45,8 +48,41 @@ public class ParfaitAuthPlugin extends PluginBase {
 		this.getServer().getPluginManager().registerEvents(new EventHandler(this), this);
 
 		// DB에 서버 상태갱신
-		this.getServer().getScheduler().scheduleRepeatingTask(
-				new UpdateServerStatusTask(UUID.fromString((String) this.settings.get("server-uuid"))), 200);
+		this.serverStatusUpdater();
+
+		// DB예서 푸시 이벤트 돌리기
+		this.notificationCollector();
+	}
+
+	private void serverStatusUpdater() {
+		this.getServer().getScheduler().scheduleRepeatingTask((new Task() {
+			@Override
+			public void onRun(int currentTick) {
+				ParfaitAuth.updateServerStatus(ParfaitAuth.getParfaitAuthUUID());
+			}
+		}), 200);
+	}
+
+	private void notificationCollector() {
+		this.getServer().getScheduler().scheduleRepeatingTask((new Task() {
+			@Override
+			public void onRun(int currentTick) {
+				Server.getInstance().getScheduler().scheduleAsyncTask(new AsyncTask() {
+					private ArrayList<Event> events;
+
+					@Override
+					public void onRun() {
+						this.events = ParfaitAuth.pullNotification();
+					}
+
+					@Override
+					public void onCompletion(Server server) {
+						for (Event event : events)
+							server.getPluginManager().callEvent(event);
+					}
+				});
+			}
+		}), 20);
 	}
 
 	private void initialDatabase() {
@@ -69,7 +105,6 @@ public class ParfaitAuthPlugin extends PluginBase {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		for (Entry<String, Object> entry : commandMap.entrySet()) {
-			String key = entry.getKey();
 			Object pluginCommand = entry.getValue();
 
 			if (pluginCommand instanceof hmhmmhm.ParfaitAuth.Commands.Command)
