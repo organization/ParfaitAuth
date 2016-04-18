@@ -52,6 +52,8 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 		// DB예서 푸시 이벤트 돌리기
 		this.notificationCollector();
+
+		Notification.push("hmhmmhm.paapapa.adaiaia", "hello gi gagagaga");
 	}
 
 	private void serverStatusUpdater() {
@@ -77,12 +79,14 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 					@Override
 					public void onCompletion(Server server) {
-						for (Event event : events)
-							server.getPluginManager().callEvent(event);
+						if (this.events != null)
+							for (Event event : this.events)
+								if (event != null)
+									server.getPluginManager().callEvent(event);
 					}
 				});
 			}
-		}), 20);
+		}), 5);
 	}
 
 	private void initialDatabase() {

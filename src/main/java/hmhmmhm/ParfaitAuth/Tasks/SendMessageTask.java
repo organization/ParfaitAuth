@@ -12,15 +12,15 @@ public class SendMessageTask extends Task {
 	private int index = 1;
 
 	// 메시지 테스크 간에 중복으로 작동하지 않도록 방지
-	private static LinkedHashMap<String, Task> userUUIDMap = new LinkedHashMap<String, Task>();
+	public static LinkedHashMap<String, Task> userUUIDMap = new LinkedHashMap<String, Task>();
 
 	public SendMessageTask(CommandSender sender, String stringKey) {
 		this.sender = sender;
 		this.stringKey = stringKey;
 
 		// 이미 작동중인 메시지 전달 테스크가 있을 경우
-		if (SendMessageTask.userUUIDMap.get(sender.getName()) != null) {
-			Task oldTask = SendMessageTask.userUUIDMap.get(sender.getName());
+		if (userUUIDMap.get(sender.getName()) != null) {
+			Task oldTask = userUUIDMap.get(sender.getName());
 
 			// 그 테스크가 여전히 작동하고 있을 경우
 			if (!oldTask.getHandler().isCancelled()) {
@@ -29,7 +29,7 @@ public class SendMessageTask extends Task {
 			}
 		}
 
-		SendMessageTask.userUUIDMap.put(sender.getName(), this);
+		userUUIDMap.put(sender.getName(), this);
 	}
 
 	@Override
@@ -37,8 +37,9 @@ public class SendMessageTask extends Task {
 		String message = ParfaitAuthPlugin.getPlugin().getMessage(this.stringKey + index);
 
 		if (message == null) {
-			SendMessageTask.userUUIDMap.put(sender.getName(), null);
+			userUUIDMap.put(this.sender.getName(), null);
 			this.cancel();
+			return;
 		}
 
 		sender.sendMessage(message);

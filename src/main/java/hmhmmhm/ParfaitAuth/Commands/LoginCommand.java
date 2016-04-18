@@ -26,6 +26,11 @@ public class LoginCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
+			if (ParfaitAuth.authorisedID.get((Player) sender) != null) {
+				sender.sendMessage(this.getMessage(""));
+				return true;
+			}
+
 			ParfaitAuth.preAuthorizationID((Player) sender, args[0], args[1], false);
 			return true;
 		}

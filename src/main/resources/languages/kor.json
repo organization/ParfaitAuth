@@ -5,6 +5,14 @@
 	"status-database-was-updated": "DB 기반정보가 자동으로 업데이트되었습니다!",
 	"status-database-check-all-green": "DB 기반정보 체크완료! 계정연동 정상작동중!",
 	"status-new-message-task-now-working": "이전 메시지목록보기가 중단되고 새메시지를 출력합니다...",
+	"status-that-function-currently-not-support": "* 해당기능은 현재 지원되고 있지 않습니다. (향후지원)",
+	"status-start-change-account-type-async": "* 비동기로 계정 유형 변경 명령을 수행합니다..",
+	"status-requested-change-account-type-to-another-server": "* 유저가 접속하고 있는 서버에 계정유형 변경요청을 전달했습니다!",
+	"status-outcom-process-change-account-type": "* DB에서 계정유형 변경요청 들어옴.. 수행중..",
+	"status-outcom-process-force-access": "* DB에서 계정 강제접근 요청 들어옴... 수행중..",
+	"status-show-account-statistics": "* DB에서 수집한 계정 통계를 출력합니다.",
+	"status-start-show-user-identifier-list": "* 포함된 유저 명단을 표시합니다.",
+	"status-start-the-async-db-request": "* DB에 비동기로 정보를 요청합니다...",
 
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
 	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
@@ -23,6 +31,10 @@
 	"error-taht-account-might-be-already-used": "* 계정이 타인에 의해 접속되어있는 것일 수도 있습니다.",
 	"error-if-auth-server-has-problem-will-be-fixed": "인증서버의 연결문제라면 20초 안에 복구 될 것입니다.",
 	"error-please-login-first": "* ID계정으로 로그인을 먼저 해주세요.",
+	"error-you-already-logined": "* 이미 로그인되어있습니다",
+	"error-cant-find-that-accounttype": "* 해당 계정유형은 사전정의되지 않았습니다!",
+	"error-permission-not-authorized": "* 관리권한 비인가 상태인 게정입니다.",
+	"error-identifier-create-failed": "* 매치되는 결과값 없음! 식별번호 발급실패",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
@@ -30,17 +42,23 @@
 	"caution-account-founded-but-your-new-ip": "* 아이디계정이 확인되었으나, 새 IP가 감지되었습니다.",
 	"caution-you-need-to-run-login-command": "* /로그인 <아이디> <비밀번호> 를 진행하셔야합니다.",
 	"caution-requesting-for-temp-uuid-account": "* 인증전까지 사용될 임시 UUID 계정을 발급 요청중...",
+	"caution-account-was-unstable-logouted-rewrited-type-data": "* 계정이 이전에 이서버에서 비정상 접속종료됨, 정보를 덮어씁니다.",
 
 	"success-id-account-was-created": "* ID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 	"success-uuid-account-was-created": "* UUID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 	"success-uuid-account-login-complete": "* 임시 UUID 계정으로 자동 로그인 되었습니다.",
 	"success-id-account-was-logined": "* 아이디 계정으로 로그인 되었습니다.",
 	"success-id-account-was-auto-logined": "* 아이디 계정으로 자동 로그인 되었습니다",
+	"success-account-type-changed": "* 계정 유형이 자동으로 변경되었습니다.",
+	"success-that-account-was-deleted": "* 해당 계정이 정상적으로 삭제되었습니다.",
 
 	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
 	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
-	
-	"kick-successfully-logout": "로그아웃처리되었습니다."
+	"info-identifier-founded": "* 식별번호 생성됨 : [%1]",
+
+	"kick-successfully-logout": "로그아웃처리되었습니다.",
+	"kick-successfully-unregistered": "계정삭제요청처리되었습니다.",
+	"kick-account-force-connected": "관리자가 해당 계정에 엑세스시도",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
@@ -93,13 +111,13 @@
 	"commands-howtoban-permission": "parfaitauth.commands.howtoban",
 	"commands-howtoban-description": "밴처리에 필요한 밴처리 명령어를 표시합니다.",
 	"commands-howtoban-usage": "/밴처리",
-	
+
 	"commands-howtoban-help-1": "* 밴처리에 필요한 밴처리 명령어를 표시합니다.",
 	"commands-howtoban-help-2": "* 명령어: /a /f /b /i /s /r",
 	"commands-howtoban-help-3": "* (약어: account find ban ip subnet release)",
 	"commands-howtoban-help-4": "* (번역: 계정검색 검색 계정밴 아이피밴 서브넷밴 밴해제)",
 	"commands-howtoban-help-5": "* (식별번호는 @숫자 와 같이 적습니다!)",
-	
+
 	"commands-account": "계정",
 	"commands-account-permission": "parfaitauth.commands.account",
 	"commands-account-description": "계정관리에 필요한 관리용 명령어를 표시합니다.",
@@ -108,92 +126,108 @@
 	"commands-account-sub-login": "접속",
 	"commands-account-sub-del": "삭제",
 	"commands-account-sub-stat": "통계",
-	
+
 	"commands-account-help-1": "* 계정관리에 필요한 관리용 명령어를 표시합니다.",
 	"commands-account-help-2": "* /계정 유형 <아이디> <유형지정>",
 	"commands-account-help-3": "* /계정 접속 <아이디> - 해당 계정에 접속합니다.",
 	"commands-account-help-4": "* /계정 삭제 <아이디> - 해당 계정을 삭제합니다.",
 	"commands-account-help-5": "* /계정 통계 - 계정과 관련된 통계를 수집합니다.",
-	
+
+	"commands-account-type-help-1": "* 계정 유형 목록을 표시합니다. (숫자만 입력)",
+	"commands-account-type-help-2": "* 0 - 기본 서버기본모드만 가능",
+	"commands-account-type-help-3": "* 1 - 어드벤쳐모드 가능",
+	"commands-account-type-help-4": "* 2 - 생존모드 가능",
+	"commands-account-type-help-5": "* 3 - 창조모드 가능",
+	"commands-account-type-help-6": "* 4 - 밴처리가능",
+	"commands-account-type-help-7": "* 5 - 모든권한가능",
+
 	"commands-account-info": "a",
 	"commands-account-info-permission": "parfaitauth.commands.account-info",
 	"commands-account-info-description": "밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
 	"commands-account-info-usage": "/a <필터> <검색어>",
-	
+
+	"commands-account-info-show-start": "* 계정 정보를 표시합니다.",
+	"commands-account-info-idnick": "* 계정명: %nick ID: %id",
+	"commands-account-info-lastdate": "* 최근접속일: %lastdate",
+	"commands-account-info-lastip": "* 접근IP: %lastip",
+	"commands-account-info-account-type": "* 계정유형: %type",
+	"commands-account-info-logined": "* 접속서버: %logined",
+	"commands-account-info-unblock-period": "* 차단정보: %unblockperiod",
+
 	"commands-account-info-sub-id": "아이디",
 	"commands-account-info-sub-nick": "닉네임",
 	"commands-account-info-sub-identy": "식별번호",
-	
+
 	"commands-account-info-help-1": "* /a <필터> <검색어>",
 	"commands-account-info-help-2": "* 밴처리를 위해 해당 유저의 계정정보를 찾습니다.",
 	"commands-account-info-help-3": "* (사용가능필터, 아이디, 닉네임, 식별번호)",
 	"commands-account-info-help-4": "* (아이디 혹은 닉네임을 정확하게 입력해야합니다.)",
-	
+
 	"commands-account-find": "f",
 	"commands-account-find-permission": "parfaitauth.commands.account-find",
 	"commands-account-find-description": "밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
 	"commands-account-find-usage": "/f <필터> <검색어>",
-	
+
 	"commands-account-find-sub-id": "아이디",
 	"commands-account-find-sub-nick": "닉",
 	"commands-account-find-sub-chat": "채팅",
 	"commands-account-find-sub-logout": "나감",
 	"commands-account-find-sub-login": "접속",
 	"commands-account-find-sub-diff": "복잡닉",
-	
+
 	"commands-account-find-help-1": "* /f <필터> <검색어>",
 	"commands-account-find-help-2": "* 밴처리를 위해 지정된 유저 식별번호를 찾습니다.",
 	"commands-account-find-help-3": "* (사용가능필터: 아이디, 닉네임, 채팅, 나감, 접속, 복잡닉)",
-	
+
 	"commands-ban-account": "b",
 	"commands-ban-account-permission": "parfaitauth.commands.ban-account",
 	"commands-ban-account-description": "해당 유저의 계정을 차단합니다.",
 	"commands-ban-account-usage": "/b <식별번호|아이디> <기간> <사유>",
-	
+
 	"commands-ban-account-help-1": "* /b <식별번호|아이디> <기간> <사유>",
 	"commands-ban-account-help-2": "* 해당 유저의 계정을 차단합니다.",
 	"commands-ban-account-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
 	"commands-ban-account-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
 	"commands-ban-account-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
-	
+
 	"commands-ban-ipaddress": "i",
 	"commands-ban-ipaddress-permission": "parfaitauth.commands.ban-ipaddress",
 	"commands-ban-ipaddress-description": "해당 아이피 혹은 유저의 아이피를 차단합니다.",
 	"commands-ban-ipaddress-usage": "/i <식별번호|아이피> <기간> <사유>",
-	
+
 	"commands-ban-ipaddress-help-1": "* /i <식별번호|아이피> <기간> <사유>",
 	"commands-ban-ipaddress-help-2": "* 해당 아이피 혹은 유저의 아이피를 차단합니다.",
 	"commands-ban-ipaddress-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
 	"commands-ban-ipaddress-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
 	"commands-ban-ipaddress-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
-	
+
 	"commands-ban-subnet": "s",
 	"commands-ban-subnet-permission": "parfaitauth.commands.ban-subnet",
 	"commands-ban-subnet-description": "해당 서브넷 혹은 유저의 서브넷을 차단합니다.",
 	"commands-ban-subnet-usage": "/s <식별번호|서브넷> <기간> <사유>",
-	
+
 	"commands-ban-subnet-help-1": "* /s <식별번호|서브넷> <기간> <사유>",
 	"commands-ban-subnet-help-2": "* 해당 서브넷 혹은 유저의 서브넷을 차단합니다.",
 	"commands-ban-subnet-help-3": "* (기간에 숫자만 입력시 분단위가 되며)",
 	"commands-ban-subnet-help-4": "* (앞에 h, d를 붙일 수 있고, 각각 시간,일자단위)",
 	"commands-ban-subnet-help-5": "* (사유는 반드시 적어야하며 띄어쓰기가 가능함)",
-	
+
 	"commands-ban-release": "r",
 	"commands-ban-release-permission": "parfaitauth.commands.ban-release",
 	"commands-ban-release-description": "해당 유저의 계정정보를 찾고 차단을 해제합니다.",
 	"commands-ban-release-usage": "/r <필터> <검색어> <사유>",
-	
+
 	"commands-ban-release-sub-id": "아이디",
 	"commands-ban-release-sub-identy": "식별번호",
 	"commands-ban-release-sub-nick": "닉네임",
 	"commands-ban-release-sub-ip": "아이피",
 	"commands-ban-release-sub-subnet": "서브넷",
-	
+
 	"commands-ban-release-help-1": "* /r <필터> <검색어> <사유>",
 	"commands-ban-release-help-2": "* 해당 유저의 계정정보를 찾고 차단을 해제합니다.",
 	"commands-ban-release-help-3": "* (사용가능필터, 아이디, 닉네임, 식별번호, 아이피, 서브넷)",
 	"commands-ban-release-help-4": "* (검색어를 정확하게 입력해야합니다.)",
-	
+
 	"authcommand-info-1": "* 이 서버는 ParfaitAuth 프로그램의 인증체계를 사용합니다.",
 	"authcommand-info-2": "* 인증과정에서 여러분이 접속하고 있는 위치의 IP와",
 	"authcommand-info-3": "* 마인크래프트 앱이 제공하는 난수식별자를 수집하며,",

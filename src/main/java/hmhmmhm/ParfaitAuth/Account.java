@@ -24,12 +24,12 @@ public class Account {
 	public int accountType = 0;
 
 	/* 계정 유형 목록 */
-	final static int TYPE_DEFAULT = 0; // 서버기본모드만 가능
-	final static int TYPE_GUEST = 1; // 어드벤쳐모드 가능
-	final static int TYPE_NORMAL = 2; // 생존모드 가능
-	final static int TYPE_BUILDER = 3; // 창조모드 가능
-	final static int TYPE_OVER_POWER = 4; // 밴처리가능
-	final static int TYPE_ADMIN = 5; // 모든권한가능
+	public final static int TYPE_DEFAULT = 0; // 서버기본모드만 가능
+	public final static int TYPE_GUEST = 1; // 어드벤쳐모드 가능
+	public final static int TYPE_NORMAL = 2; // 생존모드 가능
+	public final static int TYPE_BUILDER = 3; // 창조모드 가능
+	public final static int TYPE_OVER_POWER = 4; // 밴처리가능
+	public final static int TYPE_ADMIN = 5; // 모든권한가능
 
 	/**
 	 * banned is have the when he released.<br>
@@ -273,7 +273,51 @@ public class Account {
 	 * @return String
 	 */
 	public String getUnblockPeriod() {
+		if (this.banned == null)
+			return null;
 		return (new Timestamp(Long.valueOf(this.banned))).toString();
+	}
+
+	/**
+	 * 언제 마지막으로 접속했는지 일자를 문자열로 반환합니다.<br>
+	 * ex: 2016-04-01 20:43:47.822
+	 * 
+	 * @return String
+	 */
+	public String getLastDate() {
+		if (this.banned == null)
+			return null;
+		return (new Timestamp(Long.valueOf(this.lastDate))).toString();
+	}
+
+	/**
+	 * 해당 계정이 어떤 유형인지를 문자열로 반환합니다.
+	 * 
+	 * @return String
+	 */
+	public String getAccountType() {
+		String type = "DEFAULT";
+		switch (this.accountType) {
+		case Account.TYPE_ADMIN:
+			type = "ADMIN";
+			break;
+		case Account.TYPE_BUILDER:
+			type = "BUILDER";
+			break;
+		case Account.TYPE_DEFAULT:
+			type = "DEFAULT";
+			break;
+		case Account.TYPE_GUEST:
+			type = "GUEST";
+			break;
+		case Account.TYPE_NORMAL:
+			type = "NORMAL";
+			break;
+		case Account.TYPE_OVER_POWER:
+			type = "OVERPOWER";
+			break;
+		}
+		return type;
 	}
 
 	public LinkedHashMap<String, Object> getAdditionalData() {

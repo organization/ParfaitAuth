@@ -7,11 +7,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
+
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
@@ -25,9 +26,14 @@ import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
 import hmhmmhm.ParfaitAuth.Tasks.CreateNewUUIDAccountTask;
+import hmhmmhm.ParfaitAuth.Tasks.DeleteAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.RetryAuthAlreadyLoginedAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateAccountTask;
+
 import mongodblib.MongoDBLib;
+import static java.util.Arrays.asList;
+
+import java.lang.Character.UnicodeBlock;
 
 public class ParfaitAuth {
 	public static String parfaitAuthCollectionName = "hmhmmhm.ParfaitAuth";
@@ -186,6 +192,15 @@ public class ParfaitAuth {
 	}
 
 	/**
+	 * 비동기로 계정을 삭제합니다.
+	 * 
+	 * @param uuid
+	 */
+	public static void deleteAccountAsync(UUID uuid) {
+		Server.getInstance().getScheduler().scheduleAsyncTask(new DeleteAccountTask(uuid.toString()));
+	}
+
+	/**
 	 * 계정정보를 갱신합니다. 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
 	 * <br>
 	 * 클라이언트가 오프라인상태일때 ParfaitAuth.CLIENT_IS_DEAD<br>
@@ -340,7 +355,7 @@ public class ParfaitAuth {
 
 		// 인덱스에 맞춰서 push-*로 문서 넣고 인덱스 올리고 업로드.
 		int index = (int) serverstate.get("index");
-		serverstate.put("push-" + index, new Document(identifier, object));
+		serverstate.put("push-" + index, new Document().append("key", identifier).append("value", object));
 		serverstate.put("index", ++index);
 
 		UpdateResult result = collection.updateOne(new Document("_id", serverUUID), new Document("$set", serverstate));
@@ -353,7 +368,8 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
-		List<Document> documents = collection.find(new Document("_id", serverUUID)).into(new ArrayList<Document>());
+		List<Document> documents = collection.find(new Document("_id", serverUUID.toString()))
+				.into(new ArrayList<Document>());
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
 		// 서버상태문서가 없으면 넘김
@@ -369,25 +385,26 @@ public class ParfaitAuth {
 		// 밚환할 이벤트 모음
 		ArrayList<Event> events = new ArrayList<Event>();
 
-		for (int i = 0; i <= index; i++) {
+		for (int i = 0; i <= (index - 1); i++) {
 			// 문서 아닐 경우 넘김
-			Object value = serverstate.get("push-" + index);
+			Object value = serverstate.get("push-" + i);
+
 			if (value == null || !(value instanceof Document))
 				continue;
 
 			Document document = (Document) value;
-			for (Entry<String, Object> entry : document.entrySet()) {
-				String identifier = entry.getKey();
-				String json = (String) entry.getValue();
+			String key = (String) document.get("key");
+			String json = (String) document.get("value");
+			Object object = JSON.parse(json);
 
-				// JSON이 아닌 손상된 자료인 경우
-				if (identifier == null || json == null)
-					continue;
+			if (key != null && json != null)
+				events.add(new NotificationReceiveEvent(key, object));
 
-				Object object = JSON.parse(json);
-				events.add(new NotificationReceiveEvent(identifier, object));
-			}
+			serverstate.remove("push-" + i);
 		}
+
+		if (events.size() != 0)
+			collection.replaceOne(new Document("_id", serverUUID.toString()), serverstate);
 
 		return events;
 	}
@@ -467,6 +484,20 @@ public class ParfaitAuth {
 		// ( 즉 서버가 갑자기 크래시되도 10초안에 다른서버 접속이 허용됩니다. )
 		return (ParfaitAuth.checkServerPingGreen(serverTimestamp)) ? ParfaitAuth.SERVERSTATE_IS_GREEN
 				: ParfaitAuth.SERVERSTATE_IS_RED;
+	}
+
+	/**
+	 * DB에 저장되어있는 계정 유형 통계를 표시합니다.
+	 * 
+	 * @return List<Document>
+	 */
+	public static List<Document> getAccountStatistics() {
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection("restaurants")
+				.aggregate(asList(new Document("$group",
+						new Document("accountType", "$borough").append("count", new Document("$sum", 1)))))
+				.into(new ArrayList<Document>());
+		return documents;
 	}
 
 	/**
@@ -764,6 +795,7 @@ public class ParfaitAuth {
 
 		for (int i = 0; i < len; i++) {
 			char c = id.charAt(i);
+			// English and under bar allow
 			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
 				continue;
 			return false;
@@ -785,8 +817,15 @@ public class ParfaitAuth {
 
 		for (int i = 0; i < len; i++) {
 			char c = name.charAt(i);
-			if (c == '*' || c == '@' || c == '#')
-				return false;
+			// English and under bar allow
+			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+				continue;
+
+			// If server is kr server, so allow kr language
+			if (Server.getInstance().getLanguage().getLang() == "kor" && ParfaitAuth.isHangul(c))
+				continue;
+			
+			return false;
 		}
 		return true;
 	}
@@ -821,9 +860,23 @@ public class ParfaitAuth {
 
 		for (int i = 0; i < len; i++) {
 			char c = name.charAt(i);
-			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'))
+			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
+				// If server is kr server, so pass kr language
+				if (Server.getInstance().getLanguage().getLang() == "kor" && ParfaitAuth.isHangul(c))
+					continue;
 				count++;
+			}
 		}
 		return count;
 	}
+
+	public static boolean isHangul(char ch) {
+		UnicodeBlock block = UnicodeBlock.of(ch);
+		if (UnicodeBlock.HANGUL_SYLLABLES == block || UnicodeBlock.HANGUL_JAMO == block
+				|| UnicodeBlock.HANGUL_COMPATIBILITY_JAMO == block) {
+			return true;
+		}
+		return false;
+	}
+
 }

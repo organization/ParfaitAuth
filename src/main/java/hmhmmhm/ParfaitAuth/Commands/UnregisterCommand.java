@@ -23,7 +23,9 @@ public class UnregisterCommand extends ParfaitAuthCommand {
 				sender.sendMessage(this.getMessage("error-please-login-first"));
 				return true;
 			}
-			// TODO
+
+			ParfaitAuth.deleteAccountAsync(((Player) sender).getUniqueId());
+			((Player) sender).kick(ParfaitAuthPlugin.getPlugin().getMessage("kick-successfully-unregistered"));
 			return true;
 		}
 		return false;

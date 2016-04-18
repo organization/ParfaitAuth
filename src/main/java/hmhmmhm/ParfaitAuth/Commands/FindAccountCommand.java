@@ -12,7 +12,7 @@ public class FindAccountCommand extends ParfaitAuthCommand {
 	@Override
 	public boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args) {
 		if (command.getName().toLowerCase() == this.commandName) {
-			// TODO
+			sender.sendMessage(this.getMessage("status-that-function-currently-not-support"));
 			return true;
 		}
 		return false;
