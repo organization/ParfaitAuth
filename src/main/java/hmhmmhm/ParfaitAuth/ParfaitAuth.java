@@ -37,27 +37,43 @@ import static java.util.Arrays.asList;
 import java.lang.Character.UnicodeBlock;
 
 public class ParfaitAuth {
+	/**
+	 * 파르페오스의 기본세팅문서가 담길 DB 컬렉션 명입니다.<br>
+	 * 다른 이름의 컬렉션을 사용하고 싶으면 이 변수를 변경합니다.
+	 */
 	public static String parfaitAuthCollectionName = "hmhmmhm.ParfaitAuth";
+	/**
+	 * 파르페오스의 유저문서가 담길 DB 컬렉션 명입니다.<br>
+	 * 다른 이름의 컬렉션을 사용하고 싶으면 이 변수를 변경합니다.
+	 */
 	public static String accountCollectionName = "hmhmmhm.ParfaitAuth.Account";
 
+	/**
+	 * 플러그인이 사용중인 데이터베이스 버전명을 나타냅니다.<br>
+	 * 출시 이후 DB에 큰 변동사항이 발생하면 이 값이 1씩 올라갑니다.
+	 */
 	final static public int DATABASE_VERSION = 1;
 
+	/* 각 함수에서 반환용으로 사용되는 결과값들 입니다. */
 	final static public int CLIENT_IS_DEAD = 0;
 	final static public int SUCCESS = 1;
 	final static public int ALREADY_EXIST_ACCOUNT = 2;
 	final static public int NOT_EXIST_ACCOUNT = 3;
 	final static public int USER_DATA_NOT_EXIST = 4;
-
 	final static public int ALREADY_INITIALIZED_DATABASE = 5;
 	final static public int UPDATED_DATABASE = 6;
 	final static public int CAUTION_PLUGIN_IS_OUTDATE = 7;
 
+	/* 해당 서버의 온라인 여부를 반환할때 쓰는 결과값들입니다. */
 	final static public int SERVERSTATE_IS_NULL = 8;
 	final static public int SERVERSTATE_IS_GREEN = 9;
 	final static public int SERVERSTATE_IS_RED = 10;
 
+	/* 어떤 인증도 아직 거치지 않은 유저들이 여기 기록됩니다. */
 	public static LinkedHashMap<UUID, Player> unauthorised = new LinkedHashMap<>();
+	/* UUID로만 인증을 받은 유저들이 여기 기록됩니다. */
 	public static LinkedHashMap<UUID, Account> authorisedUUID = new LinkedHashMap<>();
+	/* ID계정을 통해 인증 받은 유저들이 여기 기록됩니다. */
 	public static LinkedHashMap<UUID, Account> authorisedID = new LinkedHashMap<>();
 
 	/* 차단된 네트워크주소 명단이 여기 담깁니다. */
@@ -281,19 +297,24 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// serverstate 문서를 가져옵니다.
 		List<Document> documents = collection.find(new Document("_id", "serverstate")).into(new ArrayList<Document>());
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
+		// nameindex 문서를 가져옵니다.
 		documents = collection.find(new Document("_id", "nameindex")).into(new ArrayList<Document>());
 		Document nameindex = (documents.size() == 0) ? null : documents.get(0);
 
+		// DB버전이 플러그인에 프로그래밍 된 DB보다 더 높은지 확인합니다.
+		// 더 높으면 어떤 작업도 실행하지 않고 바로 반환합니다.
 		if (serverstate != null)
-			if ((int) serverstate.get("initVersion") > ParfaitAuth.UPDATED_DATABASE)
+			if ((int) serverstate.get("initVersion") > ParfaitAuth.DATABASE_VERSION)
 				return ParfaitAuth.CAUTION_PLUGIN_IS_OUTDATE;
 
 		List<Document> insertDocuments = new ArrayList<Document>();
 
-		// serverstate
+		// serverstate 문서를 추가합니다.
+		// Insert serverstate document
 		if (serverstate == null || serverstate.get("initVersion") == null
 				|| (int) serverstate.get("initVersion") < ParfaitAuth.DATABASE_VERSION) {
 			Document serverstate_document = new Document();
@@ -306,7 +327,8 @@ public class ParfaitAuth {
 			insertDocuments.add(serverstate_document);
 		}
 
-		// nameindex
+		// nameindex 문서를 추가합니다.
+		// Insert nameindex document
 		if (nameindex == null) {
 			Document nameindex_document = new Document();
 			nameindex_document.put("_id", "nameindex");
@@ -314,14 +336,20 @@ public class ParfaitAuth {
 			insertDocuments.add(nameindex_document);
 		}
 
-		// TODO 만약 나중에 DB에 내장해야할 자료가 생기면 여기에 추가하고 DB버전업
+		// TODO 만약 나중에 DB에 내장해야할 자료가 추가로 생기면
+		// 여기에 해당코드를 추가하고 DB버전을 업데이트 해야합니다.
 
+		// DB에 업로드 해야할 문서가 존재하면 DB에 업로드합니다.
 		if (insertDocuments.size() != 0)
 			collection.insertMany(insertDocuments);
 
-		if (serverstate != null)
+		// DB버전을 업데이트 했는지 여부를 반환합니다.
+		if (serverstate != null) {
+			// TODO 향후 DB버전이 개선되면 여기에 업데이트 코드를 적습니다.
+
 			if ((int) serverstate.get("initVersion") < ParfaitAuth.DATABASE_VERSION)
 				return ParfaitAuth.UPDATED_DATABASE;
+		}
 
 		return ParfaitAuth.SUCCESS;
 	}
@@ -338,6 +366,7 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// bannedaddress 문서를 가져옵니다.
 		List<Document> documents = collection.find(new Document("_id", "bannedaddress"))
 				.into(new ArrayList<Document>());
 		Document bannedaddress = (documents.size() == 0) ? null : documents.get(0);
@@ -348,6 +377,7 @@ public class ParfaitAuth {
 		// 키는 밴처리된 네트워크주소, 밸류는 밴해제할 타임스탬프
 		for (Entry<String, Object> entry : bannedaddress.entrySet()) {
 			Long value;
+			// String 으로 저장된 타임스탬프를 Long으로 변환시도 합니다.
 			try {
 				value = Long.valueOf((String) entry.getValue());
 			} catch (NumberFormatException e) {
@@ -366,6 +396,7 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static int addBannedAddress(String address, Long period) {
+		// bannedaddress 리스트를 가져옵니다.
 		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
 
 		if (originList == null)
@@ -373,6 +404,7 @@ public class ParfaitAuth {
 
 		originList.put(address, period);
 
+		// 업로드할 bannedaddress 문서를 만듭니다.
 		Document document = new Document("_id", "bannedaddress");
 		for (Entry<String, Long> entry : originList.entrySet())
 			document.put(entry.getKey(), entry.getValue());
@@ -380,6 +412,7 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 문서를 업로드합니다.
 		UpdateResult result = collection.updateOne(new Document("_id", "bannedaddress"),
 				new Document("$set", document));
 
@@ -393,6 +426,7 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static int deleteBannedAddress(String address) {
+		// bannedaddress 리스트를 가져옵니다.
 		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
 
 		if (originList == null)
@@ -400,6 +434,7 @@ public class ParfaitAuth {
 
 		originList.remove(address);
 
+		// 업로드할 bannedaddress 문서를 만듭니다.
 		Document document = new Document("_id", "bannedaddress");
 		for (Entry<String, Long> entry : originList.entrySet())
 			document.put(entry.getKey(), entry.getValue());
@@ -407,6 +442,7 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 문서를 업로드합니다.
 		UpdateResult result = collection.updateOne(new Document("_id", "bannedaddress"),
 				new Document("$set", document));
 
@@ -414,7 +450,7 @@ public class ParfaitAuth {
 	}
 
 	/**
-	 * 자료를 활성화된 모든서버에 전송합니다.<br>
+	 * 자료를 해당 UUID를 가진 서버에 전송합니다.<br>
 	 * 식별자를 통해서 자료전달자간 서로 식별해야합니다.
 	 * 
 	 * @param serverDocument
@@ -426,25 +462,27 @@ public class ParfaitAuth {
 	public static int pushNotification(Document serverDocument, String serverUUID, String identifier, Object object) {
 		String updated = (String) serverDocument.get("updated");
 
-		// 해당 타임스탬프가 존재하지 않는다면 넘김
+		// 해당 타임스탬프가 존재하지 않는다면 반환합니다.
 		if (updated == null)
 			return ParfaitAuth.SERVERSTATE_IS_NULL;
 
+		// 서버핑 갱신일자가 10초내가 아니면 오프라인으로 간주하고 반환처리합니다.
 		long timestamp = Long.valueOf(updated);
 		if (!ParfaitAuth.checkServerPingGreen(timestamp))
-			return ParfaitAuth.SERVERSTATE_IS_NULL;
+			return ParfaitAuth.SERVERSTATE_IS_RED;
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 지정된 서버의 문서를 가져옵니다.
 		List<Document> documents = collection.find(new Document("_id", serverUUID)).into(new ArrayList<Document>());
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
-		// 서버상태문서가 없으면 넘김
+		// 서버상태문서가 없으면 반환합니다.
 		if (serverstate == null)
 			return ParfaitAuth.SERVERSTATE_IS_NULL;
 
-		// 인덱스에 맞춰서 push-*로 문서 넣고 인덱스 올리고 업로드.
+		// 인덱스에 맞춰서 push-*로 문서 넣고 인덱스를 올리고 업로드합니다.
 		int index = (int) serverstate.get("index");
 		serverstate.put("push-" + index, new Document().append("key", identifier).append("value", object));
 		serverstate.put("index", ++index);
@@ -459,27 +497,29 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 이 서버의 서버상태문서를 가져옵니다.
 		List<Document> documents = collection.find(new Document("_id", serverUUID.toString()))
 				.into(new ArrayList<Document>());
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
-		// 서버상태문서가 없으면 넘김
+		// 서버상태문서가 없으면 반환합니다.
 		if (serverstate == null)
 			return null;
 
 		int index = (int) serverstate.get("index");
 
-		// 인덱스가 0이면 넘김
+		// 인덱스가 0이면 들어온 문서가 없는 것으로 간주해서 반환합니다.
 		if (index == 0)
 			return null;
 
-		// 밚환할 이벤트 모음
+		// 반환할 이벤트를 모으는 리스트입니다.
 		ArrayList<Event> events = new ArrayList<Event>();
 
 		for (int i = 0; i <= (index - 1); i++) {
-			// 문서 아닐 경우 넘김
+			// push-인덱스값 의 형태로 문서들을 읽어옵니다.
 			Object value = serverstate.get("push-" + i);
 
+			// 저장된 값이 문서 아닐 경우 다음으로 넘어갑니다.
 			if (value == null || !(value instanceof Document))
 				continue;
 
@@ -488,12 +528,18 @@ public class ParfaitAuth {
 			String json = (String) document.get("value");
 			Object object = JSON.parse(json);
 
+			// 읽어온 문서가 정상적이면 이벤트에 추가합니다.
 			if (key != null && json != null)
 				events.add(new NotificationReceiveEvent(key, object));
 
+			// 읽어온 문서는 삭제처리합니다.
 			serverstate.remove("push-" + i);
 		}
 
+		// 들어온 모든 정보를 읽어왔으므로 인덱스를 0으로 만듭니다.
+		serverstate.put("index", 0);
+
+		// 읽어온 정보가 있으면 변경된값을 DB에 업로드합니다.
 		if (events.size() != 0)
 			collection.replaceOne(new Document("_id", serverUUID.toString()), serverstate);
 
@@ -507,10 +553,11 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static Document getServerDocument(String uuid) {
-		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
+		// 해당서버의 서버상태문서를 가져옵니다.
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
 				.find(new Document("_id", uuid)).into(new ArrayList<Document>());
@@ -524,14 +571,16 @@ public class ParfaitAuth {
 	 * @return ArrayList
 	 */
 	public static LinkedHashMap<String, Document> getAllServers() {
-		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
 		MongoDatabase db = MongoDBLib.getDatabase();
+		// 해당 컬렉션을 모두 읽어옵니다.
 		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName).find()
 				.into(new ArrayList<Document>());
 
+		// 서버상태문서만 분별해서 맵에 추가 후 반환합니다.
 		LinkedHashMap<String, Document> foundedDocuments = new LinkedHashMap<String, Document>();
 		for (Document document : documents) {
 			if (document.get("updated") == null || document.get("index") == null)
@@ -554,10 +603,11 @@ public class ParfaitAuth {
 	 * @return integer
 	 */
 	public static int getServerStatus(UUID uuid) {
-		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
+		// 해당서버의 서버상태문서를 가져옵니다.
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.parfaitAuthCollectionName)
 				.find(new Document("_id", uuid.toString())).into(new ArrayList<Document>());
@@ -565,9 +615,11 @@ public class ParfaitAuth {
 		// _id는 겹칠 수 없기에 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
+		// 갱신일자 정보가 없으면 서버문서가 없는 것으로 간주합니다.
 		if (serverstate == null || serverstate.get("updated") == null)
 			return ParfaitAuth.SERVERSTATE_IS_NULL;
 
+		// 갱신일자 정보를 타임스탬프로 읽어옵니다.
 		long serverTimestamp = Long.valueOf((String) serverstate.get("updated"));
 
 		// 10초마다 서버핑을 보내게 처리하며
@@ -583,8 +635,14 @@ public class ParfaitAuth {
 	 * @return List<Document>
 	 */
 	public static List<Document> getAccountStatistics() {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
 		MongoDatabase db = MongoDBLib.getDatabase();
-		List<Document> documents = db.getCollection("restaurants")
+
+		// accountType 키의 밸류값이 어떤게 있는지에 대한 통계를 가져옵니다.
+		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
 				.aggregate(asList(new Document("$group",
 						new Document("accountType", "$borough").append("count", new Document("$sum", 1)))))
 				.into(new ArrayList<Document>());
@@ -604,35 +662,34 @@ public class ParfaitAuth {
 	}
 
 	public static int updateServerStatus(UUID uuid) {
-		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
 			return ParfaitAuth.CLIENT_IS_DEAD;
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 현재시간을 타임스탬프로 만든 후 문자열로 저장합니다.
 		String currentTimestamp = String.valueOf(Calendar.getInstance().getTime().getTime());
 
-		// 서버 상태모음 문서 찾아오기
+		// 서버상태문서를 가져옵니다.
 		ArrayList<Document> documents = collection.find(new Document("_id", uuid.toString()))
 				.into(new ArrayList<Document>());
 		Document serverstate = (documents.size() == 0) ? null : documents.get(0);
 
 		if (serverstate == null || !(serverstate instanceof Document)) {
-			// 내 서버상태 문서 없으면 생성
+			// 서버상태문서 없으면 생성합니다.
 			serverstate = new Document("_id", uuid.toString()).append("updated", currentTimestamp).append("index", 0);
 			collection.insertOne(serverstate);
 			return ParfaitAuth.SUCCESS;
 		} else {
-			// 내 서버상태 문서 타임스탬프 갱신처리
+			// 서버상태문서 타임스탬프를 갱신처리 합니다.
 			serverstate.put("updated", currentTimestamp);
-
 			UpdateResult result = collection.updateOne(new Document("_id", uuid.toString()),
 					new Document("$set", serverstate));
 
 			return (result.getMatchedCount() == 1) ? ParfaitAuth.SUCCESS : ParfaitAuth.SERVERSTATE_IS_NULL;
 		}
-
 	}
 
 	/**
@@ -648,8 +705,10 @@ public class ParfaitAuth {
 			return;
 
 		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-account-data"));
+		// 비인가자 명단에 추가합니다.
 		ParfaitAuth.unauthorised.put(player.getUniqueId(), player);
 
+		// 비동기로 DB에서 정보를 가져온 후 처리합니다.
 		Server.getInstance().getScheduler()
 				.scheduleAsyncTask(new CheckUnauthorizedAccessTask(player.getUniqueId(), player.getName()));
 	}
@@ -667,6 +726,7 @@ public class ParfaitAuth {
 			return;
 		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-id-account-data"));
 
+		// 아이디와 암호가 일치하는지 확인합니다.
 		Server.getInstance().getScheduler().scheduleAsyncTask(new CheckAuthorizationIDTask(player.getName(), id, pw,
 				ParfaitAuth.getParfaitAuthUUID(), pwCheckPassForce));
 	}
@@ -679,14 +739,17 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static boolean authorization(Player player, Account accountData) {
+		// 계정정보가 없거나 유저가 접속중이 아니면 반환합니다.
 		if (accountData == null)
 			return false;
 		if (player == null || !player.isConnected())
 			return false;
 
 		if (accountData.id != null) {
+			// ID정보가 존재하면 ID계정으로 인증합니다.
 			ParfaitAuth.authorizationID(player, accountData, false, false);
 		} else {
+			// ID정보가 없으면 UUID계정으로 인증합니다.
 			ParfaitAuth.authorizationUUID(player, accountData);
 		}
 		return true;
@@ -710,7 +773,7 @@ public class ParfaitAuth {
 		if (!loginedForce && !(accountData.logined == ParfaitAuth.getParfaitAuthUUID().toString())) {
 			// accountData상 이미 로그인 중일 경우
 			// 이 경우에 이전 서버가 크래시되었다면 10초 안에 복구될 것이고,
-			// 단순히 자료전송이 늦는거면 5초 안에 복구될 것..
+			// 단순히 자료전송이 늦는거면 5초 안에 복구됩니다.
 
 			player.sendMessage(plugin.getMessage("error-that-account-already-used-by-db"));
 			player.sendMessage(plugin.getMessage("error-will-be-retry-in-3-seconds"));
@@ -722,7 +785,7 @@ public class ParfaitAuth {
 			return false;
 		}
 
-		// IP가 이전과 다른 경우
+		// IP가 이전과 다른 경우 재로그인 유도
 		if (!ipForce && ((accountData.lastIp != null) && (player.getAddress() != accountData.lastIp))) {
 			player.sendMessage(plugin.getMessage("caution-account-founded-but-your-new-ip"));
 			player.sendMessage(plugin.getMessage("caution-you-need-to-run-login-command"));
@@ -734,15 +797,18 @@ public class ParfaitAuth {
 			return false;
 		}
 
+		// ID계정으로 로그인 처리합니다.
 		accountData.login(player);
-
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
 		ParfaitAuth.authorisedID.put(player.getUniqueId(), accountData);
 
+		// IP자동로그인이 아니라면
 		if (!ipForce) {
+			// ID계정으로 로그인되었다고 알립니다.
 			player.sendMessage(plugin.getMessage("success-id-account-was-logined"));
 		} else {
+			// 자동로그인 되었다고 알립니다.
 			player.sendMessage(plugin.getMessage("success-id-account-was-auto-logined"));
 			player.sendMessage(plugin.getMessage("info-you-can-use-logout-command"));
 		}
@@ -759,6 +825,7 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static boolean authorizationUUID(Player player, Account accountData) {
+		// 비인가자/ID인가자 명단에서 제거합니다.
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
 
@@ -776,14 +843,15 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static void release(UUID uuid, Account accountData, boolean async, boolean logout) {
+		// 인가 비인가 명단에서 모두 제외합니다.
 		ParfaitAuth.unauthorised.remove(uuid);
 		ParfaitAuth.authorisedID.remove(uuid);
 		ParfaitAuth.authorisedUUID.remove(uuid);
 
-		// accountData 의 logined를 null 처리합니다.
+		// 로그아웃 처리합니다.
 		accountData.logout(logout);
 
-		// 서버에 계정정보 업데이트
+		// DB에 계정정보를 업로드합니다.
 		if (async) {
 			accountData.upload();
 		} else {
@@ -804,25 +872,31 @@ public class ParfaitAuth {
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
 
+		// 랜덤닉네임 인덱스를 가져오고 즉시 값을 1 추가해 올립니다.
 		Document searchQuery = new Document("_id", "nameindex");
 		Document increase = new Document("unauth_index", 1);
 		Document updateQuery = new Document("$inc", increase);
-
 		Document result = collection.findOneAndUpdate(searchQuery, updateQuery);
 		int index = (int) result.get("unauth_index");
 
+		// 가져온 랜던닉네임 생성횟수를 토대로 닉네임을 생성합니다.
 		return ParfaitAuth.getRandomNameLocal(index);
 	}
 
 	/**
-	 * 방문번호에 따른 랜덤 닉네임을 가져옵니다.
+	 * 랜덤닉네임 생성횟수에 따른 랜덤닉네임을 가져옵니다.
 	 * 
 	 * @return String
 	 */
 	public static String getRandomNameLocal(int index) {
+		// 서버에 저장된 랜덤닉네임 명단을 가져옵니다. (*저장된 JSON으로 커스텀가능)
+		// 랜덤닉네임 명단을 임의로 변경할 시엔 모든서버에 변경한 명단을 적용해야합니다.
+		// (특정서버만 꼭 다르게 사용해야한다면 다른서버와 명단이 절대 겹치지 않게 해야합니다.)
 		Config randomName = ParfaitAuthPlugin.getPlugin().getRandomName();
 		ArrayList names = (ArrayList) randomName.get("names");
 
+		// 생성횟수를 저장된닉네임수로 나눈 몫을 이용해 닉네임을
+		// 정하고 나머지값을 숫자로 나타냅니다.
 		int size = names.size();
 		int name_number = index / size;
 		int name_index = index - (size * name_number);
@@ -837,8 +911,10 @@ public class ParfaitAuth {
 	 */
 	public static boolean checkClientOnline() {
 		try {
+			// 클라이언트의 주소값을 가져올 수 있는지 확인합니다.
 			return MongoDBLib.getClient().getAddress() != null ? true : false;
 		} catch (IllegalStateException e) {
+			// 아예 실패하면 false를 반환합니다.
 			return false;
 		}
 	}
@@ -868,6 +944,12 @@ public class ParfaitAuth {
 		return SHA;
 	}
 
+	/**
+	 * 누킷서버의 기본UUID는 켜고 끌때마다 바뀌므로 식별자로 사용불가능하고,<br>
+	 * 파르페오스는 별도로 최초동작시의 서버 UUID를 캡쳐합니다.
+	 * 
+	 * @return
+	 */
 	public static UUID getParfaitAuthUUID() {
 		return UUID.fromString((String) ParfaitAuthPlugin.getPlugin().getSettings().get("server-uuid"));
 	}
@@ -912,8 +994,7 @@ public class ParfaitAuth {
 			if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
 				continue;
 
-			// If server is kr server, so allow kr language
-			if (Server.getInstance().getLanguage().getLang() == "kor" && ParfaitAuth.isHangul(c))
+			if (ParfaitAuth.checkLangMatch(Server.getInstance().getLanguage().getLang(), c))
 				continue;
 
 			return false;
@@ -952,8 +1033,7 @@ public class ParfaitAuth {
 		for (int i = 0; i < len; i++) {
 			char c = name.charAt(i);
 			if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')) {
-				// If server is kr server, so pass kr language
-				if (Server.getInstance().getLanguage().getLang() == "kor" && ParfaitAuth.isHangul(c))
+				if (ParfaitAuth.checkLangMatch(Server.getInstance().getLanguage().getLang(), c))
 					continue;
 				count++;
 			}
@@ -961,12 +1041,28 @@ public class ParfaitAuth {
 		return count;
 	}
 
-	public static boolean isHangul(char ch) {
+	/**
+	 * 해당서버의 언어권에 맞는 언어로 된 글자를 허용합니다.
+	 * 
+	 * @param language
+	 * @param ch
+	 * @return
+	 */
+	public static boolean checkLangMatch(String language, char ch) {
 		UnicodeBlock block = UnicodeBlock.of(ch);
-		if (UnicodeBlock.HANGUL_SYLLABLES == block || UnicodeBlock.HANGUL_JAMO == block
-				|| UnicodeBlock.HANGUL_COMPATIBILITY_JAMO == block) {
-			return true;
+
+		switch (language) {
+		case "kor":
+			if (UnicodeBlock.HANGUL_SYLLABLES == block || UnicodeBlock.HANGUL_JAMO == block
+					|| UnicodeBlock.HANGUL_COMPATIBILITY_JAMO == block)
+				return true;
+
+			// IF OTHER COUNTRY DEVELOPER NEED SOME USE
+			// NATIONAL LANGUAGE NICKNAME IN THEIR SERVER
+			// PASTE HERE ABOUT NATIONAL LANGUAGE CHECK CODE
+			// YOU MIGHT BE USE 'UnicodeBlock' CLASS
 		}
+
 		return false;
 	}
 

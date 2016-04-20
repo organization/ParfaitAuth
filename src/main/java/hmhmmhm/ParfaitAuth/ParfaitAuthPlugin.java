@@ -14,6 +14,7 @@ import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.EventHandler;
 import hmhmmhm.ParfaitAuth.Commands.AuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangeNickCommand;
@@ -26,10 +27,19 @@ import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
 import hmhmmhm.ParfaitAuth.Events.NewBannedAddressEvent;
 
 public class ParfaitAuthPlugin extends PluginBase {
+	/* 플러그인 로컬 세팅이 여기 저장됩니다. */
 	private Config settings;
+
+	/* 로딩된 언어파일이 여기 저장됩니다. */
 	private Config language;
+
+	/* 로딩된 랜덤닉네임 명단이 여기 저장됩니다. */
 	private Config randomName;
+
+	/* 로딩된 플러그인 명령어클래스 인스턴스들이 여기 저장됩니다. */
 	private LinkedHashMap<String, Object> commandMap = new LinkedHashMap<String, Object>();
+
+	/* 플러그인의 싱글톤 인스턴스가 여기 저장됩니다. */
 	private static ParfaitAuthPlugin plugin;
 
 	/**
@@ -79,9 +89,12 @@ public class ParfaitAuthPlugin extends PluginBase {
 		ParfaitAuth.bannedAddress.put(address, period);
 	}
 
+	/**
+	 * DB에서 이전에 차단된 네트워크 주소 명단을 받아 램으로 불러옵니다.
+	 */
 	private void getBannedAddress() {
 		this.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
-			private LinkedHashMap<String, Long> list;
+			private LinkedHashMap<String, Long> list = null;
 
 			@Override
 			public void onRun() {
@@ -90,12 +103,17 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 			@Override
 			public void onCompletion(Server server) {
-				for (Entry<String, Long> entry : this.list.entrySet())
-					ParfaitAuthPlugin.getPlugin().addedBannedAddress(entry.getKey(), entry.getValue());
+				if (this.list != null)
+					for (Entry<String, Long> entry : this.list.entrySet())
+						ParfaitAuthPlugin.getPlugin().addedBannedAddress(entry.getKey(), entry.getValue());
 			}
 		});
 	}
 
+	/**
+	 * 10초마다 DB에 현재 시간을 타임스탬프로 저장해 올려서<br>
+	 * 다른서버들이 이서버가 온라인상태임을 알 수 있게끔 지속적으로 갱신합니다..
+	 */
 	private void serverStatusUpdater() {
 		this.getServer().getScheduler().scheduleRepeatingTask((new Task() {
 			@Override
@@ -105,6 +123,9 @@ public class ParfaitAuthPlugin extends PluginBase {
 		}), 200);
 	}
 
+	/**
+	 * 이 서버에 요청들어온 알림들을 DB에서 수집해옵니다.
+	 */
 	private void notificationCollector() {
 		this.getServer().getScheduler().scheduleRepeatingTask((new Task() {
 			@Override
@@ -129,6 +150,10 @@ public class ParfaitAuthPlugin extends PluginBase {
 		}), 5);
 	}
 
+	/**
+	 * DB에 필수컬렉션과 필수문서가 만들어져있는지 확인후 없으면 생성합니다.<br>
+	 * 만약 DB 버전이 플러그인에 내장된 DB버전보다 높거나 낮으면 그사항을 알립니다.
+	 */
 	private void initialDatabase() {
 		switch (ParfaitAuth.initialDatabase()) {
 		case ParfaitAuth.CLIENT_IS_DEAD:
@@ -192,6 +217,12 @@ public class ParfaitAuthPlugin extends PluginBase {
 			this.loadLanguage(true);
 	}
 
+	/**
+	 * 플러그인에서 사용하는 언어파일을 램으로 불러옵니다.<br>
+	 * replace가 true면 서버의 언어파일을 내장파일로 교체(갱신)합니다.
+	 * 
+	 * @param replace
+	 */
 	private void loadLanguage(boolean replace) {
 		// 현재서버에서 사용 중인 언어자료가 존재할 경우
 		if (this.getResource("languages/" + this.getServer().getLanguage().getLang() + ".json") != null) {
@@ -206,6 +237,9 @@ public class ParfaitAuthPlugin extends PluginBase {
 		}
 	}
 
+	/*
+	 * 서버에서 사용할 랜덤닉네임명단을 램으로 불러옵니다.
+	 */
 	private void loadRandomName() {
 		this.saveResource("randomname.json");
 		this.randomName = new Config(new File(this.getDataFolder().getAbsolutePath() + "/randomname.json"),
@@ -252,14 +286,44 @@ public class ParfaitAuthPlugin extends PluginBase {
 		return this.randomName;
 	}
 
+	/**
+	 * 플러그인에서 쓰는 메시지의 번역본을 가져옵니다.
+	 * 
+	 * @param key
+	 * @return String
+	 */
 	public String getMessage(String key) {
-		return (String) this.language.get(key);
+		String message = (String) this.language.get(key);
+
+		// Coloring
+		if (key.split("error-")[1] != null)
+			message = TextFormat.RED + message;
+		if (key.split("caution-")[1] != null)
+			message = TextFormat.YELLOW + message;
+		if (key.split("success-")[1] != null)
+			message = TextFormat.DARK_AQUA + message;
+		if (key.split("-help-")[1] != null)
+			message = TextFormat.DARK_AQUA + message;
+
+		return message;
 	}
 
+	/**
+	 * 파르페오스의 명령어 클래스의 인스턴스를 얻어옵니다.<br>
+	 * 해당 인스턴스를 통해 파르페오스의 명령어를 실행시킬 수 있습니다.
+	 * 
+	 * @param key
+	 * @return ParfaitAuthCommand
+	 */
 	public ParfaitAuthCommand getCommandClass(String key) {
 		return (ParfaitAuthCommand) this.commandMap.get(key);
 	}
 
+	/**
+	 * 파르페오스 플러그인의 인스턴스를 가져옵니다.
+	 * 
+	 * @return
+	 */
 	public static ParfaitAuthPlugin getPlugin() {
 		return plugin;
 	}
