@@ -57,7 +57,7 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 				SendAccountInfoTask task = new SendAccountInfoTask();
 
 				int index = Integer.valueOf(args[1].split("[")[1].split("]")[0]);
-				task.identy = PlayerIdentifier.get(index).getUniqueId().toString();
+				task.identy = PlayerIdentifier.get(index).toString();
 				task.sender = sender.getName();
 
 				this.getServer().getScheduler().scheduleAsyncTask(task);

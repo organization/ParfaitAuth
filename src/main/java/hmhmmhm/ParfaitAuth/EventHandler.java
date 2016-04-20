@@ -15,7 +15,9 @@ import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
+import hmhmmhm.ParfaitAuth.Tasks.BanAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask;
+import hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask;
 
 public class EventHandler implements Listener {
 	private ParfaitAuthPlugin plugin;
@@ -68,18 +70,20 @@ public class EventHandler implements Listener {
 		lastLogoutList.add(event.getPlayer());
 	}
 
+	@SuppressWarnings("unchecked")
 	@cn.nukkit.event.EventHandler
 	public void onNotificationReceiveEvent(NotificationReceiveEvent event) {
 		switch (event.identifier) {
+
 		// 타서버 관리자가 이서버의 유저의 계정유형을 바꾸는 명령실행시
 		case "hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask":
-			ArrayList<Object> data = (ArrayList<Object>) event.object;
+			ArrayList<Object> changeAccountTypeTaskData = (ArrayList<Object>) event.object;
 
-			if (data == null)
+			if (changeAccountTypeTaskData == null)
 				return;
 
-			String id = (String) data.get(0);
-			int type = (int) data.get(1);
+			String id = (String) changeAccountTypeTaskData.get(0);
+			int type = (int) changeAccountTypeTaskData.get(1);
 
 			plugin.getLogger().info(
 					plugin.getMessage("status-outcom-process-change-account-type") + " ID:" + id + " TYPE:" + type);
@@ -97,6 +101,57 @@ public class EventHandler implements Listener {
 				Player player = this.getServer().getPlayer(account.nickname);
 				if (player != null)
 					player.kick(plugin.getMessage("kick-account-force-connected"));
+			}
+			break;
+
+		// 타서버 관리자가 이서버의 유저를 차단하려는 경우
+		case "hmhmmhm.ParfaitAuth.Tasks.BanAccountTask":
+			ArrayList<Object> banAccountTaskData = (ArrayList<Object>) event.object;
+
+			if (banAccountTaskData == null)
+				return;
+
+			String uuid1 = (String) banAccountTaskData.get(0);
+			String id1 = (String) banAccountTaskData.get(1);
+			String name = (String) banAccountTaskData.get(2);
+			String cause = (String) banAccountTaskData.get(4);
+
+			int period;
+			try {
+				period = Integer.valueOf((String) banAccountTaskData.get(3));
+			} catch (NumberFormatException e) {
+				return;
+			}
+
+			BanAccountTask task = new BanAccountTask();
+			task.uuid = uuid1;
+			task.id = id1;
+			task.name = name;
+			task.cause = cause;
+			task.period = period;
+			task.serverUUID = ParfaitAuth.getParfaitAuthUUID().toString();
+			this.getServer().getScheduler().scheduleAsyncTask(task);
+			break;
+
+		// 타서버 관리자가 이서버의 유저계정을 삭제하려는 경우
+		case "hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask":
+			String id2 = (String) event.object;
+			this.getServer().getScheduler()
+					.scheduleAsyncTask(new RemoveAccountDataTask("", id2, ParfaitAuth.getParfaitAuthUUID().toString()));
+			break;
+
+		// 타서버 관리자가 네트워크주소를 추가로 차단한 경우
+		case "hmhmmhm.ParfaitAuth.Tasks.BanAddressTask":
+			ArrayList<Object> banAddressTask = (ArrayList<Object>) event.object;
+			String address = (String) banAddressTask.get(0);
+			String period1 = (String) banAddressTask.get(1);
+
+			if (address != null) {
+				try {
+					plugin.addedBannedAddress(address, Long.valueOf(period1));
+				} catch (NumberFormatException e) {
+					return;
+				}
 			}
 			break;
 		}

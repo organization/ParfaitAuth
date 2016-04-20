@@ -36,6 +36,8 @@ public class Account {
 	 * banned 는 언제 차단을 풀지에 대한 정보를 갖습니다.
 	 */
 	public String banned = null;
+	public String banCause = null;
+	public String lastBanReleaseCause = null;
 
 	/**
 	 * 오진아웃제에 쓰이는 변수입니다.<br>
@@ -77,7 +79,9 @@ public class Account {
 		this.nickname = (String) document.get("nickname");
 		this.logined = (String) document.get("logined");
 		this.banned = (String) document.get("banned");
+		this.banCause = (String) document.get("banCause");
 		this.accountType = (int) document.get("accountType");
+		this.lastBanReleaseCause = (String) document.get("lastBanReleaseCause");
 
 		for (Entry<String, Object> entry : document.entrySet()) {
 			String key = entry.getKey();
@@ -92,7 +96,9 @@ public class Account {
 			case "nickname":
 			case "logined":
 			case "banned":
+			case "banCause":
 			case "accountType":
+			case "lastBanReleaseCause":
 				continue;
 			}
 			additionalData.put(key, value);
@@ -119,7 +125,9 @@ public class Account {
 		document.put("lastDate", this.lastDate);
 		document.put("logined", this.logined);
 		document.put("banned", this.logined);
+		document.put("banCause", this.banCause);
 		document.put("accountType", this.accountType);
+		document.put("lastBanReleaseCause", this.lastBanReleaseCause);
 
 		for (Entry<String, Object> entry : this.additionalData.entrySet()) {
 			String key = entry.getKey();
@@ -250,6 +258,16 @@ public class Account {
 	public void banTimestamp(long releaseTimestamp) {
 		this.setModified();
 		this.banned = String.valueOf(releaseTimestamp);
+	}
+
+	public void setBanCause(String banCause) {
+		this.setModified();
+		this.banCause = banCause;
+	}
+
+	public void setLastBanReleaseCause(String lastBanReleaseCause) {
+		this.setModified();
+		this.lastBanReleaseCause = lastBanReleaseCause;
 	}
 
 	/**

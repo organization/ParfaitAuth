@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
@@ -22,6 +23,7 @@ import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
 import hmhmmhm.ParfaitAuth.Commands.ParfaitAuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
+import hmhmmhm.ParfaitAuth.Events.NewBannedAddressEvent;
 
 public class ParfaitAuthPlugin extends PluginBase {
 	private Config settings;
@@ -50,10 +52,48 @@ public class ParfaitAuthPlugin extends PluginBase {
 		// DB에 서버 상태갱신
 		this.serverStatusUpdater();
 
-		// DB예서 푸시 이벤트 돌리기
+		// DB에서 푸시 이벤트 돌리기
 		this.notificationCollector();
 
-		Notification.push("hmhmmhm.paapapa.adaiaia", "hello gi gagagaga");
+		// 차단해야하는 IP명부 가져오기 및 확인
+		this.getBannedAddress();
+
+		// TODO 외부 아이피 확인 및 서버상태 문서에 업로드하기
+	}
+
+	/**
+	 * 새로 차단된 네트워크주소가 있음을 이서버에 통보합니다.
+	 */
+	public void addedBannedAddress(String address, Long period) {
+		Event event = new NewBannedAddressEvent(address, period);
+		this.getServer().getPluginManager().callEvent(event);
+
+		if (event.isCancelled())
+			return;
+
+		for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
+			if (entry.getValue().getAddress() == address)
+				entry.getValue().kick(this.getMessage("kick-that-address-is-banned"));
+		}
+
+		ParfaitAuth.bannedAddress.put(address, period);
+	}
+
+	private void getBannedAddress() {
+		this.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
+			private LinkedHashMap<String, Long> list;
+
+			@Override
+			public void onRun() {
+				this.list = ParfaitAuth.getBannedAddress();
+			}
+
+			@Override
+			public void onCompletion(Server server) {
+				for (Entry<String, Long> entry : this.list.entrySet())
+					ParfaitAuthPlugin.getPlugin().addedBannedAddress(entry.getKey(), entry.getValue());
+			}
+		});
 	}
 
 	private void serverStatusUpdater() {

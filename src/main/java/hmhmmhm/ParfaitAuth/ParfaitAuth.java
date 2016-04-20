@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -55,9 +56,12 @@ public class ParfaitAuth {
 	final static public int SERVERSTATE_IS_GREEN = 9;
 	final static public int SERVERSTATE_IS_RED = 10;
 
-	public static LinkedHashMap<UUID, Player> unauthorised = new LinkedHashMap<UUID, Player>();
-	public static LinkedHashMap<UUID, Account> authorisedUUID = new LinkedHashMap<UUID, Account>();
-	public static LinkedHashMap<UUID, Account> authorisedID = new LinkedHashMap<UUID, Account>();
+	public static LinkedHashMap<UUID, Player> unauthorised = new LinkedHashMap<>();
+	public static LinkedHashMap<UUID, Account> authorisedUUID = new LinkedHashMap<>();
+	public static LinkedHashMap<UUID, Account> authorisedID = new LinkedHashMap<>();
+
+	/* 차단된 네트워크주소 명단이 여기 담깁니다. */
+	public static LinkedHashMap<String, Long> bannedAddress = new LinkedHashMap<>();
 
 	/* unauthorized_1141 과 같은 닉네임 생성시 사용되는 인덱스 입니다. */
 	public static int unauthorizedUserCount = 0;
@@ -320,6 +324,93 @@ public class ParfaitAuth {
 				return ParfaitAuth.UPDATED_DATABASE;
 
 		return ParfaitAuth.SUCCESS;
+	}
+
+	/**
+	 * 접근이 차단되어있는 네트워크주소 목록을 가져옵니다.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	public static LinkedHashMap<String, Long> getBannedAddress() {
+		LinkedHashMap<String, Long> list = new LinkedHashMap<>();
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
+
+		List<Document> documents = collection.find(new Document("_id", "bannedaddress"))
+				.into(new ArrayList<Document>());
+		Document bannedaddress = (documents.size() == 0) ? null : documents.get(0);
+
+		if (bannedaddress == null)
+			return null;
+
+		// 키는 밴처리된 네트워크주소, 밸류는 밴해제할 타임스탬프
+		for (Entry<String, Object> entry : bannedaddress.entrySet()) {
+			Long value;
+			try {
+				value = Long.valueOf((String) entry.getValue());
+			} catch (NumberFormatException e) {
+				continue;
+			}
+			list.put(entry.getKey(), value);
+		}
+
+		return list;
+	}
+
+	/**
+	 * 해당되는 네트워크주소를 차단목록에 추가합니다.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	public static int addBannedAddress(String address, Long period) {
+		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
+
+		if (originList == null)
+			originList = new LinkedHashMap<>();
+
+		originList.put(address, period);
+
+		Document document = new Document("_id", "bannedaddress");
+		for (Entry<String, Long> entry : originList.entrySet())
+			document.put(entry.getKey(), entry.getValue());
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
+
+		UpdateResult result = collection.updateOne(new Document("_id", "bannedaddress"),
+				new Document("$set", document));
+
+		return result.getModifiedCount() == 0 ? ParfaitAuth.SERVERSTATE_IS_NULL : ParfaitAuth.SUCCESS;
+	}
+
+	/**
+	 * 해당되는 네트워크주소를 차단목록에서 삭제합니다.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	public static int deleteBannedAddress(String address) {
+		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
+
+		if (originList == null)
+			originList = new LinkedHashMap<>();
+
+		originList.remove(address);
+
+		Document document = new Document("_id", "bannedaddress");
+		for (Entry<String, Long> entry : originList.entrySet())
+			document.put(entry.getKey(), entry.getValue());
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.parfaitAuthCollectionName);
+
+		UpdateResult result = collection.updateOne(new Document("_id", "bannedaddress"),
+				new Document("$set", document));
+
+		return result.getModifiedCount() == 0 ? ParfaitAuth.SERVERSTATE_IS_NULL : ParfaitAuth.SUCCESS;
 	}
 
 	/**
@@ -824,7 +915,7 @@ public class ParfaitAuth {
 			// If server is kr server, so allow kr language
 			if (Server.getInstance().getLanguage().getLang() == "kor" && ParfaitAuth.isHangul(c))
 				continue;
-			
+
 			return false;
 		}
 		return true;

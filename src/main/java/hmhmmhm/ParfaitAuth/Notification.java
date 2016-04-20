@@ -33,13 +33,13 @@ public class Notification {
 	 * @param async
 	 */
 	public static void push(String identifier, Object object, boolean async) {
-		Event event = new NotificationSendEvent(identifier, object);
-		Server.getInstance().getPluginManager().callEvent(event);
-
-		if (event.isCancelled())
-			return;
-
 		if (async) {
+			Event event = new NotificationSendEvent(identifier, object);
+			Server.getInstance().getPluginManager().callEvent(event);
+
+			if (event.isCancelled())
+				return;
+
 			Server.getInstance().getScheduler().scheduleAsyncTask(new NotificationPushTask(identifier, object));
 		} else {
 			String json = JSON.serialize(object);
@@ -69,13 +69,13 @@ public class Notification {
 	 * @param async
 	 */
 	public static void push(String serveruuid, String identifier, Object object, boolean async) {
-		Event event = new NotificationSendEvent(serveruuid, identifier, object);
-		Server.getInstance().getPluginManager().callEvent(event);
-
-		if (event.isCancelled())
-			return;
-
 		if (async) {
+			Event event = new NotificationSendEvent(serveruuid, identifier, object);
+			Server.getInstance().getPluginManager().callEvent(event);
+
+			if (event.isCancelled())
+				return;
+
 			Server.getInstance().getScheduler()
 					.scheduleAsyncTask(new NotificationPushTask(serveruuid, identifier, object));
 		} else {

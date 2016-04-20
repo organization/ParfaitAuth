@@ -1,21 +1,20 @@
 package hmhmmhm.ParfaitAuth;
 
 import java.util.ArrayList;
-
-import cn.nukkit.Player;
+import java.util.UUID;
 
 public class PlayerIdentifier {
-	public static ArrayList<Player> identifiers = new ArrayList<Player>();
+	public static ArrayList<UUID> identifiers = new ArrayList<UUID>();
 
-	public static int put(Player player) {
+	public static int put(UUID uuid) {
 		if (PlayerIdentifier.identifiers.size() >= 9999)
-			PlayerIdentifier.identifiers = new ArrayList<Player>();
+			PlayerIdentifier.identifiers = new ArrayList<UUID>();
 
-		PlayerIdentifier.identifiers.add(player);
+		PlayerIdentifier.identifiers.add(uuid);
 		return PlayerIdentifier.identifiers.size() - 1;
 	}
 
-	public static Player get(int index) {
+	public static UUID get(int index) {
 		if (PlayerIdentifier.identifiers.get(index) == null)
 			return null;
 

@@ -1,8 +1,12 @@
 package hmhmmhm.ParfaitAuth.Commands;
 
+import java.util.UUID;
+
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
+import hmhmmhm.ParfaitAuth.PlayerIdentifier;
+import hmhmmhm.ParfaitAuth.Tasks.BanReleaseTask;
 import hmhmmhm.ParfaitAuth.Tasks.SendMessageTask;
 
 public class BanReleaseCommand extends ParfaitAuthCommand {
@@ -13,42 +17,86 @@ public class BanReleaseCommand extends ParfaitAuthCommand {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		// TODO
 		// /r <필터> <검색어> <사유>
 		// 해당 유저의 계정정보를 찾고 차단을 해제합니다.
 		// (사용가능필터, 아이디, 닉네임, 식별번호, 아이피, 서브넷)
 		// (검색어를 정확하게 입력해야합니다.)
+
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null) {
+			if (args[0] == null || (args[0] != this.getMessage(this.commandName + "-sub-id")
+					&& args[0] != this.getMessage(this.commandName + "-sub-nick")
+					&& args[0] != this.getMessage(this.commandName + "-sub-identy")
+					&& args[0] != this.getMessage(this.commandName + "-sub-ip")
+					&& args[0] != this.getMessage(this.commandName + "-sub-subnet"))) {
 				this.getServer().getScheduler()
 						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
 				return true;
 			}
+			BanReleaseTask task = new BanReleaseTask();
 
-			if (args[0] == this.getMessage(this.commandName + "-sub-id")) {
-				// TODO 아이디
-				return true;
-			}
+			// /r 아이디 검색어 사유
+			if (args[0] == this.getMessage(this.commandName + "-sub-id"))
+				task.id = args[1];
 
-			if (args[0] == this.getMessage(this.commandName + "-sub-nick")) {
-				// TODO 닉네임
-				return true;
-			}
+			// /r 닉네임 검색어 사유
+			if (args[0] == this.getMessage(this.commandName + "-sub-nick"))
+				task.nick = args[1];
 
+			// /r 아이피 검색어 사유
+			if (args[0] == this.getMessage(this.commandName + "-sub-ip"))
+				task.ip = args[1];
+
+			// /r 서브넷 검색어 사유
+			if (args[0] == this.getMessage(this.commandName + "-sub-subnet"))
+				task.subnet = args[1];
+
+			// /r 식별번호 검색어 사유
 			if (args[0] == this.getMessage(this.commandName + "-sub-identy")) {
-				// TODO 식별번호
-				return true;
+				// 식별번호 확인
+				String identifierString = null;
+				int identifierInt;
+
+				// [1]과 같은 형태로 입력되면 숫자만 분리
+				if (args[1].split("[")[1] != null && args[1].split("[")[1].split("]")[0] != null)
+					identifierString = args[1].split("[")[1].split("]")[0];
+
+				if (identifierString == null)
+					identifierString = args[1];
+
+				// 정수형으로 변환
+				try {
+					identifierInt = Integer.valueOf(identifierString);
+				} catch (NumberFormatException e) {
+					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier"));
+					return true;
+				}
+
+				// 식별번호에서 플레이어 얻기
+				UUID playerUUID = PlayerIdentifier.get(identifierInt);
+				if (playerUUID == null) {
+					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier"));
+					return true;
+				}
+
+				task.uuid = playerUUID.toString();
 			}
 
-			if (args[0] == this.getMessage(this.commandName + "-sub-ip")) {
-				// TODO 아이피
-				return true;
+			// 사유확인
+			String cause = "";
+
+			// shift 0 1 진행후 2부터 끝까지 합치기
+			for (int index = 2; index <= (args.length - 1); index++) {
+				cause += args[index];
+
+				// 문자열에 공백추가
+				if (index != 2)
+					cause += " ";
 			}
 
-			if (args[0] == this.getMessage(this.commandName + "-sub-subnet")) {
-				// TODO 서브넷
-				return true;
-			}
+			task.cause = cause;
+			task.sender = sender.getName();
+			this.getServer().getScheduler().scheduleAsyncTask(task);
+			return true;
 		}
 		return false;
 	}

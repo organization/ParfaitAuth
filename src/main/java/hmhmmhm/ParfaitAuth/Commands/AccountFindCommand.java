@@ -47,7 +47,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 					// 찾았으면 바로 메시지 전송
 					if (target != null) {
-						int identifier = PlayerIdentifier.put(target);
+						int identifier = PlayerIdentifier.put(target.getUniqueId());
 						sender.sendMessage(
 								plugin.getMessage("info-identifier-founded").replace("%1", String.valueOf(identifier)));
 						return true;
@@ -68,7 +68,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 					// 검색어가 닉네임에 포함되는지 체크
 					if (player.getName().split(args[1])[1] != null) {
-						int identifier = PlayerIdentifier.put(player);
+						int identifier = PlayerIdentifier.put(player.getUniqueId());
 						list.add("[" + identifier + "] " + player.getName() + " ");
 					}
 				}
@@ -89,7 +89,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 이벤트 헨들러에 저장된 채팅친 유저리스트 순회
 				for (Player player : EventHandler.lastChatList) {
-					int identifier = PlayerIdentifier.put(player);
+					int identifier = PlayerIdentifier.put(player.getUniqueId());
 					list.add("[" + identifier + "] " + player.getName() + " ");
 				}
 
@@ -109,7 +109,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 이벤트 헨들러에 저장된 최근접속한 유저리스트 순회
 				for (Player player : EventHandler.lastLoginList) {
-					int identifier = PlayerIdentifier.put(player);
+					int identifier = PlayerIdentifier.put(player.getUniqueId());
 					list.add("[" + identifier + "] " + player.getName() + " ");
 				}
 
@@ -129,7 +129,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 이벤트 헨들러에 저장된 최근나간 유저리스트 순회
 				for (Player player : EventHandler.lastLoginList) {
-					int identifier = PlayerIdentifier.put(player);
+					int identifier = PlayerIdentifier.put(player.getUniqueId());
 					list.add("[" + identifier + "] " + player.getName() + " ");
 				}
 
@@ -153,7 +153,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 					int diff = ParfaitAuth.getNickNameDifficult(player.getName());
 
 					if (diff != 0) {
-						int identifier = PlayerIdentifier.put(player);
+						int identifier = PlayerIdentifier.put(player.getUniqueId());
 						list.add("[" + identifier + "] " + player.getName() + " ");
 					}
 				}
