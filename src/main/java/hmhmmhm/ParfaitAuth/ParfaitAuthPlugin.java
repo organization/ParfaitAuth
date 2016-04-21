@@ -1,8 +1,13 @@
 package hmhmmhm.ParfaitAuth;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 import java.util.Map.Entry;
 
 import cn.nukkit.Player;
@@ -68,7 +73,43 @@ public class ParfaitAuthPlugin extends PluginBase {
 		// 차단해야하는 IP명부 가져오기 및 확인
 		this.getBannedAddress();
 
-		// TODO 외부 아이피 확인 및 서버상태 문서에 업로드하기
+		// 서버상태 문서에 적힐 외부 아이피를 확인
+		this.getExternalAddress();
+	}
+
+	/**
+	 * 서버상태 문서에 적힐 외부 아이피를 비동기로 AWS에서 가져옵니다.
+	 */
+	private void getExternalAddress() {
+		this.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
+			String address = null;
+
+			@Override
+			public void onRun() {
+				try {
+					URL whatismyip = new URL("http://checkip.amazonaws.com");
+					BufferedReader in = null;
+					try {
+						in = new BufferedReader(new InputStreamReader(whatismyip.openStream()));
+						this.address = in.readLine();
+					} finally {
+						if (in != null) {
+							try {
+								in.close();
+							} catch (IOException e) {
+							}
+						}
+					}
+				} catch (Exception e) {
+				}
+			}
+
+			@Override
+			public void onCompletion(Server server) {
+				if (this.address != null)
+					ParfaitAuth.externalAddress = address + ":" + server.getPort();
+			}
+		});
 	}
 
 	/**
@@ -155,6 +196,9 @@ public class ParfaitAuthPlugin extends PluginBase {
 	 * 만약 DB 버전이 플러그인에 내장된 DB버전보다 높거나 낮으면 그사항을 알립니다.
 	 */
 	private void initialDatabase() {
+		ParfaitAuth.parfaitAuthUUID = UUID.fromString((String) this.getSettings().get("server-uuid"));
+		ParfaitAuth.randomName = this.getRandomName();
+
 		switch (ParfaitAuth.initialDatabase()) {
 		case ParfaitAuth.CLIENT_IS_DEAD:
 			this.getLogger().emergency(this.getMessage("caution-client-is-dead"));

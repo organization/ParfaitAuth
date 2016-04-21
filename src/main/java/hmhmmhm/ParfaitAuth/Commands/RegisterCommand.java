@@ -10,6 +10,7 @@ import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
+import hmhmmhm.ParfaitAuth.Events.RegisterEvent;
 import hmhmmhm.ParfaitAuth.Tasks.RequestAccountRegisterTask;
 import hmhmmhm.ParfaitAuth.Tasks.RequestAccountRegisterTaskFallback;
 import hmhmmhm.ParfaitAuth.Tasks.SendMessageTask;
@@ -53,6 +54,18 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			// 유저에게 비동기 인증 시작 메시지 전송
 			sender.sendMessage(this.getMessage("status-start-register-account"));
 			RegisterCommand.taskMap.put(sender.getName(), taskUUID);
+
+			RegisterEvent registerEvent = new RegisterEvent(id, pw, uuid);
+			this.getServer().getPluginManager().callEvent(registerEvent);
+
+			if (registerEvent.isCancelled()) {
+				if (registerEvent.reason != null) {
+					sender.sendMessage(registerEvent.reason);
+				} else {
+					sender.sendMessage(plugin.getMessage("error-register-is-cancelled-by-other-plugin"));
+				}
+				return true;
+			}
 
 			// 아래부터 비동기처리화
 			this.getServer().getScheduler().scheduleAsyncTask(

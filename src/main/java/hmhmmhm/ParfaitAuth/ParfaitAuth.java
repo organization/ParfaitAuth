@@ -13,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.bson.Document;
 
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.UpdateResult;
@@ -23,6 +22,8 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Event;
 import cn.nukkit.utils.Config;
+import hmhmmhm.ParfaitAuth.Events.LoginEvent;
+import hmhmmhm.ParfaitAuth.Events.LogoutEvent;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
@@ -81,6 +82,15 @@ public class ParfaitAuth {
 
 	/* unauthorized_1141 과 같은 닉네임 생성시 사용되는 인덱스 입니다. */
 	public static int unauthorizedUserCount = 0;
+
+	/* 서버의 외부아이피:포트 정보가 여기에 담깁니다. */
+	public static String externalAddress = null;
+
+	/* 서버의 UUID(플러그인 최초기동시 캡쳐한 UUID)값이 여기에 담깁니다. */
+	public static UUID parfaitAuthUUID = null;
+
+	/* 서버의 랜덤닉네임 명단이 여기에 담깁니다. */
+	public static Config randomName = null;
 
 	/**
 	 * 유저의 UUID를 검색해서 유저 계정자료를 얻어옵니다.
@@ -661,6 +671,12 @@ public class ParfaitAuth {
 		return (diff >= 20) ? false : true;
 	}
 
+	/**
+	 * 서버상태문서에 10초마다 타임스탬프를 갱신합니다.
+	 * 
+	 * @param uuid
+	 * @return
+	 */
 	public static int updateServerStatus(UUID uuid) {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
@@ -685,6 +701,12 @@ public class ParfaitAuth {
 		} else {
 			// 서버상태문서 타임스탬프를 갱신처리 합니다.
 			serverstate.put("updated", currentTimestamp);
+
+			// 갱신되는 서버가 이서버이고 외부네트워크주소가 존재하면 서버에 업로드
+			if (ParfaitAuth.getParfaitAuthUUID().toString() == uuid.toString())
+				if (ParfaitAuth.externalAddress != null)
+					serverstate.put("externalAddress", ParfaitAuth.externalAddress);
+
 			UpdateResult result = collection.updateOne(new Document("_id", uuid.toString()),
 					new Document("$set", serverstate));
 
@@ -797,6 +819,18 @@ public class ParfaitAuth {
 			return false;
 		}
 
+		LoginEvent loginEvent = new LoginEvent(player, accountData);
+		Server.getInstance().getPluginManager().callEvent(loginEvent);
+
+		if (loginEvent.isCancelled()) {
+			if (loginEvent.reason != null) {
+				player.sendMessage(loginEvent.reason);
+			} else {
+				player.sendMessage(plugin.getMessage("error-login-is-cancelled-by-other-plugin"));
+			}
+			return true;
+		}
+
 		// ID계정으로 로그인 처리합니다.
 		accountData.login(player);
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
@@ -843,6 +877,8 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static void release(UUID uuid, Account accountData, boolean async, boolean logout) {
+		Server.getInstance().getPluginManager().callEvent(new LogoutEvent(uuid, accountData));
+
 		// 인가 비인가 명단에서 모두 제외합니다.
 		ParfaitAuth.unauthorised.remove(uuid);
 		ParfaitAuth.authorisedID.remove(uuid);
@@ -892,7 +928,6 @@ public class ParfaitAuth {
 		// 서버에 저장된 랜덤닉네임 명단을 가져옵니다. (*저장된 JSON으로 커스텀가능)
 		// 랜덤닉네임 명단을 임의로 변경할 시엔 모든서버에 변경한 명단을 적용해야합니다.
 		// (특정서버만 꼭 다르게 사용해야한다면 다른서버와 명단이 절대 겹치지 않게 해야합니다.)
-		Config randomName = ParfaitAuthPlugin.getPlugin().getRandomName();
 		ArrayList names = (ArrayList) randomName.get("names");
 
 		// 생성횟수를 저장된닉네임수로 나눈 몫을 이용해 닉네임을
@@ -951,7 +986,7 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static UUID getParfaitAuthUUID() {
-		return UUID.fromString((String) ParfaitAuthPlugin.getPlugin().getSettings().get("server-uuid"));
+		return ParfaitAuth.parfaitAuthUUID;
 	}
 
 	/**

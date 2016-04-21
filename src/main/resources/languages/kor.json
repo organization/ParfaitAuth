@@ -41,6 +41,12 @@
 	"error-cant-find-player-identifier": "* 해당되는 식별번호를 확인할 수 없습니다.",
 	"error-cant-find-player-identifier-or-address": "* 해당되는 식별번호나 IP를 확인할 수 없습니다.",
 	"error-wrong-period": "* 잘못된 기간이 입력되었습니다. 처리불가.",
+	"error-cant-use-that-name-wrong-char-founded": "* 사용할 수 없는 문자가 포함된 닉네임입니다. 변경불가!",
+	"error-failed-change-name-that-name-already-exist": "* 해당 닉네임이 이미 존재합니다. 변경불가!",
+	"error-password-length-must-be-6~40": "* 암호는 6~40자로 지정하셔야합니다.",
+	"error-login-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 로그인이 거부되었습니다.",
+	"error-register-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 가입이 거부되었습니다.",
+	"error-unregister-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 탈퇴가 거부되었습니다.",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
@@ -61,6 +67,7 @@
 	"success-account-ban-process-sent": "* 해당유저가 접속중인 서버에 밴요청 전송성공!",
 	"success-address-banned": "* 해당 네트워크주소를 정상적으로 차단하였습니다.",
 	"success-ban-released": "* 해당 차단이 정상적으로 해지되었습니다.",
+	"success-password-was-changed": "* 비밀번호를 정상적으로 변경했습니다.",
 
 	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
 	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
@@ -70,6 +77,7 @@
 	"kick-successfully-unregistered": "계정삭제요청처리되었습니다.",
 	"kick-account-force-connected": "관리자가 해당 계정에 엑세스시도",
 	"kick-that-address-is-banned": "해당 접속주소는 차단된 상태입니다.",
+	"kick-successfully-account-name-changed": "계정 이름이 정상적으로 변경되었습니다.",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
@@ -164,6 +172,8 @@
 	"commands-account-info-account-type": "* 계정유형: %type",
 	"commands-account-info-logined": "* 접속서버: %logined",
 	"commands-account-info-unblock-period": "* 차단정보: %unblockperiod",
+	"commands-account-info-ban-cause": "* 차단사유: %bancause",
+	"commands-account-info-release-cause": "* 차단해제사유: %releasecause",
 
 	"commands-account-info-sub-id": "아이디",
 	"commands-account-info-sub-nick": "닉네임",

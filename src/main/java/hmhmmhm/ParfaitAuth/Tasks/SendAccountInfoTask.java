@@ -40,15 +40,22 @@ public class SendAccountInfoTask extends AsyncTask {
 			return;
 
 		player.sendMessage(plugin.getMessage("commands-account-info-show-start"));
-		player.sendMessage(plugin.getMessage("commands-account-info-idnick").replace("%id", this.account.id)
-				.replace("%nick", this.account.nickname));
-		player.sendMessage(
-				plugin.getMessage("commands-account-info-lastdate").replace("%lastdate", account.getLastDate()));
-		player.sendMessage(plugin.getMessage("commands-account-info-lastip").replace("%lastip", account.lastIp));
-		player.sendMessage(
-				plugin.getMessage("commands-account-info-account-type").replace("%type", account.getAccountType()));
-		player.sendMessage(plugin.getMessage("commands-account-info-logined").replace("%logined", account.logined));
-		player.sendMessage(plugin.getMessage("commands-account-info-unblock-period").replace("%unblockperiod",
-				account.getUnblockPeriod()));
+
+		String message = "";
+		message += plugin.getMessage("commands-account-info-idnick").replace("%id", this.account.id).replace("%nick",
+				this.account.nickname) + " ";
+		message += plugin.getMessage("commands-account-info-lastdate").replace("%lastdate", account.getLastDate())
+				+ " ";
+		message += plugin.getMessage("commands-account-info-lastip").replace("%lastip", account.lastIp) + " ";
+		message += plugin.getMessage("commands-account-info-account-type").replace("%type", account.getAccountType())
+				+ " ";
+		message += plugin.getMessage("commands-account-info-logined").replace("%logined", account.logined) + " ";
+		message += plugin.getMessage("commands-account-info-unblock-period").replace("%unblockperiod",
+				account.getUnblockPeriod()) + " ";
+		message += plugin.getMessage("commands-account-info-ban-cause").replace("%bancause", account.banCause) + " ";
+		message += plugin.getMessage("commands-account-info-release-cause").replace("%releasecause",
+				account.lastBanReleaseCause);
+
+		player.sendMessage(message);
 	}
 }

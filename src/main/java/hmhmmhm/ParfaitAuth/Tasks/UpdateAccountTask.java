@@ -20,5 +20,4 @@ public class UpdateAccountTask extends AsyncTask {
 	public void onRun() {
 		ParfaitAuth.updateAccount(this.uuid, this.document);
 	}
-
 }

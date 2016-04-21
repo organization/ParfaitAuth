@@ -4,6 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
+import hmhmmhm.ParfaitAuth.Events.UnregisterEvent;
 
 public class UnregisterCommand extends ParfaitAuthCommand {
 	public UnregisterCommand(ParfaitAuthPlugin plugin) {
@@ -21,6 +22,18 @@ public class UnregisterCommand extends ParfaitAuthCommand {
 
 			if (ParfaitAuth.authorisedID.get((Player) sender) == null) {
 				sender.sendMessage(this.getMessage("error-please-login-first"));
+				return true;
+			}
+
+			UnregisterEvent unregisterEvent = new UnregisterEvent((Player) sender);
+			this.getServer().getPluginManager().callEvent(unregisterEvent);
+
+			if (unregisterEvent.isCancelled()) {
+				if (unregisterEvent.reason != null) {
+					sender.sendMessage(unregisterEvent.reason);
+				} else {
+					sender.sendMessage(plugin.getMessage("error-unregister-is-cancelled-by-other-plugin"));
+				}
 				return true;
 			}
 

@@ -42,8 +42,7 @@ public class ChangeNameTask extends AsyncTask {
 
 		// 닉네임이 이미 사용중이면 반환합니다.
 		if (!!this.isCanBeUsed) {
-			// TODO 해당 닉네임은 이미 사용중입니다.
-			player.sendMessage(plugin.getMessage(""));
+			player.sendMessage(plugin.getMessage("error-failed-change-name-that-name-already-exist"));
 			return;
 		}
 
@@ -51,7 +50,7 @@ public class ChangeNameTask extends AsyncTask {
 
 		// 현재 ID계정으로 접속중이 아니라면 반환합니다.
 		if (account == null) {
-			// TODO ID계정인 사람만 사용가능
+			player.sendMessage(plugin.getMessage("error-please-login-first"));
 			return;
 		}
 
@@ -59,6 +58,6 @@ public class ChangeNameTask extends AsyncTask {
 		account.setModified();
 		account.upload();
 
-		// TODO 닉네임이 정상적으로 변경되었음
+		player.kick(plugin.getMessage("kick-successfully-account-name-changed"));
 	}
 }
