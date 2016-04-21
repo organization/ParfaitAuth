@@ -6,8 +6,18 @@ import java.util.UUID;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.block.BlockBreakEvent;
+import cn.nukkit.event.block.BlockPlaceEvent;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.inventory.InventoryOpenEvent;
 import cn.nukkit.event.player.PlayerChatEvent;
+import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
+import cn.nukkit.event.player.PlayerDropItemEvent;
+import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.event.player.PlayerItemConsumeEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
+import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.network.protocol.DataPacket;
@@ -35,6 +45,9 @@ public class EventHandler implements Listener {
 
 	@cn.nukkit.event.EventHandler
 	public void onDataPacketReceiveEvent(DataPacketReceiveEvent event) {
+		if (event.isCancelled())
+			return;
+
 		DataPacket packet = event.getPacket();
 
 		switch (packet.pid()) {
@@ -47,7 +60,116 @@ public class EventHandler implements Listener {
 	}
 
 	@cn.nukkit.event.EventHandler
+	public void onPlayerMoveEvent(PlayerMoveEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 움직이지 못하게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onPlayerInteractEvent(PlayerInteractEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 상호작용할 수 없게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onPlayerDropItemEvent(PlayerDropItemEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 아이템을 버릴 수 없게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onPlayerItemConsumeEvent(PlayerItemConsumeEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 아이템을 주울 수 없게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onEntityDamageEvent(EntityDamageEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 데미지를 받을 수 없게 합니다.
+		if (event.getEntity() instanceof Player) {
+			if (ParfaitAuth.unauthorised.get(((Player) event.getEntity()).getUniqueId()) != null) {
+				event.setCancelled();
+				return;
+			}
+		}
+
+		// 인증을 거치지 않았으면 데미지를 줄 수 없게 합니다.
+		if (event instanceof EntityDamageByEntityEvent) {
+			if (ParfaitAuth.unauthorised
+					.get(((Player) ((EntityDamageByEntityEvent) event).getDamager()).getUniqueId()) != null) {
+				event.setCancelled();
+				return;
+			}
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onBlockBreakEvent(BlockBreakEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 블럭을 캘 수 없게합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onBlockPlaceEvent(BlockPlaceEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 블럭을 배치할 수 없게합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	public void onInventoryOpenEvent(InventoryOpenEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 인벤토리창을 열 수 없게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
 	public void onPlayerLoginEvent(PlayerLoginEvent event) {
+		if (event.isCancelled())
+			return;
+
 		ParfaitAuth.unauthorizedAccess(event.getPlayer());
 
 		// AccountFindCommand 용
@@ -162,6 +284,12 @@ public class EventHandler implements Listener {
 		if (event.isCancelled())
 			return;
 
+		// 인증을 거치지 않았으면 채팅을 할 수 없게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+
 		// AccountFindCommand 용
 		if (lastChatList.size() == 20) {
 			lastChatList.remove(0);
@@ -171,6 +299,18 @@ public class EventHandler implements Listener {
 		lastChatList.add(event.getPlayer());
 	}
 
+	@cn.nukkit.event.EventHandler
+	public void onPlayerCommandPreprocessEvent(PlayerCommandPreprocessEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 인증을 거치지 않았으면 명령어 사용불가능하게 합니다.
+		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
+			event.setCancelled();
+			return;
+		}
+	}
+
 	public String getMessage(String key) {
 		return this.plugin.getMessage(key);
 	}
@@ -178,6 +318,4 @@ public class EventHandler implements Listener {
 	public Server getServer() {
 		return this.server;
 	}
-
-	// TODO 비인가자가 사용해선 안될 모든 이벤트 함수화 후 차단처리
 }
