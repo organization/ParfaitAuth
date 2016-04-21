@@ -34,7 +34,7 @@ public class BanIpAddressCommand extends ParfaitAuthCommand {
 			String identifierString = null;
 			int identifierInt = 0;
 
-			if (args[0].split("[")[1] != null && args[0].split("[")[1].split("]")[0] != null)
+			if (args[0].split("[").length == 2 && args[0].split("[")[1].split("]").length == 1)
 				identifierString = args[0].split("[")[1].split("]")[0];
 
 			if (identifierString == null)
@@ -45,7 +45,7 @@ public class BanIpAddressCommand extends ParfaitAuthCommand {
 				identifierInt = Integer.valueOf(identifierString);
 				identifierUUID = PlayerIdentifier.get(identifierInt).toString();
 			} catch (NumberFormatException e) {
-				if (args[0].split(".")[3] != null) {
+				if (args[0].split(".").length == 4) {
 					address = args[0];
 				} else {
 					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier-or-address"));
@@ -66,13 +66,13 @@ public class BanIpAddressCommand extends ParfaitAuthCommand {
 			} catch (NumberFormatException e) {
 				// 시간과 일단위 분단위로 변경
 				try {
-					if (args[1].split("h")[1] != null) {
+					if (args[1].split("h").length == 2) {
 						periodString = args[1].split("h")[1];
 						periodInt = Integer.valueOf(periodString);
 						periodInt *= 60;
 					}
 
-					if (args[1].split("d")[1] != null) {
+					if (args[1].split("d").length == 2) {
 						periodString = args[1].split("d")[1];
 						periodInt = Integer.valueOf(periodString);
 						periodInt *= 60;

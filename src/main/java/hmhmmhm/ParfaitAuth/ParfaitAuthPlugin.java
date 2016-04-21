@@ -257,7 +257,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 		this.loadLanguage(false);
 
 		// 서버에 있는 언어자료가 최신판이 아니면 업데이트합니다.
-		if ((int) this.language.get("languageFileVersion", 1) != this.languageFileVersion)
+		if (this.language.get("languageFileVersion", "1") != String.valueOf(this.languageFileVersion))
 			this.loadLanguage(true);
 	}
 
@@ -340,13 +340,15 @@ public class ParfaitAuthPlugin extends PluginBase {
 		String message = (String) this.language.get(key);
 
 		// Coloring
-		if (key.split("error-")[1] != null)
+		if (key.split("error-").length == 2)
 			message = TextFormat.RED + message;
-		if (key.split("caution-")[1] != null)
+		if (key.split("caution-").length == 2)
 			message = TextFormat.YELLOW + message;
-		if (key.split("success-")[1] != null)
+		if (key.split("status-").length == 2)
 			message = TextFormat.DARK_AQUA + message;
-		if (key.split("-help-")[1] != null)
+		if (key.split("success-").length == 2)
+			message = TextFormat.DARK_AQUA + message;
+		if (key.split("-help-").length == 2)
 			message = TextFormat.DARK_AQUA + message;
 
 		return message;

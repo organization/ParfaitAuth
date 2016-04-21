@@ -56,8 +56,26 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 				sender.sendMessage(this.getPlugin().getMessage("status-start-the-async-db-request"));
 				SendAccountInfoTask task = new SendAccountInfoTask();
 
-				int index = Integer.valueOf(args[1].split("[")[1].split("]")[0]);
-				task.identy = PlayerIdentifier.get(index).toString();
+				// 식별번호 확인
+				String identifierString = null;
+				int identifierInt;
+
+				// [1]과 같은 형태로 입력되면 숫자만 분리
+				if (args[1].split("[").length == 2 && args[1].split("[")[1].split("]").length == 1)
+					identifierString = args[1].split("[")[1].split("]")[0];
+
+				if (identifierString == null)
+					identifierString = args[1];
+
+				// 정수형으로 변환
+				try {
+					identifierInt = Integer.valueOf(identifierString);
+				} catch (NumberFormatException e) {
+					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier"));
+					return true;
+				}
+				
+				task.identy = PlayerIdentifier.get(identifierInt).toString();
 				task.sender = sender.getName();
 
 				this.getServer().getScheduler().scheduleAsyncTask(task);

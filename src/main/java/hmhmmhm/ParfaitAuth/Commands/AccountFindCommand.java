@@ -26,7 +26,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 		// f <필터> <검색어>
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null) {
+			if (args[0] == null || args[1] == null) {
 				this.getServer().getScheduler()
 						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
 				return true;
@@ -67,7 +67,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 					Player player = entry.getValue();
 
 					// 검색어가 닉네임에 포함되는지 체크
-					if (player.getName().split(args[1])[1] != null) {
+					if (player.getName().split(args[1]).length == 2) {
 						int identifier = PlayerIdentifier.put(player.getUniqueId());
 						list.add("[" + identifier + "] " + player.getName() + " ");
 					}
