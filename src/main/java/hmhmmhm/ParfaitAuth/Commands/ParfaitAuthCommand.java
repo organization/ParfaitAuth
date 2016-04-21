@@ -8,10 +8,11 @@ abstract public class ParfaitAuthCommand extends Command {
 	}
 
 	protected void load(String commandPrefix, boolean isOp) {
-		this.commandName = this.getMessage("commands-" + commandPrefix);
-		this.permissionName = this.getMessage("commands-" + commandPrefix + "-permission");
-		this.commandDescription = this.getMessage("commands-" + commandPrefix + "-description");
-		this.commandUsage = this.getMessage("commands-" + commandPrefix + "-usage");
+		this.commandKey = "commands-" + commandPrefix;
+		this.commandName = this.getMessage(this.commandKey);
+		this.permissionName = this.getMessage(this.commandKey + "-permission");
+		this.commandDescription = this.getMessage(this.commandKey + "-description");
+		this.commandUsage = this.getMessage(this.commandKey + "-usage");
 
 		this.registerCommand();
 		this.registerPermission(this.permissionName, isOp, this.commandDescription);

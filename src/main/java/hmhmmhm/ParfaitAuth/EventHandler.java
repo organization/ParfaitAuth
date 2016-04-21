@@ -18,6 +18,7 @@ import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerItemConsumeEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.network.protocol.DataPacket;
@@ -166,12 +167,18 @@ public class EventHandler implements Listener {
 	}
 
 	@cn.nukkit.event.EventHandler
+	public void onPlayerPreLoginEvent(PlayerPreLoginEvent event){
+		if (event.isCancelled())
+			return;
+		
+		ParfaitAuth.unauthorizedAccess(event.getPlayer());
+	}
+	
+	@cn.nukkit.event.EventHandler
 	public void onPlayerLoginEvent(PlayerLoginEvent event) {
 		if (event.isCancelled())
 			return;
-
-		ParfaitAuth.unauthorizedAccess(event.getPlayer());
-
+		
 		// AccountFindCommand 용
 		if (lastLoginList.size() == 20) {
 			lastLoginList.remove(0);

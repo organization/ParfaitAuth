@@ -22,6 +22,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Event;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.Events.LoginEvent;
 import hmhmmhm.ParfaitAuth.Events.LogoutEvent;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
@@ -36,6 +37,7 @@ import mongodblib.MongoDBLib;
 import static java.util.Arrays.asList;
 
 import java.lang.Character.UnicodeBlock;
+import java.lang.reflect.Field;
 
 public class ParfaitAuth {
 	/**
@@ -703,7 +705,7 @@ public class ParfaitAuth {
 			serverstate.put("updated", currentTimestamp);
 
 			// 갱신되는 서버가 이서버이고 외부네트워크주소가 존재하면 서버에 업로드
-			if (ParfaitAuth.getParfaitAuthUUID().toString() == uuid.toString())
+			if (ParfaitAuth.getParfaitAuthUUID().toString().equals(uuid.toString()))
 				if (ParfaitAuth.externalAddress != null)
 					serverstate.put("externalAddress", ParfaitAuth.externalAddress);
 
@@ -837,6 +839,9 @@ public class ParfaitAuth {
 		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
 		ParfaitAuth.authorisedID.put(player.getUniqueId(), accountData);
 
+		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
+		changePlayerName(player, accountData.nickname);
+
 		// IP자동로그인이 아니라면
 		if (!ipForce) {
 			// ID계정으로 로그인되었다고 알립니다.
@@ -862,6 +867,8 @@ public class ParfaitAuth {
 		// 비인가자/ID인가자 명단에서 제거합니다.
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
+
+		changePlayerName(player, accountData.nickname);
 
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
 		player.sendMessage(plugin.getMessage("success-uuid-account-login-complete"));
@@ -924,11 +931,12 @@ public class ParfaitAuth {
 	 * 
 	 * @return String
 	 */
+	@SuppressWarnings("unchecked")
 	public static String getRandomNameLocal(int index) {
 		// 서버에 저장된 랜덤닉네임 명단을 가져옵니다. (*저장된 JSON으로 커스텀가능)
 		// 랜덤닉네임 명단을 임의로 변경할 시엔 모든서버에 변경한 명단을 적용해야합니다.
 		// (특정서버만 꼭 다르게 사용해야한다면 다른서버와 명단이 절대 겹치지 않게 해야합니다.)
-		ArrayList names = (ArrayList) randomName.get("names");
+		ArrayList<String> names = (ArrayList<String>) randomName.get("names");
 
 		// 생성횟수를 저장된닉네임수로 나눈 몫을 이용해 닉네임을
 		// 정하고 나머지값을 숫자로 나타냅니다.
@@ -1101,4 +1109,43 @@ public class ParfaitAuth {
 		return false;
 	}
 
+	public static boolean changePlayerName(Player player, String toName) {
+		setProtectedValue(player, "username", TextFormat.clean(toName));
+		setProtectedValue(player, "displayName", toName);
+		player.setNameTag(toName);
+		setProtectedValue(player, "iusername", toName.toLowerCase());
+		return true;
+	}
+
+	public static boolean setProtectedValue(Object object, String key, Object value) {
+		Class<?> myClass = object.getClass();
+		Field myField;
+		try {
+			myField = getField(myClass, key);
+		} catch (NoSuchFieldException e) {
+			return false;
+		}
+		myField.setAccessible(true);
+		try {
+			myField.set(object, value);
+		} catch (IllegalArgumentException e) {
+			return false;
+		} catch (IllegalAccessException e) {
+			return false;
+		}
+		return true;
+	}
+
+	public static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+		try {
+			return clazz.getDeclaredField(fieldName);
+		} catch (NoSuchFieldException e) {
+			Class<?> superClass = clazz.getSuperclass();
+			if (superClass == null) {
+				throw e;
+			} else {
+				return getField(superClass, fieldName);
+			}
+		}
+	}
 }

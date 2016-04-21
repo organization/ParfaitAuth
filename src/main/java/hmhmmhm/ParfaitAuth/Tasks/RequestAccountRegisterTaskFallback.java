@@ -24,7 +24,7 @@ public class RequestAccountRegisterTaskFallback extends Task {
 		if (nowTaskUUID == null || !(nowTaskUUID instanceof UUID))
 			return;
 
-		if (nowTaskUUID.toString() == this.taskUUID.toString()) {
+		if (nowTaskUUID.toString().equals(this.taskUUID.toString())) {
 			RegisterCommand.taskMap.remove(this.username);
 
 			Player player = Server.getInstance().getPlayer(username);

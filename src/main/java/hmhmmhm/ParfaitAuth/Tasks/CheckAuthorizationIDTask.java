@@ -33,13 +33,13 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 		String inputPasswordHash = ParfaitAuth.hash(this.pw);
 
 		this.idAccount = ParfaitAuth.getAccountById(this.id);
-		this.passwordCorrect = (inputPasswordHash == this.idAccount.password);
+		this.passwordCorrect = inputPasswordHash.equals(this.idAccount.password);
 
 		if (this.pwCheckPassForce)
 			this.passwordCorrect = true;
 
 		// 인증서버의 오프라인 유무를 사전검사
-		if ((idAccount.logined != null && idAccount.logined != this.serverUUID.toString())) {
+		if ((idAccount.logined != null && !idAccount.logined.equals(this.serverUUID.toString()))) {
 			switch (ParfaitAuth.getServerStatus(UUID.fromString(idAccount.logined))) {
 			case ParfaitAuth.SERVERSTATE_IS_NULL:
 			case ParfaitAuth.SERVERSTATE_IS_RED:

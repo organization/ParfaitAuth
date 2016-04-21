@@ -30,7 +30,7 @@ public class RemoveAccountDataTask extends AsyncTask {
 			return;
 
 		// 다른서버에 접속중이면 해당서버에 요청전송
-		if (this.account.logined != null && this.account.logined != this.serverUUID) {
+		if (this.account.logined != null && !this.account.logined.equals(this.serverUUID)) {
 			if (ParfaitAuth
 					.getServerStatus(UUID.fromString(this.account.logined)) == ParfaitAuth.SERVERSTATE_IS_GREEN) {
 				Notification.push(this.account.logined, "hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask", id, true);

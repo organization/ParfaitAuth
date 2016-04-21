@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.PlayerIdentifier;
 import hmhmmhm.ParfaitAuth.Tasks.BanReleaseTask;
@@ -23,35 +24,36 @@ public class BanReleaseCommand extends ParfaitAuthCommand {
 		// (검색어를 정확하게 입력해야합니다.)
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || (args[0] != this.getMessage(this.commandName + "-sub-id")
-					&& args[0] != this.getMessage(this.commandName + "-sub-nick")
-					&& args[0] != this.getMessage(this.commandName + "-sub-identy")
-					&& args[0] != this.getMessage(this.commandName + "-sub-ip")
-					&& args[0] != this.getMessage(this.commandName + "-sub-subnet"))) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length < 3 || (!args[0].equals(this.getMessage(this.commandKey + "-sub-id"))
+					&& !args[0].equals(this.getMessage(this.commandKey + "-sub-nick"))
+					&& !args[0].equals(this.getMessage(this.commandKey + "-sub-identy"))
+					&& !args[0].equals(this.getMessage(this.commandKey + "-sub-ip"))
+					&& !args[0].equals(this.getMessage(this.commandKey + "-sub-subnet")))) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 			BanReleaseTask task = new BanReleaseTask();
 
 			// /r 아이디 검색어 사유
-			if (args[0] == this.getMessage(this.commandName + "-sub-id"))
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-id")))
 				task.id = args[1];
 
 			// /r 닉네임 검색어 사유
-			if (args[0] == this.getMessage(this.commandName + "-sub-nick"))
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-nick")))
 				task.nick = args[1];
 
 			// /r 아이피 검색어 사유
-			if (args[0] == this.getMessage(this.commandName + "-sub-ip"))
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-ip")))
 				task.ip = args[1];
 
 			// /r 서브넷 검색어 사유
-			if (args[0] == this.getMessage(this.commandName + "-sub-subnet"))
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-subnet")))
 				task.subnet = args[1];
 
 			// /r 식별번호 검색어 사유
-			if (args[0] == this.getMessage(this.commandName + "-sub-identy")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-identy"))) {
 				// 식별번호 확인
 				String identifierString = null;
 				int identifierInt;

@@ -16,6 +16,7 @@ abstract public class Command {
 	ParfaitAuthPlugin plugin;
 	Server server;
 
+	protected String commandKey;
 	protected String commandName;
 	protected String permissionName;
 	protected String commandDescription;

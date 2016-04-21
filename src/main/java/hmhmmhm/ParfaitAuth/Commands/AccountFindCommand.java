@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.EventHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
@@ -26,19 +27,15 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 		// f <필터> <검색어>
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || args[1] == null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length < 2) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 
 			// /f 아이디 검색어
-			if (args[0] == this.getMessage(this.commandName + "-sub-id")) {
-				if (args[1] == null) {
-					this.getServer().getScheduler()
-							.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
-					return true;
-				}
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-id"))) {
 
 				// 접속중인 유저중 해당 아이디가 있나 확인
 				Account findOnlineAccount = ParfaitAuth.authorisedID.get(args[1]);
@@ -59,7 +56,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			}
 
 			// /f 닉네임 검색어
-			if (args[0] == this.getMessage(this.commandName + "-sub-nick")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-nick"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 온라인 상태인 유저목록 순회
@@ -75,7 +72,9 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 식별번호 시간차를 갖고 나눠서 보여지게함
 				if (list.size() != 0) {
-					this.getServer().getScheduler().scheduleRepeatingTask(new SendUserIdentifierTask(sender, list), 10);
+					SendUserIdentifierTask task = new SendUserIdentifierTask(sender, list);
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -84,7 +83,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			}
 
 			// /f 채팅
-			if (args[0] == this.getMessage(this.commandName + "-sub-chat")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-chat"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 이벤트 헨들러에 저장된 채팅친 유저리스트 순회
@@ -95,7 +94,9 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 식별번호 시간차를 갖고 나눠서 보여지게함
 				if (list.size() != 0) {
-					this.getServer().getScheduler().scheduleRepeatingTask(new SendUserIdentifierTask(sender, list), 10);
+					SendUserIdentifierTask task = new SendUserIdentifierTask(sender, list);
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -104,7 +105,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			}
 
 			// /f 접속
-			if (args[0] == this.getMessage(this.commandName + "-sub-login")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-login"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 이벤트 헨들러에 저장된 최근접속한 유저리스트 순회
@@ -115,7 +116,9 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 식별번호 시간차를 갖고 나눠서 보여지게함
 				if (list.size() != 0) {
-					this.getServer().getScheduler().scheduleRepeatingTask(new SendUserIdentifierTask(sender, list), 10);
+					SendUserIdentifierTask task = new SendUserIdentifierTask(sender, list);
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -124,7 +127,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			}
 
 			// /f 나감
-			if (args[0] == this.getMessage(this.commandName + "-sub-logout")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-logout"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 이벤트 헨들러에 저장된 최근나간 유저리스트 순회
@@ -135,7 +138,9 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 식별번호 시간차를 갖고 나눠서 보여지게함
 				if (list.size() != 0) {
-					this.getServer().getScheduler().scheduleRepeatingTask(new SendUserIdentifierTask(sender, list), 10);
+					SendUserIdentifierTask task = new SendUserIdentifierTask(sender, list);
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -144,7 +149,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			}
 
 			// /f 복잡닉
-			if (args[0] == this.getMessage(this.commandName + "-sub-diff")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-diff"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
 				for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
@@ -160,7 +165,9 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 				// 식별번호 시간차를 갖고 나눠서 보여지게함
 				if (list.size() != 0) {
-					this.getServer().getScheduler().scheduleRepeatingTask(new SendUserIdentifierTask(sender, list), 10);
+					SendUserIdentifierTask task = new SendUserIdentifierTask(sender, list);
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 

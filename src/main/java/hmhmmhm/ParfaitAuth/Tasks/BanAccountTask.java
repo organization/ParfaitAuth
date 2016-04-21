@@ -55,7 +55,7 @@ public class BanAccountTask extends AsyncTask {
 		}
 
 		// 이서버에 접속중이면
-		if (this.account.logined == ParfaitAuth.getParfaitAuthUUID().toString()) {
+		if (this.account.logined.equals(ParfaitAuth.getParfaitAuthUUID().toString())) {
 			// 서버에서 킥처리
 			Player target = server.getPlayer(this.account.nickname);
 			if (target != null)

@@ -3,6 +3,7 @@ package hmhmmhm.ParfaitAuth.Commands;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
@@ -30,18 +31,20 @@ public class AccountCommand extends ParfaitAuthCommand {
 				}
 			}
 
-			if (args[0] == null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length == 0) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 
-			// "commands-account-sub-type": "유형"
-			if (args[0] == this.getMessage(this.commandName + "-sub-type")) {
+			// 계정 유형 아이디
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-type"))) {
 				// 계정 유형 아이디 1 의 형식이 아닐경우
-				if (args[1] == null || args[2] == null) {
-					this.getServer().getScheduler()
-							.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "type-help-"), 5);
+				if (args.length < 2) {
+					SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-type-help-");
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -75,13 +78,12 @@ public class AccountCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			// "commands-account-sub-login": "접속"
-			if (args[0] == this.getMessage(this.commandName + "-sub-login")) {
-				// 계정 접속 아이디
-
-				if (args[1] == null) {
-					this.getServer().getScheduler()
-							.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "type-help-"), 5);
+			// 계정 접속 아이디
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-login"))) {
+				if (args.length < 2) {
+					SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-type-help-");
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -91,13 +93,12 @@ public class AccountCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			// "commands-account-sub-del": "삭제"
-			if (args[0] == this.getMessage(this.commandName + "-sub-del")) {
-				// 계정 삭제 아이디
-
-				if (args[1] == null) {
-					this.getServer().getScheduler()
-							.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "type-help-"), 5);
+			// 계정 삭제 아이디
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-del"))) {
+				if (args.length < 2) {
+					SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-type-help-");
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
 					return true;
 				}
 
@@ -107,11 +108,16 @@ public class AccountCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			// "commands-account-sub-stat": "통계"
-			if (args[0] == this.getMessage(this.commandName + "-sub-stat")) {
+			// /계정 통계
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-stat"))) {
 				this.getServer().getScheduler().scheduleAsyncTask(new AccountStatisticsTask(sender.getName()));
 				return true;
 			}
+			
+			SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+			TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+			task.setHandler(handler);
+			return true;
 		}
 		return false;
 	}

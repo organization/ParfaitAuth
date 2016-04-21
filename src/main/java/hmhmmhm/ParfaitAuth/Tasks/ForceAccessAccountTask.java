@@ -37,14 +37,14 @@ public class ForceAccessAccountTask extends AsyncTask {
 		}
 
 		// 다른서버에 로그인 한 경우
-		if (this.account.logined != null && this.account.logined != this.serverUUID) {
+		if (this.account.logined != null && !this.account.logined.equals(this.serverUUID)) {
 			this.result = ParfaitAuth.getServerStatus(UUID.fromString(this.account.logined));
 			this.resultAct = USER_ALREADY_LOGINED_ANOTHER_SERVER;
 			this.gotoUUID = this.account.logined;
 			return;
 		}
 
-		if (this.account.logined == this.serverUUID) {
+		if (this.account.logined.equals(this.serverUUID)) {
 			// 이 서버에 접속한 경우
 			this.resultAct = USER_ALREADY_LOGINED_THIS_SERVER;
 			return;

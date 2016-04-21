@@ -2,6 +2,7 @@ package hmhmmhm.ParfaitAuth.Commands;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
@@ -16,9 +17,10 @@ public class ChangePasswordCommand extends ParfaitAuthCommand {
 	@Override
 	public boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args) {
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || args[1] != null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length == 0) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 

@@ -5,6 +5,7 @@ import java.util.UUID;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.PlayerIdentifier;
@@ -26,14 +27,15 @@ public class BanAccountCommand extends ParfaitAuthCommand {
 		// (사유는 반드시 적어야하며 띄어쓰기가 가능함)
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || args[1] == null || args[2] == null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length < 4) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 
-			// /b 식별번호 <기간> <사유>
-			if (args[0] == this.getPlugin().getMessage(this.commandName + "-sub-identy")) {
+			// /b 식별번호 <검색명> <기간> <사유>
+			if (args[0].equals(this.getPlugin().getMessage(this.commandKey + "-sub-identy"))) {
 				// 식별번호 확인
 				String identifierString = null;
 				int identifierInt;
@@ -113,8 +115,8 @@ public class BanAccountCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			// /b 아이디 <기간> <사유>
-			if (args[0] == this.getPlugin().getMessage(this.commandName + "-sub-id")) {
+			// /b 아이디 <검색명> <기간> <사유>
+			if (args[0].equals(this.getPlugin().getMessage(this.commandKey + "-sub-id"))) {
 
 				// 기간 확인
 				String periodString = null;
@@ -169,8 +171,8 @@ public class BanAccountCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			/// /b 닉네임 <기간> <사유>
-			if (args[0] == this.getPlugin().getMessage(this.commandName + "-sub-nick")) {
+			/// /b 닉네임 <검색명> <기간> <사유>
+			if (args[0].equals(this.getPlugin().getMessage(this.commandKey + "-sub-nick"))) {
 
 				// 기간 확인
 				String periodString = null;

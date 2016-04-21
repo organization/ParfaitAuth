@@ -117,7 +117,7 @@ public class Account {
 			return null;
 
 		document.put("_id", this._id);
-		document.put("uuid", this.uuid);
+		document.put("uuid", this.uuid.toString());
 		document.put("nickname", this.nickname);
 		document.put("id", this.id);
 		document.put("password", this.password);

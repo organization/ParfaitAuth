@@ -7,6 +7,7 @@ import java.util.UUID;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
@@ -33,11 +34,11 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			}
 
 			// 입력한 계정명이나 암호가 잘못되거나 없을 경우
-			if (args[0] == null || args[1] == null || args[2] == null || args.length != 3
-					|| !ParfaitAuth.checkRightId(args[0]) || ParfaitAuth.checkRightPassword(args[1])
+			if (args.length != 3 || !ParfaitAuth.checkRightId(args[0]) || ParfaitAuth.checkRightPassword(args[1])
 					|| ParfaitAuth.checkRightName(args[2])) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, "commands-register-help-"), 20);
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 

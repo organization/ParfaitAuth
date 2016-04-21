@@ -2,6 +2,7 @@ package hmhmmhm.ParfaitAuth.Commands;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.PlayerIdentifier;
 import hmhmmhm.ParfaitAuth.Tasks.BanAddressTask;
@@ -23,9 +24,10 @@ public class BanSubnetAddressCommand extends ParfaitAuthCommand {
 		// (사유는 반드시 적어야하며 띄어쓰기가 가능함)
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || args[1] == null || args[2] == null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length < 3) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 

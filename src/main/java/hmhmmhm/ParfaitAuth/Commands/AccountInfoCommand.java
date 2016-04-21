@@ -2,6 +2,7 @@ package hmhmmhm.ParfaitAuth.Commands;
 
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.PlayerIdentifier;
 import hmhmmhm.ParfaitAuth.Tasks.SendAccountInfoTask;
@@ -21,14 +22,15 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 		// (아이디 혹은 닉네임을 정확하게 입력해야합니다.)
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args[0] == null || args[1] == null) {
-				this.getServer().getScheduler()
-						.scheduleRepeatingTask(new SendMessageTask(sender, this.commandName + "-help-"), 10);
+			if (args.length < 2) {
+				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				task.setHandler(handler);
 				return true;
 			}
 
 			// /a 아이디 <검색어>
-			if (args[0] == this.getMessage(this.commandName + "-sub-id")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-id"))) {
 				sender.sendMessage(this.getPlugin().getMessage("status-start-the-async-db-request"));
 				SendAccountInfoTask task = new SendAccountInfoTask();
 
@@ -40,7 +42,7 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 			}
 
 			// /a 닉네임 <검색어>
-			if (args[0] == this.getMessage(this.commandName + "-sub-nick")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-nick"))) {
 				sender.sendMessage(this.getPlugin().getMessage("status-start-the-async-db-request"));
 				SendAccountInfoTask task = new SendAccountInfoTask();
 
@@ -52,7 +54,7 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 			}
 
 			// /a 식별번호 <검색어>
-			if (args[0] == this.getMessage(this.commandName + "-sub-identy")) {
+			if (args[0].equals(this.getMessage(this.commandKey + "-sub-identy"))) {
 				sender.sendMessage(this.getPlugin().getMessage("status-start-the-async-db-request"));
 				SendAccountInfoTask task = new SendAccountInfoTask();
 
@@ -74,7 +76,7 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier"));
 					return true;
 				}
-				
+
 				task.identy = PlayerIdentifier.get(identifierInt).toString();
 				task.sender = sender.getName();
 

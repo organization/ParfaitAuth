@@ -339,6 +339,9 @@ public class ParfaitAuthPlugin extends PluginBase {
 	public String getMessage(String key) {
 		String message = (String) this.language.get(key);
 
+		if (message == null || message == "null")
+			return null;
+
 		// Coloring
 		if (key.split("error-").length == 2)
 			message = TextFormat.RED + message;
