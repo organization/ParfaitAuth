@@ -1,7 +1,10 @@
 package hmhmmhm.ParfaitAuth;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -28,6 +31,7 @@ import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.BanAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask;
+import hmhmmhm.ParfaitAuth.Tasks.DeleteBannedAddressTask;
 import hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask;
 
 public class EventHandler implements Listener {
@@ -167,18 +171,54 @@ public class EventHandler implements Listener {
 	}
 
 	@cn.nukkit.event.EventHandler
-	public void onPlayerPreLoginEvent(PlayerPreLoginEvent event){
+	public void onPlayerPreLoginEvent(PlayerPreLoginEvent event) {
 		if (event.isCancelled())
 			return;
-		
+
+		String ip = event.getPlayer().getAddress();
+		String subnet = ip.split("\\.")[0] + "." + ip.split("\\.")[1];
+		Long currentTimestamp = Calendar.getInstance().getTime().getTime();
+
+		// 차단된 아이피인지 여부 체크
+		if (ParfaitAuth.bannedAddress.get(ip) != null) {
+			Long timestamp = ParfaitAuth.bannedAddress.get(ip);
+			Long diff = timestamp - currentTimestamp;
+
+			if (diff <= 0) {
+				// 차단기간이 지났으면 차단해제
+				this.getServer().getScheduler().scheduleAsyncTask(new DeleteBannedAddressTask(ip));
+			} else {
+				// 차단기간이 남았으면 차단
+				String releasePeriod = (new Timestamp(Long.valueOf(timestamp))).toString();
+				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+				return;
+			}
+		}
+
+		// 차단된 서브넷인지 여부 체크
+		if (ParfaitAuth.bannedAddress.get(subnet) != null) {
+			Long timestamp = ParfaitAuth.bannedAddress.get(subnet);
+			Long diff = TimeUnit.MILLISECONDS.toSeconds(currentTimestamp - timestamp);
+
+			if (diff <= 0) {
+				// 차단기간이 지났으면 차단해제
+				this.getServer().getScheduler().scheduleAsyncTask(new DeleteBannedAddressTask(subnet));
+			} else {
+				// 차단기간이 남았으면 차단
+				String releasePeriod = (new Timestamp(Long.valueOf(timestamp))).toString();
+				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+				return;
+			}
+		}
+
 		ParfaitAuth.unauthorizedAccess(event.getPlayer());
 	}
-	
+
 	@cn.nukkit.event.EventHandler
 	public void onPlayerLoginEvent(PlayerLoginEvent event) {
 		if (event.isCancelled())
 			return;
-		
+
 		// AccountFindCommand 용
 		if (lastLoginList.size() == 20) {
 			lastLoginList.remove(0);
@@ -315,6 +355,24 @@ public class EventHandler implements Listener {
 		if (ParfaitAuth.unauthorised.get(event.getPlayer().getUniqueId()) != null) {
 			event.setCancelled();
 			return;
+		}
+
+		// ID계정을 사용중일때
+		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
+			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
+
+			if (account.accountType == Account.TYPE_BUILDER) {
+
+				// 빌더가 /gamemode 명령어를 사용해서 타인의 게임모드를 바꾸는 것을 방지
+				if (event.getMessage().split("/gamemode").length == 2) {
+					String[] args = event.getMessage().split("/gamemode")[1].split(" ");
+					if (args.length > 1) {
+						event.getPlayer()
+								.sendMessage(plugin.getMessage("error-builder-cant-change-other-player-gamemode"));
+						event.setCancelled();
+					}
+				}
+			}
 		}
 	}
 

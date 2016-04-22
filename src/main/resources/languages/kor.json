@@ -36,7 +36,7 @@
 	"error-please-login-first": "* ID계정으로 로그인을 먼저 해주세요.",
 	"error-you-already-logined": "* 이미 로그인되어있습니다",
 	"error-cant-find-that-accounttype": "* 해당 계정유형은 사전정의되지 않았습니다!",
-	"error-permission-not-authorized": "* 관리권한 비인가 상태인 게정입니다.",
+	"error-permission-not-authorized": "* 해당 명령을 사용할 권한을 인가받지 못했습니다.",
 	"error-identifier-create-failed": "* 매치되는 결과값 없음! 식별번호 발급실패",
 	"error-cant-find-player-identifier": "* 해당되는 식별번호를 확인할 수 없습니다.",
 	"error-cant-find-player-identifier-or-address": "* 해당되는 식별번호나 IP를 확인할 수 없습니다.",
@@ -47,6 +47,7 @@
 	"error-login-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 로그인이 거부되었습니다.",
 	"error-register-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 가입이 거부되었습니다.",
 	"error-unregister-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 탈퇴가 거부되었습니다.",
+	"error-builder-cant-change-other-player-gamemode": "* 게임모드 권한을 타인에게 적용할 수 없습니다.",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",
@@ -81,8 +82,9 @@
 	"kick-successfully-logout": "로그아웃처리되었습니다.",
 	"kick-successfully-unregistered": "계정삭제요청처리되었습니다.",
 	"kick-account-force-connected": "관리자가 해당 계정에 엑세스시도",
-	"kick-that-address-is-banned": "해당 접속주소는 차단된 상태입니다.",
 	"kick-successfully-account-name-changed": "계정 이름이 정상적으로 변경되었습니다.",
+	"kick-account-is-banned": "차단된 계정입니다. 해제일자[%period] 사유[%cause]",
+	"kick-address-is-banned": "차단된 접속주소입니다. 해제일자[%period]",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",

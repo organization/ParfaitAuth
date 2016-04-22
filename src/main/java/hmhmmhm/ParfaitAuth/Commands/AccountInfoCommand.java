@@ -63,8 +63,8 @@ public class AccountInfoCommand extends ParfaitAuthCommand {
 				int identifierInt;
 
 				// [1]과 같은 형태로 입력되면 숫자만 분리
-				if (args[1].split("[").length == 2 && args[1].split("[")[1].split("]").length == 1)
-					identifierString = args[1].split("[")[1].split("]")[0];
+				if (args[1].split("\\[").length == 2 && args[1].split("\\[")[1].split("\\]").length == 1)
+					identifierString = args[1].split("\\[")[1].split("\\]")[0];
 
 				if (identifierString == null)
 					identifierString = args[1];

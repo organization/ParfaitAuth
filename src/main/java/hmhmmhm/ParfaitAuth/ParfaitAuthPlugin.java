@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
@@ -21,11 +22,20 @@ import cn.nukkit.scheduler.Task;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.EventHandler;
+import hmhmmhm.ParfaitAuth.Commands.AccountCommand;
+import hmhmmhm.ParfaitAuth.Commands.AccountFindCommand;
+import hmhmmhm.ParfaitAuth.Commands.AccountInfoCommand;
 import hmhmmhm.ParfaitAuth.Commands.AuthCommand;
+import hmhmmhm.ParfaitAuth.Commands.BanAccountCommand;
+import hmhmmhm.ParfaitAuth.Commands.BanIpAddressCommand;
+import hmhmmhm.ParfaitAuth.Commands.BanReleaseCommand;
+import hmhmmhm.ParfaitAuth.Commands.BanSubnetAddressCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangeNickCommand;
 import hmhmmhm.ParfaitAuth.Commands.ChangePasswordCommand;
 import hmhmmhm.ParfaitAuth.Commands.FindAccountCommand;
+import hmhmmhm.ParfaitAuth.Commands.HowToBanCommand;
 import hmhmmhm.ParfaitAuth.Commands.LoginCommand;
+import hmhmmhm.ParfaitAuth.Commands.LogoutCommand;
 import hmhmmhm.ParfaitAuth.Commands.ParfaitAuthCommand;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 import hmhmmhm.ParfaitAuth.Commands.UnregisterCommand;
@@ -123,8 +133,10 @@ public class ParfaitAuthPlugin extends PluginBase {
 			return;
 
 		for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
-			if (entry.getValue().getAddress() == address)
-				entry.getValue().kick(this.getMessage("kick-that-address-is-banned"));
+			if (entry.getValue().getAddress() == address) {
+				String releasePeriod = (new Timestamp(period)).toString();
+				entry.getValue().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+			}
 		}
 
 		ParfaitAuth.bannedAddress.put(address, period);
@@ -294,11 +306,20 @@ public class ParfaitAuthPlugin extends PluginBase {
 	 * 명령어들을 서버에 등록합니다.
 	 */
 	private void loadCommands() {
+		this.commandMap.put("AccountCommand", new AccountCommand(this));
+		this.commandMap.put("AccountFindCommand", new AccountFindCommand(this));
+		this.commandMap.put("AccountInfoCommand", new AccountInfoCommand(this));
 		this.commandMap.put("AuthCommand", new AuthCommand(this));
+		this.commandMap.put("BanAccountCommand", new BanAccountCommand(this));
+		this.commandMap.put("BanIpAddressCommand", new BanIpAddressCommand(this));
+		this.commandMap.put("BanReleaseCommand", new BanReleaseCommand(this));
+		this.commandMap.put("BanSubnetAddressCommand", new BanSubnetAddressCommand(this));
 		this.commandMap.put("ChangeNickCommand", new ChangeNickCommand(this));
 		this.commandMap.put("ChangePasswordCommand", new ChangePasswordCommand(this));
 		this.commandMap.put("FindAccountCommand", new FindAccountCommand(this));
+		this.commandMap.put("HowToBanCommand", new HowToBanCommand(this));
 		this.commandMap.put("LoginCommand", new LoginCommand(this));
+		this.commandMap.put("LogoutCommand", new LogoutCommand(this));
 		this.commandMap.put("RegisterCommand", new RegisterCommand(this));
 		this.commandMap.put("UnregisterCommand", new UnregisterCommand(this));
 	}
@@ -350,6 +371,8 @@ public class ParfaitAuthPlugin extends PluginBase {
 		if (key.split("status-").length == 2)
 			message = TextFormat.DARK_AQUA + message;
 		if (key.split("success-").length == 2)
+			message = TextFormat.DARK_AQUA + message;
+		if (key.split("info-").length == 2)
 			message = TextFormat.DARK_AQUA + message;
 		if (key.split("-help-").length == 2)
 			message = TextFormat.DARK_AQUA + message;

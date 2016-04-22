@@ -1,7 +1,6 @@
 package hmhmmhm.ParfaitAuth.Commands;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
@@ -9,7 +8,6 @@ import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.SimpleCommandMap;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.Plugin;
-import cn.nukkit.utils.Config;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
 abstract public class Command {
@@ -49,7 +47,8 @@ abstract public class Command {
 		return this.plugin.getMessage(key);
 	}
 
-	public abstract boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label, String[] args);
+	public abstract boolean onCommand(CommandSender sender, cn.nukkit.command.Command command, String label,
+			String[] args);
 
 	public Server getServer() {
 		return this.server;

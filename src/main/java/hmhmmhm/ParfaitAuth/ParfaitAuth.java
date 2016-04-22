@@ -822,6 +822,13 @@ public class ParfaitAuth {
 			return false;
 		}
 
+		// 차단된 계정이면 킥처리
+		if (accountData.isBanned()) {
+			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period",
+					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)));
+			return true;
+		}
+
 		LoginEvent loginEvent = new LoginEvent(player, accountData);
 		Server.getInstance().getPluginManager().callEvent(loginEvent);
 
@@ -842,6 +849,9 @@ public class ParfaitAuth {
 
 		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);
+
+		// 계정자료에 지정된 권한을 부여
+		accountData.applyAccountType(player);
 
 		// IP자동로그인이 아니라면
 		if (!ipForce) {
@@ -865,13 +875,25 @@ public class ParfaitAuth {
 	 * @param accountData
 	 */
 	public static boolean authorizationUUID(Player player, Account accountData) {
+		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+		
+		// 차단된 계정이면 킥처리
+		if (accountData.isBanned()) {
+			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period",
+					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)));
+			return true;
+		}
+		
 		// 비인가자/ID인가자 명단에서 제거합니다.
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
 
+		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);
 
-		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+		// 계정자료에 지정된 권한을 부여
+		accountData.applyAccountType(player);
+
 		player.sendMessage(plugin.getMessage("success-uuid-account-login-complete"));
 		player.sendMessage(plugin.getMessage("info-you-can-use-auth-command"));
 		return true;

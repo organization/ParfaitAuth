@@ -113,7 +113,7 @@ public class AccountCommand extends ParfaitAuthCommand {
 				this.getServer().getScheduler().scheduleAsyncTask(new AccountStatisticsTask(sender.getName()));
 				return true;
 			}
-			
+
 			SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
 			TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
 			task.setHandler(handler);

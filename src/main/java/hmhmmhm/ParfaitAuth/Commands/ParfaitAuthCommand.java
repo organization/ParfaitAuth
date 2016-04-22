@@ -14,7 +14,7 @@ abstract public class ParfaitAuthCommand extends Command {
 		this.commandDescription = this.getMessage(this.commandKey + "-description");
 		this.commandUsage = this.getMessage(this.commandKey + "-usage");
 
-		this.registerCommand();
-		this.registerPermission(this.permissionName, isOp, this.commandDescription);
+		boolean permCheck = this.registerPermission(this.permissionName, isOp, this.commandDescription);
+		boolean commCheck = this.registerCommand();
 	}
 }

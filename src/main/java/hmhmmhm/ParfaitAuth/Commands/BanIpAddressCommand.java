@@ -37,8 +37,8 @@ public class BanIpAddressCommand extends ParfaitAuthCommand {
 			String identifierString = null;
 			int identifierInt = 0;
 
-			if (args[0].split("[").length == 2 && args[0].split("[")[1].split("]").length == 1)
-				identifierString = args[0].split("[")[1].split("]")[0];
+			if (args[0].split("\\[").length == 2 && args[0].split("\\[")[1].split("\\]").length == 1)
+				identifierString = args[0].split("\\[")[1].split("\\]")[0];
 
 			if (identifierString == null)
 				identifierString = args[0];
@@ -48,7 +48,7 @@ public class BanIpAddressCommand extends ParfaitAuthCommand {
 				identifierInt = Integer.valueOf(identifierString);
 				identifierUUID = PlayerIdentifier.get(identifierInt).toString();
 			} catch (NumberFormatException e) {
-				if (args[0].split(".").length == 4) {
+				if (args[0].split("\\.").length == 4) {
 					address = args[0];
 				} else {
 					sender.sendMessage(plugin.getMessage("error-cant-find-player-identifier-or-address"));

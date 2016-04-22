@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 
 public class Account {
 	/* 계정 필수 정보들을 별도로 변수로 보관합니다. */
@@ -336,6 +337,61 @@ public class Account {
 			break;
 		}
 		return type;
+	}
+
+	public void applyAccountType(Player player) {
+		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+
+		switch (this.accountType) {
+		case Account.TYPE_ADMIN:
+			player.setOp(true);
+			player.setGamemode(Player.CREATIVE);
+			player.setAllowFlight(true);
+			// TODO 운영권한 인가됨 - 운영권한이 부여되었습니다.
+			break;
+		case Account.TYPE_BUILDER:
+			player.setOp(false);
+			player.setGamemode(Player.CREATIVE);
+			player.setAllowFlight(true);
+			player.addAttachment(plugin, "nukkit.command.gamemode", true);
+			// TODO 창조권한 인가됨 - 창조모드권한이 부여되었습니다.
+			break;
+		case Account.TYPE_DEFAULT:
+			player.setOp(false);
+			player.setGamemode(Server.getInstance().getGamemode());
+			break;
+		case Account.TYPE_GUEST:
+			player.setOp(false);
+			player.setGamemode(Player.VIEW);
+			// TODO 손님권한 인가됨 -
+			break;
+		case Account.TYPE_NORMAL:
+			player.setOp(false);
+			player.setGamemode(Player.SURVIVAL);
+			break;
+		case Account.TYPE_OVER_POWER:
+			player.setOp(false);
+			player.setAllowFlight(true);
+			player.addAttachment(plugin, "nukkit.command.gamemode", true);
+			player.addAttachment(plugin, "nukkit.command.say", true);
+			player.addAttachment(plugin, "nukkit.command.time.add;" + "nukkit.command.time.set;"
+					+ "nukkit.command.time.start;" + "nukkit.command.time.stop", true);
+			player.addAttachment(plugin, "nukkit.command.weather", true);
+			player.addAttachment(plugin, "nukkit.command.ban.player", true);
+			player.addAttachment(plugin, "nukkit.command.ban.ip", true);
+			player.addAttachment(plugin, "nukkit.command.ban.list", true);
+			player.addAttachment(plugin, "nukkit.command.unban.player", true);
+			player.addAttachment(plugin, "nukkit.command.unban.ip", true);
+			player.addAttachment(plugin, plugin.getMessage("commands-howtoban-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-account-info-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-account-find-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-ban-account-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-ban-ipaddress-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-ban-subnet-permission"), true);
+			player.addAttachment(plugin, plugin.getMessage("commands-ban-release-permission"), true);
+			// TODO 관리권한 인가됨 - 관리권한이 부여되었습니다.
+			break;
+		}
 	}
 
 	public LinkedHashMap<String, Object> getAdditionalData() {
