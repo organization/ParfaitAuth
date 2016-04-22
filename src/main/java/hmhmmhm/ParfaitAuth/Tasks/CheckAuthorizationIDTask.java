@@ -83,7 +83,7 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 				// 오진아웃제를 초기화하고, 30분간 밴하고, kick처리
 				account.fiveStrikes = 0;
 				account.banMinute(30);
-				player.kick();
+				player.kick(plugin.getMessage("kick-account-has-banned"), false);
 			} else {
 				player.sendMessage(plugin.getMessage("caution-if-you-are-missmatch-pw-five-time-willbe-ban"));
 			}
@@ -91,6 +91,6 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 		}
 
 		// 계정을 찾았고 비밀번호가 맞는 경우
-		ParfaitAuth.authorizationID(player, this.idAccount, false, this.loginedForce);
+		ParfaitAuth.authorizationID(player, this.idAccount, true, this.loginedForce);
 	}
 }

@@ -27,7 +27,7 @@ public class UnregisterCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			if (ParfaitAuth.authorisedID.get((Player) sender) == null) {
+			if (ParfaitAuth.authorisedID.get(((Player) sender).getUniqueId()) == null) {
 				sender.sendMessage(this.getMessage("error-please-login-first"));
 				return true;
 			}
@@ -70,7 +70,7 @@ public class UnregisterCommand extends ParfaitAuthCommand {
 			}
 
 			ParfaitAuth.deleteAccountAsync(((Player) sender).getUniqueId());
-			((Player) sender).kick(ParfaitAuthPlugin.getPlugin().getMessage("kick-successfully-unregistered"));
+			((Player) sender).kick(ParfaitAuthPlugin.getPlugin().getMessage("kick-successfully-unregistered"), false);
 			return true;
 		}
 		return false;

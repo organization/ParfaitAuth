@@ -18,7 +18,7 @@ public class LoginCommand extends ParfaitAuthCommand {
 		if (command.getName().toLowerCase() == this.commandName) {
 			if (args.length < 2) {
 				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
-				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 20);
 				task.setHandler(handler);
 				return true;
 			}
@@ -28,8 +28,8 @@ public class LoginCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			if (ParfaitAuth.authorisedID.get((Player) sender) != null) {
-				sender.sendMessage(this.getMessage(""));
+			if (ParfaitAuth.authorisedID.get(((Player) sender).getUniqueId()) != null) {
+				sender.sendMessage(this.getMessage("error-you-already-logined"));
 				return true;
 			}
 

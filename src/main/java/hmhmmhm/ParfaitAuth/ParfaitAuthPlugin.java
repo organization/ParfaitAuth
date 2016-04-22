@@ -135,7 +135,8 @@ public class ParfaitAuthPlugin extends PluginBase {
 		for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
 			if (entry.getValue().getAddress() == address) {
 				String releasePeriod = (new Timestamp(period)).toString();
-				entry.getValue().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+				entry.getValue().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod),
+						false);
 			}
 		}
 

@@ -43,12 +43,12 @@ public class CheckUnauthorizedAccessTask extends AsyncTask {
 			return;
 
 		// ID가 미포함인 정보일 경우 authorizationUUID를 돌립니다.
-		if (this.account.id == null || this.account.id == "") {
+		if (this.account.id == null) {
 			ParfaitAuth.authorizationUUID(player, this.account);
 			return;
 		}
 
 		// ID가 포함된 정보일 경우 authorizationID를 돌리고,
-		ParfaitAuth.authorizationUUID(player, this.account);
+		ParfaitAuth.authorizationID(player, this.account, false, false);
 	}
 }

@@ -85,7 +85,7 @@ public class ForceAccessAccountTask extends AsyncTask {
 				Player target = server.getPlayer(idAccount.nickname);
 				// 유저 인스턴스가 존재하면
 				if (target != null)
-					target.kick(plugin.getMessage("kick-account-force-connected"));
+					target.kick(plugin.getMessage("kick-account-force-connected"), false);
 			}
 		}
 		Account senderAccount = ParfaitAuth.getAccount(player.getUniqueId());

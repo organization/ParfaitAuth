@@ -1,8 +1,8 @@
 {
 	"languageFileVersion": "1",
 	"status-start-get-account-data": "* 계정 정보를 서버에 전송 요청합니다...",
-	"status-start-get-id-account-data": "* ID 게정 정보를 서버에 전송 요청합니다...",
-	"status-start-register-account": "* 계정 등록을 서버에 요청 중 입니다...",
+	"status-start-get-id-account-data": "* ID 계정 정보를 서버에 전송 요청합니다...",
+	"status-start-register-account": "* 계정 등록을 DB에 요청 중 입니다...",
 	"status-database-was-updated": "DB 기반정보가 자동으로 업데이트되었습니다!",
 	"status-database-check-all-green": "DB 기반정보 체크완료! 계정연동 정상작동중!",
 	"status-new-message-task-now-working": "이전 메시지목록보기가 중단되고 새메시지를 출력합니다...",
@@ -15,6 +15,7 @@
 	"status-show-account-statistics": "* DB에서 수집한 계정 통계를 출력합니다.",
 	"status-start-show-user-identifier-list": "* 포함된 유저 명단을 표시합니다.",
 	"status-start-the-async-db-request": "* DB에 비동기로 정보를 요청합니다...",
+	"status-start-wait-db-response-about-login": "* 로그인정보를 DB가 전송하길 기다리는 중입니다.",
 
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
 	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
@@ -78,6 +79,10 @@
 	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
 	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
 	"info-identifier-founded": "* 식별번호 생성됨 : [%1]",
+	"info-admin-account-permission-granted": "* 운영권한 인가됨 - 운영권한이 부여되었습니다.",
+	"info-builder-account-permission-granted": "창조권한 인가됨 - 창조모드권한이 부여되었습니다.",
+	"info-guest-account-permission-granted": "손님권한 인가됨 - 관람모드권한이 부여되었습니다.",
+	"info-op-account-permission-granted": "* 관리권한 인가됨 - 관리권한이 부여되었습니다.",
 
 	"kick-successfully-logout": "로그아웃처리되었습니다.",
 	"kick-successfully-unregistered": "계정삭제요청처리되었습니다.",
@@ -85,6 +90,8 @@
 	"kick-successfully-account-name-changed": "계정 이름이 정상적으로 변경되었습니다.",
 	"kick-account-is-banned": "차단된 계정입니다. 해제일자[%period] 사유[%cause]",
 	"kick-address-is-banned": "차단된 접속주소입니다. 해제일자[%period]",
+	"kick-authorization-failed": "기초인증정보 획득에 실패했습니다. 관리자에게 문의해주세요.",
+	"kick-account-has-banned": "계정이 차단되었습니다. 관리자에게 문의해주세요.",
 
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
@@ -121,11 +128,16 @@
 	"commands-login-description": "해당IP에서 아이디계정으로 로그인합니다.",
 	"commands-login-usage": "/로그인 아이디 암호",
 
+	"commands-login-help-1": "* /로그인 아이디 암호",
+	"commands-login-help-2": "* 한번 로그인하면 로그아웃할때까지,",
+	"commands-login-help-3": "* 해당 IP에서 현재 기기로 접속 시 자동로그인 처리 시킵니다.",
+	"commands-login-help-4": "* 다른 IP에서 접속하면 이전 IP에서의 인증은 자동으로 해제됩니다.",
+
 	"commands-logout": "로그아웃",
 	"commands-logout-permission": "parfaitauth.commands.logout",
 	"commands-logout-description": "해당IP에서 아이디계정을 로그아웃합니다.",
 	"commands-logout-usage": "/로그아웃 아이디 암호",
-
+	
 	"commands-register": "가입",
 	"commands-register-permission": "parfaitauth.commands.register",
 	"commands-register-description": "아이디계정을 생성합니다.",

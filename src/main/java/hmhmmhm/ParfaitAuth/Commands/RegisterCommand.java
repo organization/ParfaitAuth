@@ -34,8 +34,8 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			}
 
 			// 입력한 계정명이나 암호가 잘못되거나 없을 경우
-			if (args.length != 3 || !ParfaitAuth.checkRightId(args[0]) || ParfaitAuth.checkRightPassword(args[1])
-					|| ParfaitAuth.checkRightName(args[2])) {
+			if (args.length != 3 || !ParfaitAuth.checkRightId(args[0]) || !ParfaitAuth.checkRightPassword(args[1])
+					|| !ParfaitAuth.checkRightName(args[2])) {
 				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
 				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 20);
 				task.setHandler(handler);
@@ -69,8 +69,8 @@ public class RegisterCommand extends ParfaitAuthCommand {
 			}
 
 			// 아래부터 비동기처리화
-			this.getServer().getScheduler().scheduleAsyncTask(
-					new RequestAccountRegisterTask(id, pw, uuid, taskUUID, timestamp, userIp, serverUUID, nickname));
+			this.getServer().getScheduler().scheduleAsyncTask(new RequestAccountRegisterTask(id, pw, uuid, taskUUID,
+					timestamp, userIp, serverUUID, nickname, sender.getName()));
 
 			// 비동기 응답이 안 올때 6초 후에 서버미응답 표시하게처리
 			this.getServer().getScheduler()

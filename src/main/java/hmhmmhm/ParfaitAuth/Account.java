@@ -70,8 +70,12 @@ public class Account {
 
 	public Account(Document document) {
 		String uuidString = (String) document.get("uuid");
+		if (uuidString != null) {
+			this.uuid = UUID.fromString(uuidString);
+		} else {
+			this.uuid = null;
+		}
 
-		this.uuid = UUID.fromString(uuidString);
 		this._id = document.get("_id");
 		this.id = (String) document.get("id");
 		this.password = (String) document.get("password");
@@ -114,18 +118,22 @@ public class Account {
 	public Document convertToDocument() {
 		Document document = new Document();
 
-		if (this.uuid == null || this.nickname == null)
-			return null;
+		if (this._id != null)
+			document.put("_id", this._id);
 
-		document.put("_id", this._id);
-		document.put("uuid", this.uuid.toString());
+		if (this.uuid != null) {
+			document.put("uuid", this.uuid.toString());
+		} else {
+			document.put("uuid", null);
+		}
+
 		document.put("nickname", this.nickname);
 		document.put("id", this.id);
 		document.put("password", this.password);
 		document.put("lastIp", this.lastIp);
 		document.put("lastDate", this.lastDate);
 		document.put("logined", this.logined);
-		document.put("banned", this.logined);
+		document.put("banned", this.banned);
 		document.put("banCause", this.banCause);
 		document.put("accountType", this.accountType);
 		document.put("lastBanReleaseCause", this.lastBanReleaseCause);
@@ -173,11 +181,14 @@ public class Account {
 	 * @return
 	 */
 	public boolean isBanned() {
-		if (this.banned == null)
+		if (this.banned == null || this.banned == "null")
 			return false;
 
-		long nowTimestamp = Calendar.getInstance().getTime().getTime();
-		long releaseTimestamp = Long.getLong(this.banned);
+		Long nowTimestamp = Calendar.getInstance().getTime().getTime();
+		Long releaseTimestamp = Long.getLong(this.banned);
+
+		if (releaseTimestamp == null)
+			return false;
 
 		// 타임스탬프는 1970년 이후부터의 밀리초, 고로 큰게 더 미래입니다.
 		if (releaseTimestamp > nowTimestamp)
@@ -195,8 +206,8 @@ public class Account {
 		if (this.lastUploaded == 0)
 			return true;
 
-		long nowTimestamp = Calendar.getInstance().getTime().getTime();
-		long diff = TimeUnit.MILLISECONDS.toMinutes(nowTimestamp - this.lastUploaded);
+		Long nowTimestamp = Calendar.getInstance().getTime().getTime();
+		Long diff = TimeUnit.MILLISECONDS.toMinutes(nowTimestamp - this.lastUploaded);
 
 		if (diff < 5) // 5분이 지나지 않았다면 업로드 필요없음
 			return false;
@@ -292,7 +303,7 @@ public class Account {
 	 * @return String
 	 */
 	public String getUnblockPeriod() {
-		if (this.banned == null)
+		if (this.banned == null || this.banned == "null")
 			return null;
 		return (new Timestamp(Long.valueOf(this.banned))).toString();
 	}
@@ -304,7 +315,7 @@ public class Account {
 	 * @return String
 	 */
 	public String getLastDate() {
-		if (this.banned == null)
+		if (this.banned == null || this.banned == "null")
 			return null;
 		return (new Timestamp(Long.valueOf(this.lastDate))).toString();
 	}
@@ -339,6 +350,11 @@ public class Account {
 		return type;
 	}
 
+	/**
+	 * 해당 플레이어에게 계정유형에 맞는 권한을 적용합니다.
+	 * 
+	 * @param player
+	 */
 	public void applyAccountType(Player player) {
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
 
@@ -347,14 +363,14 @@ public class Account {
 			player.setOp(true);
 			player.setGamemode(Player.CREATIVE);
 			player.setAllowFlight(true);
-			// TODO 운영권한 인가됨 - 운영권한이 부여되었습니다.
+			player.sendMessage(plugin.getMessage("info-admin-account-permission-granted"));
 			break;
 		case Account.TYPE_BUILDER:
 			player.setOp(false);
 			player.setGamemode(Player.CREATIVE);
 			player.setAllowFlight(true);
 			player.addAttachment(plugin, "nukkit.command.gamemode", true);
-			// TODO 창조권한 인가됨 - 창조모드권한이 부여되었습니다.
+			player.sendMessage(plugin.getMessage("info-builder-account-permission-granted"));
 			break;
 		case Account.TYPE_DEFAULT:
 			player.setOp(false);
@@ -363,7 +379,7 @@ public class Account {
 		case Account.TYPE_GUEST:
 			player.setOp(false);
 			player.setGamemode(Player.VIEW);
-			// TODO 손님권한 인가됨 -
+			player.sendMessage(plugin.getMessage("info-guest-account-permission-granted"));
 			break;
 		case Account.TYPE_NORMAL:
 			player.setOp(false);
@@ -389,7 +405,7 @@ public class Account {
 			player.addAttachment(plugin, plugin.getMessage("commands-ban-ipaddress-permission"), true);
 			player.addAttachment(plugin, plugin.getMessage("commands-ban-subnet-permission"), true);
 			player.addAttachment(plugin, plugin.getMessage("commands-ban-release-permission"), true);
-			// TODO 관리권한 인가됨 - 관리권한이 부여되었습니다.
+			player.sendMessage(plugin.getMessage("info-op-account-permission-granted"));
 			break;
 		}
 	}

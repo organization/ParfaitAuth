@@ -2,6 +2,7 @@ package hmhmmhm.ParfaitAuth.Commands;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
@@ -38,7 +39,13 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			if (args[0].equals(this.getMessage(this.commandKey + "-sub-id"))) {
 
 				// 접속중인 유저중 해당 아이디가 있나 확인
-				Account findOnlineAccount = ParfaitAuth.authorisedID.get(args[1]);
+				Account findOnlineAccount = null;
+				for (Entry<UUID, Account> entry : ParfaitAuth.authorisedID.entrySet()) {
+					if (entry.getValue().id == args[1]) {
+						findOnlineAccount = entry.getValue();
+						break;
+					}
+				}
 				if (findOnlineAccount != null) {
 					Player target = this.getServer().getPlayer(findOnlineAccount.nickname);
 

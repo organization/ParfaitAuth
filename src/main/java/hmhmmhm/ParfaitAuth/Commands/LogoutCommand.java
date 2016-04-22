@@ -20,13 +20,13 @@ public class LogoutCommand extends ParfaitAuthCommand {
 				return true;
 			}
 
-			if (ParfaitAuth.authorisedID.get((Player) sender) == null) {
+			if (ParfaitAuth.authorisedID.get(((Player) sender).getUniqueId()) == null) {
 				sender.sendMessage(this.getMessage("error-please-login-first"));
 				return true;
 			}
 
-			Account accountData = ParfaitAuth.authorisedID.get((Player) sender);
-			((Player) sender).kick(this.getMessage("kick-successfully-logout"));
+			Account accountData = ParfaitAuth.authorisedID.get(((Player) sender).getUniqueId());
+			((Player) sender).kick(this.getMessage("kick-successfully-logout"), false);
 			ParfaitAuth.release(((Player) sender).getUniqueId(), accountData, true, true);
 			return true;
 		}

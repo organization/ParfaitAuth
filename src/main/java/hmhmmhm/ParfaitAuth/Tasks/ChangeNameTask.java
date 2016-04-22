@@ -58,6 +58,6 @@ public class ChangeNameTask extends AsyncTask {
 		account.setModified();
 		account.upload();
 
-		player.kick(plugin.getMessage("kick-successfully-account-name-changed"));
+		player.kick(plugin.getMessage("kick-successfully-account-name-changed"), false);
 	}
 }

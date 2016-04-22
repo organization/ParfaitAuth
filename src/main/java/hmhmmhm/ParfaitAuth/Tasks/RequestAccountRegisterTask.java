@@ -9,7 +9,7 @@ import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.Commands.RegisterCommand;
 
 public class RequestAccountRegisterTask extends AsyncTask {
-	private String id, pw, timestamp, userIp, nickname;
+	private String id, pw, timestamp, userIp, nickname, sender;
 	private UUID uuid, taskUUID, serverUUID;
 
 	private int resultState;
@@ -22,7 +22,7 @@ public class RequestAccountRegisterTask extends AsyncTask {
 	public static final int USER_DATA_NOT_EXIST = 5;
 
 	public RequestAccountRegisterTask(String id, String pw, UUID uuid, UUID taskUUID, String timestamp, String userIp,
-			UUID serverUUID, String nickname) {
+			UUID serverUUID, String nickname, String sender) {
 		this.id = id;
 		this.pw = pw;
 		this.uuid = uuid;
@@ -31,6 +31,7 @@ public class RequestAccountRegisterTask extends AsyncTask {
 		this.userIp = userIp;
 		this.serverUUID = serverUUID;
 		this.nickname = nickname;
+		this.sender = sender;
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class RequestAccountRegisterTask extends AsyncTask {
 
 		// 닉네임이 이미 존재하는 경우
 		if (nameAccountCheck != null) {
-			this.resultState = RequestAccountRegisterTask.ID_ACCOUNT_ALREADY_EXIST;
+			this.resultState = RequestAccountRegisterTask.NAME_ACCOUNT_ALREADY_EXIST;
 			return;
 		}
 
@@ -62,7 +63,6 @@ public class RequestAccountRegisterTask extends AsyncTask {
 			// 이미 아이디로 로그인한 상태일 경우
 			if (uuidAccountCheck.id != null)
 				this.resultState = RequestAccountRegisterTask.ID_ACCOUNT_ALREADY_EXIST;
-
 			// 가입 진행
 			Account newAccount = new Account();
 			newAccount.id = this.id;
@@ -93,9 +93,9 @@ public class RequestAccountRegisterTask extends AsyncTask {
 	@Override
 	public void onCompletion(Server server) {
 		if (this.resultState == RequestAccountRegisterTask.SUCCESS) {
-			RegisterCommand.registerCallback(this.nickname, this.taskUUID, this.result);
+			RegisterCommand.registerCallback(this.sender, this.taskUUID, this.result);
 		} else {
-			RegisterCommand.registerFailCallback(this.nickname, this.resultState);
+			RegisterCommand.registerFailCallback(this.sender, this.resultState);
 		}
 	}
 

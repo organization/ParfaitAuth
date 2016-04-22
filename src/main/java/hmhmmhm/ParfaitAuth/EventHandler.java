@@ -27,10 +27,12 @@ import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.scheduler.TaskHandler;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.BanAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask;
+import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedResponseTask;
 import hmhmmhm.ParfaitAuth.Tasks.DeleteBannedAddressTask;
 import hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask;
 
@@ -190,7 +192,8 @@ public class EventHandler implements Listener {
 			} else {
 				// 차단기간이 남았으면 차단
 				String releasePeriod = (new Timestamp(Long.valueOf(timestamp))).toString();
-				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod),
+						false);
 				return;
 			}
 		}
@@ -206,7 +209,8 @@ public class EventHandler implements Listener {
 			} else {
 				// 차단기간이 남았으면 차단
 				String releasePeriod = (new Timestamp(Long.valueOf(timestamp))).toString();
-				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod));
+				event.getPlayer().kick(this.getMessage("kick-address-is-banned").replace("%period", releasePeriod),
+						false);
 				return;
 			}
 		}
@@ -226,6 +230,15 @@ public class EventHandler implements Listener {
 			return;
 		}
 		lastLoginList.add(event.getPlayer());
+
+		// DB연결이 불안정해서 unauthorized_ 인채로 접속이 들어왔을경우
+		if (event.getPlayer().getName().split("unauthorized_").length != 0) {
+			event.getPlayer().sendMessage(plugin.getMessage("status-start-wait-db-response-about-login"));
+			CheckUnauthorizedResponseTask task = new CheckUnauthorizedResponseTask(event.getPlayer().getName(),
+					event.getPlayer().getUniqueId());
+			TaskHandler handler = this.getServer().getScheduler().scheduleDelayedRepeatingTask(task, 100, 100);
+			task.setHandler(handler);
+		}
 	}
 
 	@cn.nukkit.event.EventHandler
@@ -269,7 +282,7 @@ public class EventHandler implements Listener {
 			if (account != null) {
 				Player player = this.getServer().getPlayer(account.nickname);
 				if (player != null)
-					player.kick(plugin.getMessage("kick-account-force-connected"));
+					player.kick(plugin.getMessage("kick-account-force-connected"), false);
 			}
 			break;
 

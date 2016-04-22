@@ -21,6 +21,7 @@ import com.mongodb.util.JSON;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Event;
+import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.Events.ChangedNameEvent;
@@ -251,6 +252,9 @@ public class ParfaitAuth {
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
+
+		if (document.containsKey("_id"))
+			document.remove("_id");
 
 		UpdateResult result = collection.updateOne(new Document("uuid", uuid.toString()),
 				new Document("$set", document));
@@ -791,27 +795,31 @@ public class ParfaitAuth {
 		// loginedForce의 용도는 통상적으로는
 		// 인증서버의 오프라인 유무를 사전검사해서
 		// 이전 인증서버가 사망시 로그인 여부를 따지지 않기 위해 쓰입니다.
-
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
 
 		// 이전 인증서버가 살아있고 현재 접속중이며, 접속했던 서버가 이서버가 아닐때
-		if (!loginedForce && !(accountData.logined == ParfaitAuth.getParfaitAuthUUID().toString())) {
-			// accountData상 이미 로그인 중일 경우
-			// 이 경우에 이전 서버가 크래시되었다면 10초 안에 복구될 것이고,
-			// 단순히 자료전송이 늦는거면 5초 안에 복구됩니다.
+		if (accountData.logined != null) {
+			if (!loginedForce && !(accountData.logined.equals(ParfaitAuth.getParfaitAuthUUID().toString()))) {
+				// accountData상 이미 로그인 중일 경우
+				// 이 경우에 이전 서버가 크래시되었다면 10초 안에 복구될 것이고,
+				// 단순히 자료전송이 늦는거면 5초 안에 복구됩니다.
 
-			player.sendMessage(plugin.getMessage("error-that-account-already-used-by-db"));
-			player.sendMessage(plugin.getMessage("error-will-be-retry-in-3-seconds"));
+				player.sendMessage(plugin.getMessage("error-that-account-already-used-by-db"));
+				player.sendMessage(plugin.getMessage("error-will-be-retry-in-3-seconds"));
 
-			// 자동로그인 혹은 명령어 입력시 불편함을 덜하기 위해서
-			// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
-			Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(
-					new RetryAuthAlreadyLoginedAccountTask(player.getName(), accountData.id), 60, 60);
-			return false;
+				// 자동로그인 혹은 명령어 입력시 불편함을 덜하기 위해서
+				// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
+				RetryAuthAlreadyLoginedAccountTask task = new RetryAuthAlreadyLoginedAccountTask(player.getName(),
+						accountData.id);
+				TaskHandler handler = Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(task, 60, 60);
+				task.setHandler(handler);
+
+				return false;
+			}
 		}
 
 		// IP가 이전과 다른 경우 재로그인 유도
-		if (!ipForce && ((accountData.lastIp != null) && (player.getAddress() != accountData.lastIp))) {
+		if (!ipForce && !player.getAddress().equals(accountData.lastIp)) {
 			player.sendMessage(plugin.getMessage("caution-account-founded-but-your-new-ip"));
 			player.sendMessage(plugin.getMessage("caution-you-need-to-run-login-command"));
 			player.sendMessage(plugin.getMessage("caution-requesting-for-temp-uuid-account"));
@@ -825,7 +833,7 @@ public class ParfaitAuth {
 		// 차단된 계정이면 킥처리
 		if (accountData.isBanned()) {
 			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period",
-					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)));
+					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)), false);
 			return true;
 		}
 
@@ -876,14 +884,14 @@ public class ParfaitAuth {
 	 */
 	public static boolean authorizationUUID(Player player, Account accountData) {
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
-		
+
 		// 차단된 계정이면 킥처리
 		if (accountData.isBanned()) {
 			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period",
-					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)));
+					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)), false);
 			return true;
 		}
-		
+
 		// 비인가자/ID인가자 명단에서 제거합니다.
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);

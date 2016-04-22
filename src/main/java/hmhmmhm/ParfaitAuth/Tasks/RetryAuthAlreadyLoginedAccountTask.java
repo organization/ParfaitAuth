@@ -21,7 +21,7 @@ public class RetryAuthAlreadyLoginedAccountTask extends Task {
 
 		// 이미 반복시도중이므로 생성취소
 		if (playerList.get(username) != null) {
-			this.getHandler().cancel();
+			this.cancel();
 			return;
 		}
 
@@ -35,7 +35,7 @@ public class RetryAuthAlreadyLoginedAccountTask extends Task {
 		// 유저가 존재하지 않으면(나갔으면) 테스크 중단
 		if (player == null || !player.isConnected()) {
 			playerList.remove(username);
-			this.getHandler().cancel();
+			this.cancel();
 			return;
 		}
 

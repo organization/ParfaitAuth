@@ -59,7 +59,7 @@ public class BanAccountTask extends AsyncTask {
 			// 서버에서 킥처리
 			Player target = server.getPlayer(this.account.nickname);
 			if (target != null)
-				target.kick();
+				target.kick(plugin.getMessage("kick-account-has-banned"), false);
 
 			this.account.banMinute(this.period);
 			this.account.setBanCause(this.cause);
