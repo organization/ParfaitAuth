@@ -1,5 +1,10 @@
 package hmhmmhm.ParfaitAuth.Commands;
 
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
@@ -7,6 +12,8 @@ import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Events.UnregisterEvent;
 
 public class UnregisterCommand extends ParfaitAuthCommand {
+	public static LinkedHashMap<UUID, Long> userUUIDMap = new LinkedHashMap<UUID, Long>();
+
 	public UnregisterCommand(ParfaitAuthPlugin plugin) {
 		super(plugin);
 		this.load("unregister", false);
@@ -23,6 +30,31 @@ public class UnregisterCommand extends ParfaitAuthCommand {
 			if (ParfaitAuth.authorisedID.get((Player) sender) == null) {
 				sender.sendMessage(this.getMessage("error-please-login-first"));
 				return true;
+			}
+
+			// 처음입력하는 경우 주의문 띄우기
+			if (userUUIDMap.get(((Player) sender).getUniqueId()) == null) {
+				Long currentTimestamp = Calendar.getInstance().getTime().getTime();
+
+				userUUIDMap.put(((Player) sender).getUniqueId(), currentTimestamp);
+				sender.sendMessage(plugin.getMessage("caution-are-you-really-unregister"));
+				sender.sendMessage(plugin.getMessage("caution-if-you-want-unregister-hit-again"));
+				return true;
+			}
+
+			// 두번째로 입력하는 경우
+			if (userUUIDMap.get(((Player) sender).getUniqueId()) != null) {
+				Long pastTimestamp = userUUIDMap.get(((Player) sender).getUniqueId());
+				Long currentTimestamp = Calendar.getInstance().getTime().getTime();
+				Long diff = TimeUnit.MILLISECONDS.toSeconds(currentTimestamp - pastTimestamp);
+
+				// 이전보다 30초를 넘어서 입력되었다면 다시 주의문 띄우기
+				if (diff >= 30) {
+					userUUIDMap.put(((Player) sender).getUniqueId(), currentTimestamp);
+					sender.sendMessage(plugin.getMessage("caution-are-you-really-unregister"));
+					sender.sendMessage(plugin.getMessage("caution-if-you-want-unregister-hit-again"));
+					return true;
+				}
 			}
 
 			UnregisterEvent unregisterEvent = new UnregisterEvent((Player) sender);

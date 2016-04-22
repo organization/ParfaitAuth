@@ -55,6 +55,11 @@
 	"caution-you-need-to-run-login-command": "* /로그인 <아이디> <비밀번호> 를 진행하셔야합니다.",
 	"caution-requesting-for-temp-uuid-account": "* 인증전까지 사용될 임시 UUID 계정을 발급 요청중...",
 	"caution-account-was-unstable-logouted-rewrited-type-data": "* 계정이 이전에 이서버에서 비정상 접속종료됨, 정보를 덮어씁니다.",
+	"caution-are-you-really-unregister": "* 정말로 서버에서 해당 계정을 삭제하시겠습니까?",
+	"caution-if-you-want-unregister-hit-again": "* 삭제된 계정은 복구할 수 없으며 20초 내 다시 명령하면 적용됩니다!",
+	"caution-are-you-really-change-name": "* 정말로 서버내에서의 이름을 변경하겠습니까?",
+	"caution-check-your-name-ownership": "* 영역이나 개인소유가 남아있는지 확인하신후 진행해주세요.",
+	"caution-if-you-want-change-name-hit-again": "* 처리는 복구할 수 없으며 20초내 다시 명령시 적용됩니다!",
 
 	"success-id-account-was-created": "* ID계정생성에 성공했습니다! 자동으로 로그인 진행중..",
 	"success-uuid-account-was-created": "* UUID계정생성에 성공했습니다! 자동으로 로그인 진행중..",

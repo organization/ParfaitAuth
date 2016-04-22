@@ -23,6 +23,7 @@ import cn.nukkit.Server;
 import cn.nukkit.event.Event;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
+import hmhmmhm.ParfaitAuth.Events.ChangedNameEvent;
 import hmhmmhm.ParfaitAuth.Events.LoginEvent;
 import hmhmmhm.ParfaitAuth.Events.LogoutEvent;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
@@ -1110,10 +1111,14 @@ public class ParfaitAuth {
 	}
 
 	public static boolean changePlayerName(Player player, String toName) {
+		String oldName = player.getName();
+
 		setProtectedValue(player, "username", TextFormat.clean(toName));
 		setProtectedValue(player, "displayName", toName);
 		player.setNameTag(toName);
 		setProtectedValue(player, "iusername", toName.toLowerCase());
+
+		Server.getInstance().getPluginManager().callEvent(new ChangedNameEvent(player, oldName, toName));
 		return true;
 	}
 
