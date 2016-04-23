@@ -139,7 +139,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 						false);
 			}
 		}
-
+		
 		ParfaitAuth.bannedAddress.put(address, period);
 	}
 

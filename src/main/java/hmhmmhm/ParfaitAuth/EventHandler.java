@@ -214,7 +214,7 @@ public class EventHandler implements Listener {
 				return;
 			}
 		}
-
+		
 		ParfaitAuth.unauthorizedAccess(event.getPlayer());
 	}
 
@@ -239,6 +239,7 @@ public class EventHandler implements Listener {
 			TaskHandler handler = this.getServer().getScheduler().scheduleDelayedRepeatingTask(task, 100, 100);
 			task.setHandler(handler);
 		}
+
 	}
 
 	@cn.nukkit.event.EventHandler

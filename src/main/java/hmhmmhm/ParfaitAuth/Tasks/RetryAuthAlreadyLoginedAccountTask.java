@@ -46,6 +46,7 @@ public class RetryAuthAlreadyLoginedAccountTask extends Task {
 			player.sendMessage(plugin.getMessage("error-cant-use-that-account"));
 			player.sendMessage(plugin.getMessage("error-taht-account-might-be-already-used"));
 			player.sendMessage(plugin.getMessage("error-if-auth-server-has-problem-will-be-fixed"));
+			return;
 		}
 
 		ParfaitAuth.preAuthorizationID(player, this.id, null, true);

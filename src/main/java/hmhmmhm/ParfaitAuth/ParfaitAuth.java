@@ -28,13 +28,14 @@ import hmhmmhm.ParfaitAuth.Events.ChangedNameEvent;
 import hmhmmhm.ParfaitAuth.Events.LoginEvent;
 import hmhmmhm.ParfaitAuth.Events.LogoutEvent;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
+import hmhmmhm.ParfaitAuth.Events.TemporaryUUIDAccountDeletedEvent;
 import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
 import hmhmmhm.ParfaitAuth.Tasks.CreateNewUUIDAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.DeleteAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.RetryAuthAlreadyLoginedAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateAccountTask;
-
+import hmhmmhm.ParfaitAuth.Tasks.UpdateAccount_IdAsync;
 import mongodblib.MongoDBLib;
 import static java.util.Arrays.asList;
 
@@ -107,6 +108,9 @@ public class ParfaitAuth {
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
+		if (uuid == null)
+			return null;
+
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
 				.find(new Document("uuid", uuid.toString())).into(new ArrayList<Document>());
@@ -157,6 +161,30 @@ public class ParfaitAuth {
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName).find(new Document("id", id))
+				.into(new ArrayList<Document>());
+
+		// 닉네임은 겹치지 않게 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
+		Document accountDocument = (documents.size() == 0) ? null : documents.get(0);
+
+		if (accountDocument == null)
+			return null;
+
+		return new Account(accountDocument);
+	}
+
+	/**
+	 * 유저의 DB아이를 검색해서 유저 계정자료를 얻어옵니다.
+	 * 
+	 * @param nickname
+	 * @return Account | null
+	 */
+	public static Account getAccountBy_Id(Object _id) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName).find(new Document("_id", _id))
 				.into(new ArrayList<Document>());
 
 		// 닉네임은 겹치지 않게 반복문 돌지않고 즉시 첫째값만 꺼냅니다.
@@ -222,6 +250,58 @@ public class ParfaitAuth {
 		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
 
 		collection.deleteOne(new Document("uuid", uuid.toString()));
+		return ParfaitAuth.SUCCESS;
+	}
+
+	/**
+	 * 계정을 삭제합니다. 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
+	 * <br>
+	 * 클라이언트가 오프라인상태일때 ParfaitAuth.CLIENT_IS_DEAD<br>
+	 * 이미 가입된 계정이 없을때 ParfaitAuth.NOT_EXIST_ACCOUNT<br>
+	 * 자료를 성공적으로 삭제했으면 ParfaitAuth.SUCCESS 이 반환됩니다.
+	 * 
+	 * @param uuid
+	 * @return integer
+	 */
+	public static int deleteAccountById(String id) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
+		// 계정자료가 이미 존재하지 않으면 계정삭제하지 않고 반환처리
+		if (ParfaitAuth.getAccountById(id) == null)
+			return ParfaitAuth.NOT_EXIST_ACCOUNT;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
+
+		collection.deleteOne(new Document("id", id));
+		return ParfaitAuth.SUCCESS;
+	}
+
+	/**
+	 * 계정을 삭제합니다. 결과메시지가 반환되니 예외처리 하셔야합니다.<br>
+	 * <br>
+	 * 클라이언트가 오프라인상태일때 ParfaitAuth.CLIENT_IS_DEAD<br>
+	 * 이미 가입된 계정이 없을때 ParfaitAuth.NOT_EXIST_ACCOUNT<br>
+	 * 자료를 성공적으로 삭제했으면 ParfaitAuth.SUCCESS 이 반환됩니다.
+	 * 
+	 * @param uuid
+	 * @return integer
+	 */
+	public static int deleteAccountBy_Id(Object _id) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
+		// 계정자료가 이미 존재하지 않으면 계정삭제하지 않고 반환처리
+		if (ParfaitAuth.getAccountBy_Id(_id) == null)
+			return ParfaitAuth.NOT_EXIST_ACCOUNT;
+
+		MongoDatabase db = MongoDBLib.getDatabase();
+		MongoCollection<Document> collection = db.getCollection(ParfaitAuth.accountCollectionName);
+
+		collection.deleteOne(new Document("_id", _id));
 		return ParfaitAuth.SUCCESS;
 	}
 
@@ -293,6 +373,17 @@ public class ParfaitAuth {
 	 */
 	public static void updateAccountAsync(UUID uuid, Document document) {
 		Server.getInstance().getScheduler().scheduleAsyncTask(new UpdateAccountTask(uuid, document));
+	}
+
+	/**
+	 * 계정정보를 비동기로 DB에 갱신합니다.<br>
+	 * 연결상태가 양호할때만 쓰는게 좋습니다.
+	 * 
+	 * @param _id
+	 * @param document
+	 */
+	public static void updateAccount_IdAsync(Object _id, Document document) {
+		Server.getInstance().getScheduler().scheduleAsyncTask(new UpdateAccount_IdAsync(_id, document));
 	}
 
 	/**
@@ -733,6 +824,9 @@ public class ParfaitAuth {
 		if (player == null || !player.isConnected())
 			return;
 
+		if (player.getUniqueId() == null || player.getName() == null)
+			return;
+
 		player.sendMessage(ParfaitAuthPlugin.getPlugin().getMessage("status-start-get-account-data"));
 		// 비인가자 명단에 추가합니다.
 		ParfaitAuth.unauthorised.put(player.getUniqueId(), player);
@@ -826,7 +920,8 @@ public class ParfaitAuth {
 
 			// 이전계정의 UUID 정보말소
 			accountData.uuid = null;
-			Server.getInstance().getScheduler().scheduleAsyncTask(new CreateNewUUIDAccountTask(accountData));
+			Server.getInstance().getScheduler().scheduleAsyncTask(
+					new CreateNewUUIDAccountTask(accountData, player.getUniqueId(), player.getName()));
 			return false;
 		}
 
@@ -852,8 +947,19 @@ public class ParfaitAuth {
 		// ID계정으로 로그인 처리합니다.
 		accountData.login(player);
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
-		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
 		ParfaitAuth.authorisedID.put(player.getUniqueId(), accountData);
+
+		// 임시발급된 UUID계정이 남아있으면 해당계정 삭제요청
+		if (accountData._id != null) {
+			if (ParfaitAuth.authorisedUUID.get(player.getUniqueId()) != null) {
+				Account oldAccount = ParfaitAuth.authorisedUUID.get(player.getUniqueId());
+				Server.getInstance().getPluginManager()
+						.callEvent(new TemporaryUUIDAccountDeletedEvent(oldAccount, accountData));
+				ParfaitAuth.deleteAccountBy_Id(oldAccount._id);
+			}
+		}
+
+		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
 
 		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);

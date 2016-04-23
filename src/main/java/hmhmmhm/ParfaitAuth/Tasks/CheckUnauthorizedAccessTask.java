@@ -9,8 +9,8 @@ import hmhmmhm.ParfaitAuth.Account;
 import hmhmmhm.ParfaitAuth.ParfaitAuth;
 
 public class CheckUnauthorizedAccessTask extends AsyncTask {
-	private UUID uuid;
-	private String username;
+	private UUID uuid = null;
+	private String username = null;
 	private Account account = null;
 
 	public CheckUnauthorizedAccessTask(UUID uuid, String username) {
@@ -29,11 +29,16 @@ public class CheckUnauthorizedAccessTask extends AsyncTask {
 		this.account = account;
 	}
 
+	@Override
 	public void onCompletion(Server server) {
 		Player player = server.getPlayer(this.username);
 
 		// 계정정보가 존재하지 않으면 UUID계정 생성
 		if (this.account == null) {
+
+			if(this.uuid == null || this.username == null)
+				return;
+
 			server.getScheduler().scheduleAsyncTask(new CreateNewUUIDAccountTask(this.uuid, this.username));
 			return;
 		}
@@ -49,6 +54,7 @@ public class CheckUnauthorizedAccessTask extends AsyncTask {
 		}
 
 		// ID가 포함된 정보일 경우 authorizationID를 돌리고,
-		ParfaitAuth.authorizationID(player, this.account, false, false);
+		if (this.account.id != null) 
+			ParfaitAuth.authorizationID(player, this.account, false, false);
 	}
 }

@@ -76,12 +76,12 @@
 	"success-ban-released": "* 해당 차단이 정상적으로 해지되었습니다.",
 	"success-password-was-changed": "* 비밀번호를 정상적으로 변경했습니다.",
 
-	"info-you-can-use-auth-command": "(/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
-	"info-you-can-use-logout-command": "(/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
+	"info-you-can-use-auth-command": "* (/인증 입력을 통해 계정인증 명령어 설명을 확인가능합니다.)",
+	"info-you-can-use-logout-command": "* (/로그아웃 입력을 통해 자동로그인 해제가 가능합니다.)",
 	"info-identifier-founded": "* 식별번호 생성됨 : [%1]",
 	"info-admin-account-permission-granted": "* 운영권한 인가됨 - 운영권한이 부여되었습니다.",
-	"info-builder-account-permission-granted": "창조권한 인가됨 - 창조모드권한이 부여되었습니다.",
-	"info-guest-account-permission-granted": "손님권한 인가됨 - 관람모드권한이 부여되었습니다.",
+	"info-builder-account-permission-granted": "* 창조권한 인가됨 - 창조모드권한이 부여되었습니다.",
+	"info-guest-account-permission-granted": "* 손님권한 인가됨 - 관람모드권한이 부여되었습니다.",
 	"info-op-account-permission-granted": "* 관리권한 인가됨 - 관리권한이 부여되었습니다.",
 
 	"kick-successfully-logout": "로그아웃처리되었습니다.",
@@ -137,7 +137,7 @@
 	"commands-logout-permission": "parfaitauth.commands.logout",
 	"commands-logout-description": "해당IP에서 아이디계정을 로그아웃합니다.",
 	"commands-logout-usage": "/로그아웃 아이디 암호",
-	
+
 	"commands-register": "가입",
 	"commands-register-permission": "parfaitauth.commands.register",
 	"commands-register-description": "아이디계정을 생성합니다.",
@@ -168,6 +168,9 @@
 	"commands-changenick-permission": "parfaitauth.commands.changenick",
 	"commands-changenick-description": "아이디계정의 닉네임을 변경합니다.",
 	"commands-changenick-usage": "/닉네임변경 새닉네임",
+
+	"commands-changenick-help-1": "* /닉네임변경 새닉네임",
+	"commands-changenick-help-2": "* 계정의 닉네임을 해당 닉네임으로 변경합니다.",
 
 	"commands-howtoban": "밴처리",
 	"commands-howtoban-permission": "parfaitauth.commands.howtoban",

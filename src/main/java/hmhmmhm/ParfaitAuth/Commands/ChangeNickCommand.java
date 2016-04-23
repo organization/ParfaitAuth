@@ -26,7 +26,7 @@ public class ChangeNickCommand extends ParfaitAuthCommand {
 		if (command.getName().toLowerCase() == this.commandName) {
 			if (args.length == 0) {
 				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
-				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 20);
 				task.setHandler(handler);
 				return true;
 			}

@@ -293,7 +293,13 @@ public class Account {
 
 		this.lastUploaded = Calendar.getInstance().getTime().getTime();
 		this.setModified(false);
-		ParfaitAuth.updateAccountAsync(this.uuid, this.convertToDocument());
+		
+		//TODO ID 정보가 존재하면 ID로 하고, 없을때만 UUID로
+		if(this._id == null){
+			ParfaitAuth.updateAccountAsync(this.uuid, this.convertToDocument());
+		}else{
+			ParfaitAuth.updateAccount_IdAsync(this._id, this.convertToDocument());
+		}
 	}
 
 	/**

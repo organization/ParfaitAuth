@@ -1,5 +1,7 @@
 package hmhmmhm.ParfaitAuth.Tasks;
 
+import java.util.UUID;
+
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.scheduler.AsyncTask;
@@ -41,12 +43,12 @@ public class ChangeNameTask extends AsyncTask {
 			return;
 
 		// 닉네임이 이미 사용중이면 반환합니다.
-		if (!!this.isCanBeUsed) {
+		if (!this.isCanBeUsed) {
 			player.sendMessage(plugin.getMessage("error-failed-change-name-that-name-already-exist"));
 			return;
 		}
 
-		Account account = ParfaitAuth.authorisedID.get(this.uuid);
+		Account account = ParfaitAuth.authorisedID.get(UUID.fromString(this.uuid));
 
 		// 현재 ID계정으로 접속중이 아니라면 반환합니다.
 		if (account == null) {

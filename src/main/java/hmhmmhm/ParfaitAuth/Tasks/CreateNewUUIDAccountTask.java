@@ -10,8 +10,8 @@ import hmhmmhm.ParfaitAuth.ParfaitAuth;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
 public class CreateNewUUIDAccountTask extends AsyncTask {
-	private UUID uuid;
-	private String username;
+	private UUID uuid = null;
+	private String username = null;
 	private Account account = null;
 	private Account oldAccountData = null;
 	private int result;
@@ -21,8 +21,10 @@ public class CreateNewUUIDAccountTask extends AsyncTask {
 		this.username = username;
 	}
 
-	public CreateNewUUIDAccountTask(Account oldAccountData) {
+	public CreateNewUUIDAccountTask(Account oldAccountData, UUID uuid, String username) {
 		this.oldAccountData = oldAccountData;
+		this.uuid = uuid;
+		this.username = username;
 	}
 
 	@Override
@@ -34,6 +36,7 @@ public class CreateNewUUIDAccountTask extends AsyncTask {
 		this.account = ParfaitAuth.getAccount(this.uuid);
 	}
 
+	@Override
 	public void onCompletion(Server server) {
 		Player player = server.getPlayer(this.username);
 
