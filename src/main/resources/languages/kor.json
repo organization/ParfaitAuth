@@ -143,10 +143,10 @@
 	"commands-register-description": "아이디계정을 생성합니다.",
 	"commands-register-usage": "/가입 아이디 암호",
 
-	"commands-register-help-1": "* /가입 계정명 암호 닉네임",
+	"commands-register-help-1": "* /가입 아이디 암호 닉네임",
 	"commands-register-help-2": "* 아이디는 영어와 숫자 _로 가능하며, 3~15자리여야합니다.",
 	"commands-register-help-3": "* 닉네임엔 일부문자 * @ # 만 사용불가능하며 2~10여야합니다.",
-	"commands-register-help-4": "* 이미 가입된 계정명일 경우 가입이 거부될 수 있습니다.",
+	"commands-register-help-4": "* 이미 가입된 아이디일 경우 가입이 거부될 수 있습니다.",
 	"commands-register-help-5": "* 비밀번호는 6~40자까지 사용가능합니다.",
 
 	"commands-unregister": "탈퇴",
@@ -212,7 +212,7 @@
 	"commands-account-info-usage": "/a <필터> <검색어>",
 
 	"commands-account-info-show-start": "* 계정 정보를 표시합니다.",
-	"commands-account-info-idnick": "* 계정명: %nick ID: %id",
+	"commands-account-info-idnick": "* 아이디: %nick ID: %id",
 	"commands-account-info-lastdate": "* 최근접속일: %lastdate",
 	"commands-account-info-lastip": "* 접근IP: %lastip",
 	"commands-account-info-account-type": "* 계정유형: %type",

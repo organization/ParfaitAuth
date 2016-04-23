@@ -85,6 +85,29 @@ public class ParfaitAuthPlugin extends PluginBase {
 
 		// 서버상태 문서에 적힐 외부 아이피를 확인
 		this.getExternalAddress();
+
+		// 계정정보를 주기적으로 DB에 업로드 합니다.
+		this.accountDataUploader();
+	}
+
+	private void accountDataUploader() {
+		this.getServer().getScheduler().scheduleDelayedRepeatingTask(new Task() {
+			@Override
+			public void onRun(int currentTick) {
+				for (Player player : Server.getInstance().getOnlinePlayers().values()) {
+					if (ParfaitAuth.authorisedID.get(player.getUniqueId()) != null) {
+						Account account = ParfaitAuth.authorisedID.get(player.getUniqueId());
+						if (account.isNeedUpload())
+							account.upload();
+					}
+					if (ParfaitAuth.authorisedUUID.get(player.getUniqueId()) != null) {
+						Account account = ParfaitAuth.authorisedUUID.get(player.getUniqueId());
+						if (account.isNeedUpload())
+							account.upload();
+					}
+				}
+			}
+		}, 1200, 1200);
 	}
 
 	/**
@@ -139,7 +162,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 						false);
 			}
 		}
-		
+
 		ParfaitAuth.bannedAddress.put(address, period);
 	}
 

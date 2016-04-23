@@ -209,7 +209,7 @@ public class Account {
 		Long nowTimestamp = Calendar.getInstance().getTime().getTime();
 		Long diff = TimeUnit.MILLISECONDS.toMinutes(nowTimestamp - this.lastUploaded);
 
-		if (diff < 5) // 5분이 지나지 않았다면 업로드 필요없음
+		if (diff < 3) // 3분이 지나지 않았다면 업로드 필요없음
 			return false;
 
 		return true;
@@ -294,7 +294,7 @@ public class Account {
 		this.lastUploaded = Calendar.getInstance().getTime().getTime();
 		this.setModified(false);
 		
-		//TODO ID 정보가 존재하면 ID로 하고, 없을때만 UUID로
+		// ID 정보가 존재하면 ID로 하고, 없을때만 UUID로
 		if(this._id == null){
 			ParfaitAuth.updateAccountAsync(this.uuid, this.convertToDocument());
 		}else{

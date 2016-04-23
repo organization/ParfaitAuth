@@ -19,15 +19,19 @@ import cn.nukkit.event.player.PlayerCommandPreprocessEvent;
 import cn.nukkit.event.player.PlayerDropItemEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerItemConsumeEvent;
+import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerLoginEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.event.server.DataPacketReceiveEvent;
+import cn.nukkit.event.server.DataPacketSendEvent;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.LoginPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.network.protocol.TextPacket;
 import cn.nukkit.scheduler.TaskHandler;
+import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.BanAccountTask;
@@ -35,6 +39,7 @@ import hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedResponseTask;
 import hmhmmhm.ParfaitAuth.Tasks.DeleteBannedAddressTask;
 import hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask;
+import hmhmmhm.ParfaitAuth.Tasks.SendMessageTask;
 
 public class EventHandler implements Listener {
 	private ParfaitAuthPlugin plugin;
@@ -63,6 +68,26 @@ public class EventHandler implements Listener {
 			if (packet instanceof LoginPacket)
 				((LoginPacket) packet).username = "unauthorized_" + ParfaitAuth.unauthorizedUserCount++;
 			break;
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onDataPacketSendEvent(DataPacketSendEvent event) {
+		if (event.isCancelled())
+			return;
+
+		DataPacket packet = event.getPacket();
+
+		if (packet instanceof TextPacket) {
+			// 유저가 인증체계 설명을 듣고있다면
+			if (SendMessageTask.userUUIDMap.get(event.getPlayer().getName()) != null) {
+				// 인증체계 메시지 이외에 다른 채팅 전송하지 않게함
+				if (TextFormat.clean(((TextPacket) packet).message).charAt(0) != '*') {
+					event.setCancelled();
+					return;
+				}
+			}
+			return;
 		}
 	}
 
@@ -214,7 +239,7 @@ public class EventHandler implements Listener {
 				return;
 			}
 		}
-		
+
 		ParfaitAuth.unauthorizedAccess(event.getPlayer());
 	}
 
@@ -251,6 +276,33 @@ public class EventHandler implements Listener {
 			return;
 		}
 		lastLogoutList.add(event.getPlayer());
+
+		// 인가된 ID계정이 있으면 업로드
+		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
+			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
+			account.upload();
+		}
+
+		// 인가된 ID계정이 있으면 업로드
+		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
+			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
+			account.upload();
+		}
+	}
+
+	@cn.nukkit.event.EventHandler
+	public void onPlayerKickEvent(PlayerKickEvent event) {
+		// 인가된 ID계정이 있으면 업로드
+		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
+			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
+			account.upload();
+		}
+
+		// 인가된 ID계정이 있으면 업로드
+		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
+			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
+			account.upload();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
