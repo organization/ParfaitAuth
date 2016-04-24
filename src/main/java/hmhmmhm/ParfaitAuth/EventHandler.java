@@ -280,12 +280,14 @@ public class EventHandler implements Listener {
 		// 인가된 ID계정이 있으면 업로드
 		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
+			account.updateNBT(event.getPlayer());
 			account.upload();
 		}
 
 		// 인가된 ID계정이 있으면 업로드
 		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
+			account.updateNBT(event.getPlayer());
 			account.upload();
 		}
 	}
@@ -295,12 +297,14 @@ public class EventHandler implements Listener {
 		// 인가된 ID계정이 있으면 업로드
 		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
+			account.updateNBT(event.getPlayer());
 			account.upload();
 		}
 
 		// 인가된 ID계정이 있으면 업로드
 		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
+			account.updateNBT(event.getPlayer());
 			account.upload();
 		}
 	}

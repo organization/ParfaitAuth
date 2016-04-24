@@ -97,11 +97,13 @@ public class ParfaitAuthPlugin extends PluginBase {
 				for (Player player : Server.getInstance().getOnlinePlayers().values()) {
 					if (ParfaitAuth.authorisedID.get(player.getUniqueId()) != null) {
 						Account account = ParfaitAuth.authorisedID.get(player.getUniqueId());
+						account.updateNBT(player);
 						if (account.isNeedUpload())
 							account.upload();
 					}
 					if (ParfaitAuth.authorisedUUID.get(player.getUniqueId()) != null) {
 						Account account = ParfaitAuth.authorisedUUID.get(player.getUniqueId());
+						account.updateNBT(player);
 						if (account.isNeedUpload())
 							account.upload();
 					}

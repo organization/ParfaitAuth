@@ -1,16 +1,32 @@
 package hmhmmhm.ParfaitAuth;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.nio.ByteOrder;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPInputStream;
 
 import org.bson.Document;
+import org.bson.types.Binary;
 
 import cn.nukkit.Player;
+import cn.nukkit.PlayerFood;
 import cn.nukkit.Server;
+import cn.nukkit.inventory.PlayerInventory;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
+import cn.nukkit.nbt.NBTIO;
+import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.nbt.tag.DoubleTag;
+import cn.nukkit.nbt.tag.ListTag;
+import cn.nukkit.nbt.tag.ShortTag;
+import cn.nukkit.potion.Effect;
 
 public class Account {
 	/* 계정 필수 정보들을 별도로 변수로 보관합니다. */
@@ -62,6 +78,11 @@ public class Account {
 	 */
 	public boolean isModified = false;
 
+	/**
+	 * 유저의 NBT정보가 여기에 담깁니다.
+	 */
+	public CompoundTag nbt = null;
+
 	/* 계정 Document 에 남은 추가적인 정보들을 보관합니다. */
 	private LinkedHashMap<String, Object> additionalData = new LinkedHashMap<String, Object>();
 
@@ -88,6 +109,20 @@ public class Account {
 		this.accountType = (int) document.get("accountType");
 		this.lastBanReleaseCause = (String) document.get("lastBanReleaseCause");
 
+		Binary bin = (Binary) document.get("nbt");
+		byte[] data = null;
+		if (bin != null)
+			data = bin.getData();
+		if (data != null) {
+			try {
+				this.nbt = NBTIO.read(new BufferedInputStream(new GZIPInputStream(new ByteArrayInputStream(data))),
+						ByteOrder.BIG_ENDIAN);
+			} catch (IOException e) {
+				e.printStackTrace();
+				this.nbt = null;
+			}
+		}
+
 		for (Entry<String, Object> entry : document.entrySet()) {
 			String key = entry.getKey();
 			Object value = entry.getValue();
@@ -104,6 +139,7 @@ public class Account {
 			case "banCause":
 			case "accountType":
 			case "lastBanReleaseCause":
+			case "nbt":
 				continue;
 			}
 			additionalData.put(key, value);
@@ -137,6 +173,22 @@ public class Account {
 		document.put("banCause", this.banCause);
 		document.put("accountType", this.accountType);
 		document.put("lastBanReleaseCause", this.lastBanReleaseCause);
+
+		byte[] data = null;
+		if (this.nbt != null) {
+			try {
+				// 아래코드는 좋긴한데 안전성이 아직 확인안됨
+				// 스킨정보를 DB에 보관하지 않음
+				// CompoundTag nbt = this.nbt.copy();
+				// nbt.remove("Skin");
+				data = NBTIO.writeGZIPCompressed(this.nbt, ByteOrder.BIG_ENDIAN);
+			} catch (IOException e) {
+				e.printStackTrace();
+				data = null;
+			}
+		}
+
+		document.put("nbt", data);
 
 		for (Entry<String, Object> entry : this.additionalData.entrySet()) {
 			String key = entry.getKey();
@@ -288,16 +340,27 @@ public class Account {
 	 * 서버는 주기적으로 유저의 정보를 비동기전송해야합니다.
 	 */
 	public void upload() {
-		if (this.uuid == null || this.isModified == false)
+		this.upload(false);
+	}
+
+	/**
+	 * DB에 비동기로 이 계정정보를 전송합니다.<br>
+	 * 만일의 사태를 방지하기 위해서(서버크래시)<br>
+	 * 서버는 주기적으로 유저의 정보를 비동기전송해야합니다.
+	 * 
+	 * @param force
+	 */
+	public void upload(boolean force) {
+		if (!force && (this.uuid == null || this.isModified == false))
 			return;
 
 		this.lastUploaded = Calendar.getInstance().getTime().getTime();
 		this.setModified(false);
-		
+
 		// ID 정보가 존재하면 ID로 하고, 없을때만 UUID로
-		if(this._id == null){
+		if (this._id == null) {
 			ParfaitAuth.updateAccountAsync(this.uuid, this.convertToDocument());
-		}else{
+		} else {
 			ParfaitAuth.updateAccount_IdAsync(this._id, this.convertToDocument());
 		}
 	}
@@ -414,6 +477,135 @@ public class Account {
 			player.sendMessage(plugin.getMessage("info-op-account-permission-granted"));
 			break;
 		}
+	}
+
+	public void applyNBT(Player player) {
+		if (this.nbt == null)
+			return;
+
+		Server server = Server.getInstance();
+
+		// NBT APPLY
+		player.namedTag = this.nbt;
+
+		// NBT PLAYER INVENTORY APPLY
+		PlayerInventory inventory = new PlayerInventory(player);
+		if (this.nbt.contains("Inventory") && this.nbt.get("Inventory") instanceof ListTag) {
+			ListTag<CompoundTag> inventoryList = this.nbt.getList("Inventory", CompoundTag.class);
+			for (CompoundTag item : inventoryList.getAll()) {
+				int slot = item.getByte("Slot");
+				if (slot >= 0 && slot < 9) {
+					inventory.setHotbarSlotIndex(slot, item.contains("TrueSlot") ? item.getByte("TrueSlot") : -1);
+				} else if (slot >= 100 && slot < 104) {
+					inventory.setItem(inventory.getSize() + slot - 100, NBTIO.getItemHelper(item));
+				} else {
+					inventory.setItem(slot - 9, NBTIO.getItemHelper(item));
+				}
+			}
+		}
+		ParfaitAuth.setProtectedValue(player, "inventory", inventory);
+		player.addWindow(inventory, 0);
+
+		// NBT HEALTH APPLY
+		if (player.namedTag.contains("HealF")) {
+			player.namedTag.putShort("Health", player.namedTag.getShort("HealF"));
+			player.namedTag.remove("HealF");
+		}
+
+		if (!player.namedTag.contains("Health") || !(player.namedTag.get("Health") instanceof ShortTag)) {
+			player.namedTag.putShort("Health", player.getMaxHealth());
+		}
+		player.setHealth(player.namedTag.getShort("Health"));
+
+		// NBT EXPERIENCE APPLY
+		int exp = this.nbt.getInt("EXP");
+		int expLevel = this.nbt.getInt("expLevel");
+		player.setExperience(exp, expLevel);
+
+		// NBT ENTITY DATA APPLY
+		if (player.namedTag.contains("ActiveEffects")) {
+			ListTag<CompoundTag> effects = player.namedTag.getList("ActiveEffects", CompoundTag.class);
+			for (CompoundTag e : effects.getAll()) {
+				Effect effect = Effect.getEffect(e.getByte("Id"));
+				if (effect == null) {
+					continue;
+				}
+
+				effect.setAmplifier(e.getByte("Amplifier")).setDuration(e.getInt("Duration"))
+						.setVisible(e.getBoolean("showParticles"));
+
+				player.addEffect(effect);
+			}
+		}
+		if (player.namedTag.contains("CustomName")) {
+			player.setNameTag(player.namedTag.getString("CustomName"));
+			if (player.namedTag.contains("CustomNameVisible")) {
+				player.setNameTagVisible(player.namedTag.getBoolean("CustomNameVisible"));
+			}
+		}
+
+		// NBT LEVEL APPLY
+		Level level;
+		if ((level = server.getLevelByName(nbt.getString("Level"))) == null) {
+			player.setLevel(server.getDefaultLevel());
+			nbt.putString("Level", player.getLevel().getName());
+			nbt.getList("Pos", DoubleTag.class).add(new DoubleTag("0", player.getLevel().getSpawnLocation().x))
+					.add(new DoubleTag("1", player.getLevel().getSpawnLocation().y))
+					.add(new DoubleTag("2", player.getLevel().getSpawnLocation().z));
+			player.teleport(server.getDefaultLevel().getSafeSpawn());
+		} else {
+			player.setLevel(level);
+			// 현재 nbt에 찍힌 위치로 워프
+			Double x = nbt.getList("Pos", DoubleTag.class).get(0).getData();
+			Double y = nbt.getList("Pos", DoubleTag.class).get(1).getData();
+			Double z = nbt.getList("Pos", DoubleTag.class).get(2).getData();
+			player.teleport(new Position(x, y, z, level));
+		}
+
+		// NBT FOOD LEVEL APPLY
+		if (!player.namedTag.contains("foodLevel"))
+			player.namedTag.putInt("foodLevel", 20);
+		int foodLevel = player.namedTag.getInt("foodLevel");
+		if (!player.namedTag.contains("FoodSaturationLevel"))
+			player.namedTag.putFloat("FoodSaturationLevel", 20);
+		float foodSaturationLevel = player.namedTag.getFloat("foodSaturationLevel");
+		ParfaitAuth.setProtectedValue(player, "foodData", new PlayerFood(player, foodLevel, foodSaturationLevel));
+
+		// NBT HELD ITEM APPLY
+		if (player.isCreative()) {
+			player.getInventory().setHeldItemSlot(0);
+		} else {
+			player.getInventory().setHeldItemSlot(player.getInventory().getHotbarSlotIndex(0));
+		}
+
+		// Nukkit namedTag가 업데이트될 경우 이부분에 코드 추가
+	}
+
+	public void updateNBT(Player player) {
+		player.saveNBT();
+		if (player.level != null) {
+			player.namedTag.putString("Level", player.getLevel().getFolderName());
+			Position spawnPosition = player.getSpawn();
+			if (spawnPosition != null && spawnPosition.getLevel() != null) {
+				player.namedTag.putString("SpawnLevel", spawnPosition.getLevel().getFolderName());
+				player.namedTag.putInt("SpawnX", (int) spawnPosition.x);
+				player.namedTag.putInt("SpawnY", (int) spawnPosition.y);
+				player.namedTag.putInt("SpawnZ", (int) spawnPosition.z);
+			}
+
+			player.namedTag.putInt("playerGameType", player.gamemode);
+			player.namedTag.putLong("lastPlayed", System.currentTimeMillis() / 1000);
+
+			player.namedTag.putString("lastIP", player.getAddress());
+			player.namedTag.putInt("EXP", player.getExperience());
+			player.namedTag.putInt("expLevel", player.getExperienceLevel());
+
+			player.namedTag.putInt("foodLevel", player.getFoodData().getLevel());
+			player.namedTag.putFloat("foodSaturationLevel", player.getFoodData().getFoodSaturationLevel());
+		}
+
+		this.nbt = player.namedTag;
+		this.setModified();
 	}
 
 	public LinkedHashMap<String, Object> getAdditionalData() {

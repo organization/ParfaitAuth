@@ -444,7 +444,7 @@ public class ParfaitAuth {
 			insertDocuments.add(nameindex_document);
 		}
 
-		// TODO 만약 나중에 DB에 내장해야할 자료가 추가로 생기면
+		// 만약 나중에 DB에 내장해야할 자료가 추가로 생기면
 		// 여기에 해당코드를 추가하고 DB버전을 업데이트 해야합니다.
 
 		// DB에 업로드 해야할 문서가 존재하면 DB에 업로드합니다.
@@ -453,7 +453,7 @@ public class ParfaitAuth {
 
 		// DB버전을 업데이트 했는지 여부를 반환합니다.
 		if (serverstate != null) {
-			// TODO 향후 DB버전이 개선되면 여기에 업데이트 코드를 적습니다.
+			// 향후 DB버전이 개선되면 여기에 업데이트 코드를 적습니다.
 
 			if ((int) serverstate.get("initVersion") < ParfaitAuth.DATABASE_VERSION)
 				return ParfaitAuth.UPDATED_DATABASE;
@@ -964,8 +964,11 @@ public class ParfaitAuth {
 		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);
 
-		// 계정자료에 지정된 권한을 부여
+		// 계정자료에 지정된 게임모드와 권한을 부여
 		accountData.applyAccountType(player);
+
+		// 계정자료에 지정된 NBT 정보를 반영
+		accountData.applyNBT(player);
 
 		// IP자동로그인이 아니라면
 		if (!ipForce) {
@@ -998,6 +1001,9 @@ public class ParfaitAuth {
 			return true;
 		}
 
+		// UUID계정으로 로그인 처리합니다.
+		accountData.login(player);
+
 		// 비인가자/ID인가자 명단에서 제거합니다.
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
@@ -1007,6 +1013,9 @@ public class ParfaitAuth {
 
 		// 계정자료에 지정된 권한을 부여
 		accountData.applyAccountType(player);
+
+		// 계정자료에 지정된 NBT 정보를 반영
+		accountData.applyNBT(player);
 
 		player.sendMessage(plugin.getMessage("success-uuid-account-login-complete"));
 		player.sendMessage(plugin.getMessage("info-you-can-use-auth-command"));
@@ -1264,14 +1273,17 @@ public class ParfaitAuth {
 		try {
 			myField = getField(myClass, key);
 		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
 			return false;
 		}
 		myField.setAccessible(true);
 		try {
 			myField.set(object, value);
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			return false;
 		} catch (IllegalAccessException e) {
+			e.printStackTrace();
 			return false;
 		}
 		return true;
