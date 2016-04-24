@@ -21,6 +21,7 @@ import cn.nukkit.Server;
 import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -442,6 +443,8 @@ public class Account {
 			player.setGamemode(Player.CREATIVE);
 			player.setAllowFlight(true);
 			player.sendMessage(plugin.getMessage("info-admin-account-permission-granted"));
+			player.sendMessage(plugin.getMessage("info-you-can-use-howtoban-command"));
+			player.sendMessage(plugin.getMessage("info-you-can-use-account-command"));
 			break;
 		case Account.TYPE_BUILDER:
 			player.setOp(false);
@@ -449,6 +452,7 @@ public class Account {
 			player.setAllowFlight(true);
 			player.addAttachment(plugin, "nukkit.command.gamemode", true);
 			player.sendMessage(plugin.getMessage("info-builder-account-permission-granted"));
+			player.sendMessage(plugin.getMessage("info-you-can-use-gamemode-command"));
 			break;
 		case Account.TYPE_DEFAULT:
 			player.setOp(false);
@@ -484,6 +488,7 @@ public class Account {
 			player.addAttachment(plugin, plugin.getMessage("commands-ban-subnet-permission"), true);
 			player.addAttachment(plugin, plugin.getMessage("commands-ban-release-permission"), true);
 			player.sendMessage(plugin.getMessage("info-op-account-permission-granted"));
+			player.sendMessage(plugin.getMessage("info-you-can-use-howtoban-command"));
 			break;
 		}
 	}
@@ -572,7 +577,7 @@ public class Account {
 			Double x = nbt.getList("Pos", DoubleTag.class).get(0).getData();
 			Double y = nbt.getList("Pos", DoubleTag.class).get(1).getData();
 			Double z = nbt.getList("Pos", DoubleTag.class).get(2).getData();
-			player.teleport(new Position(x, y, z, level));
+			player.teleport(level.getSafeSpawn(new Vector3(x, y, z)));
 		}
 
 		// NBT FOOD LEVEL APPLY

@@ -169,10 +169,12 @@ public class EventHandler implements Listener {
 
 		// 인증을 거치지 않았으면 데미지를 줄 수 없게 합니다.
 		if (event instanceof EntityDamageByEntityEvent) {
-			if (ParfaitAuth.unauthorised
-					.get(((Player) ((EntityDamageByEntityEvent) event).getDamager()).getUniqueId()) != null) {
-				event.setCancelled();
-				return;
+			if (((EntityDamageByEntityEvent) event).getDamager() instanceof Player) {
+				if (ParfaitAuth.unauthorised
+						.get(((Player) ((EntityDamageByEntityEvent) event).getDamager()).getUniqueId()) != null) {
+					event.setCancelled();
+					return;
+				}
 			}
 		}
 	}
