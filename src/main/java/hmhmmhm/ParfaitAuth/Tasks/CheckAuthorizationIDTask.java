@@ -33,22 +33,23 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 		String inputPasswordHash = ParfaitAuth.hash(this.pw);
 
 		this.idAccount = ParfaitAuth.getAccountById(this.id);
-		this.passwordCorrect = inputPasswordHash.equals(this.idAccount.password);
 
-		if (this.pwCheckPassForce)
-			this.passwordCorrect = true;
+		if (this.idAccount != null) {
+			this.passwordCorrect = inputPasswordHash.equals(this.idAccount.password);
 
-		// 인증서버의 오프라인 유무를 사전검사
-		if ((idAccount.logined != null && !idAccount.logined.equals(this.serverUUID.toString()))) {
-			switch (ParfaitAuth.getServerStatus(UUID.fromString(idAccount.logined))) {
-			case ParfaitAuth.SERVERSTATE_IS_NULL:
-			case ParfaitAuth.SERVERSTATE_IS_RED:
-				this.loginedForce = true;
-				break;
+			if (this.pwCheckPassForce)
+				this.passwordCorrect = true;
+
+			// 인증서버의 오프라인 유무를 사전검사
+			if ((idAccount.logined != null && !idAccount.logined.equals(this.serverUUID.toString()))) {
+				switch (ParfaitAuth.getServerStatus(UUID.fromString(idAccount.logined))) {
+				case ParfaitAuth.SERVERSTATE_IS_NULL:
+				case ParfaitAuth.SERVERSTATE_IS_RED:
+					this.loginedForce = true;
+					break;
+				}
 			}
 		}
-		
-		
 	}
 
 	@Override
@@ -63,11 +64,13 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 		if (this.idAccount == null || ((this.idAccount instanceof Account) && !this.passwordCorrect)) {
 			ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
 
-			if (this.idAccount == null)
+			if (this.idAccount == null) {
 				player.sendMessage(plugin.getMessage("error-cant-find-that-id-account"));
+			}
 
-			if ((this.idAccount instanceof Account) && !this.passwordCorrect)
+			if ((this.idAccount instanceof Account) && !this.passwordCorrect) {
 				player.sendMessage(plugin.getMessage("error-cant-find-that-id-account-pw-wrong"));
+			}
 
 			Account account = ParfaitAuth.authorisedUUID.get(player.getUniqueId());
 			if (account == null) {
@@ -85,6 +88,7 @@ public class CheckAuthorizationIDTask extends AsyncTask {
 				// 오진아웃제를 초기화하고, 30분간 밴하고, kick처리
 				account.fiveStrikes = 0;
 				account.banMinute(30);
+				account.setBanCause(plugin.getMessage("ban-cause-bruteforce"));
 				player.kick(plugin.getMessage("kick-account-has-banned"), false);
 			} else {
 				player.sendMessage(plugin.getMessage("caution-if-you-are-missmatch-pw-five-time-willbe-ban"));

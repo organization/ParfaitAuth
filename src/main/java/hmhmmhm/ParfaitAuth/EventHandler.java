@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
+import cn.nukkit.event.TranslationContainer;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
@@ -33,11 +34,13 @@ import cn.nukkit.network.protocol.TextPacket;
 import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
+import hmhmmhm.ParfaitAuth.Events.LoginEvent;
 import hmhmmhm.ParfaitAuth.Events.NotificationReceiveEvent;
 import hmhmmhm.ParfaitAuth.Tasks.BanAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.ChangeAccountTypeTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedResponseTask;
 import hmhmmhm.ParfaitAuth.Tasks.DeleteBannedAddressTask;
+import hmhmmhm.ParfaitAuth.Tasks.FileDeleteTask;
 import hmhmmhm.ParfaitAuth.Tasks.RemoveAccountDataTask;
 import hmhmmhm.ParfaitAuth.Tasks.SendMessageTask;
 
@@ -65,8 +68,20 @@ public class EventHandler implements Listener {
 		switch (packet.pid()) {
 		case ProtocolInfo.LOGIN_PACKET:
 			// 비인가자 닉네임 unauthorized_0 과 같이 변경
-			if (packet instanceof LoginPacket)
+			if (packet instanceof LoginPacket) {
+				if (ParfaitAuth.unauthorizedUserCount != 0) {
+					boolean needToClear = true;
+					for (Player player : this.getServer().getOnlinePlayers().values()) {
+						if (player.getName() != null && player.getName().toLowerCase().contains("unauthorized_")) {
+							needToClear = false;
+							break;
+						}
+					}
+					if (needToClear)
+						ParfaitAuth.unauthorizedUserCount = 0;
+				}
 				((LoginPacket) packet).username = "unauthorized_" + ParfaitAuth.unauthorizedUserCount++;
+			}
 			break;
 		}
 	}
@@ -264,7 +279,16 @@ public class EventHandler implements Listener {
 			TaskHandler handler = this.getServer().getScheduler().scheduleDelayedRepeatingTask(task, 100, 100);
 			task.setHandler(handler);
 		}
+	}
 
+	public void onLoginEvent(LoginEvent event) {
+		if (event.isCancelled())
+			return;
+
+		// 접속 이후 ID 로그인이 이뤄지는경우 접속메시지 표시
+		if (event.isUUIDToId)
+			this.server.broadcastMessage(new TranslationContainer(TextFormat.YELLOW + "%multiplayer.player.joined",
+					new String[] { event.getPlayer().getDisplayName() }).getText());
 	}
 
 	@cn.nukkit.event.EventHandler
@@ -275,12 +299,14 @@ public class EventHandler implements Listener {
 			lastLogoutList.add(event.getPlayer());
 			return;
 		}
+
 		lastLogoutList.add(event.getPlayer());
 
 		// 인가된 ID계정이 있으면 업로드
 		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
 			account.updateNBT(event.getPlayer());
+			account.logout();
 			account.upload();
 		}
 
@@ -288,8 +314,17 @@ public class EventHandler implements Listener {
 		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
 			account.updateNBT(event.getPlayer());
+			account.logout();
 			account.upload();
 		}
+
+		// DB에 파일이 이미 존재하므로 .dat파일 삭제
+		this.getServer().getScheduler().scheduleAsyncTask(new FileDeleteTask(
+				this.getServer().getDataPath() + "players/" + event.getPlayer().getName().toLowerCase() + ".dat"));
+
+		// DB연결이 불안정해서 unauthorized_ 인채로 나갔을경우
+		if (event.getPlayer().getName().split("unauthorized_").length != 0)
+			event.setQuitMessage("");
 	}
 
 	@cn.nukkit.event.EventHandler
@@ -298,6 +333,7 @@ public class EventHandler implements Listener {
 		if (ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedID.get(event.getPlayer().getUniqueId());
 			account.updateNBT(event.getPlayer());
+			account.logout();
 			account.upload();
 		}
 
@@ -305,8 +341,13 @@ public class EventHandler implements Listener {
 		if (ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId()) != null) {
 			Account account = ParfaitAuth.authorisedUUID.get(event.getPlayer().getUniqueId());
 			account.updateNBT(event.getPlayer());
+			account.logout();
 			account.upload();
 		}
+
+		// DB에 파일이 이미 존재하므로 .dat파일 삭제
+		this.getServer().getScheduler().scheduleAsyncTask(new FileDeleteTask(
+				this.getServer().getDataPath() + "players/" + event.getPlayer().getName().toLowerCase() + ".dat"));
 	}
 
 	@SuppressWarnings("unchecked")

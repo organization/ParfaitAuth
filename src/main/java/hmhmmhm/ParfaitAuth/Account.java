@@ -217,13 +217,22 @@ public class Account {
 	/**
 	 * 로그아웃 했을때 갱신되어야할 정보들을<br>
 	 * 함수호출시 자동으로 갱신처리 해줍니다.
+	 */
+	public void logout() {
+		this.logout(false);
+	}
+
+	/**
+	 * 로그아웃 했을때 갱신되어야할 정보들을<br>
+	 * 함수호출시 자동으로 갱신처리 해줍니다.
 	 * 
 	 * @param removeIpData
 	 */
 	public void logout(boolean removeIpData) {
 		this.setModified();
-		if (removeIpData)
+		if (removeIpData) {
 			this.lastIp = null;
+		}
 		this.logined = null;
 	}
 
@@ -237,16 +246,16 @@ public class Account {
 			return false;
 
 		Long nowTimestamp = Calendar.getInstance().getTime().getTime();
-		Long releaseTimestamp = Long.getLong(this.banned);
+		Long releaseTimestamp = Long.valueOf(this.banned);
 
 		if (releaseTimestamp == null)
 			return false;
 
 		// 타임스탬프는 1970년 이후부터의 밀리초, 고로 큰게 더 미래입니다.
 		if (releaseTimestamp > nowTimestamp)
-			return false;
+			return true;
 
-		return true;
+		return false;
 	}
 
 	/**
@@ -503,8 +512,11 @@ public class Account {
 				}
 			}
 		}
+		player.removeWindow(player.getInventory());
 		ParfaitAuth.setProtectedValue(player, "inventory", inventory);
 		player.addWindow(inventory, 0);
+		inventory.sendContents(player);
+		inventory.sendArmorContents(player);
 
 		// NBT HEALTH APPLY
 		if (player.namedTag.contains("HealF")) {
@@ -543,6 +555,7 @@ public class Account {
 				player.setNameTagVisible(player.namedTag.getBoolean("CustomNameVisible"));
 			}
 		}
+		player.sendPotionEffects(player);
 
 		// NBT LEVEL APPLY
 		Level level;
@@ -570,6 +583,7 @@ public class Account {
 			player.namedTag.putFloat("FoodSaturationLevel", 20);
 		float foodSaturationLevel = player.namedTag.getFloat("foodSaturationLevel");
 		ParfaitAuth.setProtectedValue(player, "foodData", new PlayerFood(player, foodLevel, foodSaturationLevel));
+		player.getFoodData().sendFoodLevel();
 
 		// NBT HELD ITEM APPLY
 		if (player.isCreative()) {
@@ -577,6 +591,7 @@ public class Account {
 		} else {
 			player.getInventory().setHeldItemSlot(player.getInventory().getHotbarSlotIndex(0));
 		}
+		player.sendData(player);
 
 		// Nukkit namedTag가 업데이트될 경우 이부분에 코드 추가
 	}

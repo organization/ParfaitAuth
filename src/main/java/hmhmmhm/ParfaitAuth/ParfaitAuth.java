@@ -33,6 +33,7 @@ import hmhmmhm.ParfaitAuth.Tasks.CheckAuthorizationIDTask;
 import hmhmmhm.ParfaitAuth.Tasks.CheckUnauthorizedAccessTask;
 import hmhmmhm.ParfaitAuth.Tasks.CreateNewUUIDAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.DeleteAccountTask;
+import hmhmmhm.ParfaitAuth.Tasks.FileDeleteTask;
 import hmhmmhm.ParfaitAuth.Tasks.RetryAuthAlreadyLoginedAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateAccountTask;
 import hmhmmhm.ParfaitAuth.Tasks.UpdateAccount_IdAsync;
@@ -890,6 +891,7 @@ public class ParfaitAuth {
 		// 인증서버의 오프라인 유무를 사전검사해서
 		// 이전 인증서버가 사망시 로그인 여부를 따지지 않기 위해 쓰입니다.
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+		Server server = Server.getInstance();
 
 		// 이전 인증서버가 살아있고 현재 접속중이며, 접속했던 서버가 이서버가 아닐때
 		if (accountData.logined != null) {
@@ -905,7 +907,7 @@ public class ParfaitAuth {
 				// 자동반복 테스크로 3초마다 3번 재확인하도록 합니다.
 				RetryAuthAlreadyLoginedAccountTask task = new RetryAuthAlreadyLoginedAccountTask(player.getName(),
 						accountData.id);
-				TaskHandler handler = Server.getInstance().getScheduler().scheduleDelayedRepeatingTask(task, 60, 60);
+				TaskHandler handler = server.getScheduler().scheduleDelayedRepeatingTask(task, 60, 60);
 				task.setHandler(handler);
 
 				return false;
@@ -920,7 +922,7 @@ public class ParfaitAuth {
 
 			// 이전계정의 UUID 정보말소
 			accountData.uuid = null;
-			Server.getInstance().getScheduler().scheduleAsyncTask(
+			server.getScheduler().scheduleAsyncTask(
 					new CreateNewUUIDAccountTask(accountData, player.getUniqueId(), player.getName()));
 			return false;
 		}
@@ -932,8 +934,9 @@ public class ParfaitAuth {
 			return true;
 		}
 
-		LoginEvent loginEvent = new LoginEvent(player, accountData);
-		Server.getInstance().getPluginManager().callEvent(loginEvent);
+		LoginEvent loginEvent = new LoginEvent(player, accountData,
+				ParfaitAuth.authorisedUUID.get(player.getUniqueId()) != null);
+		server.getPluginManager().callEvent(loginEvent);
 
 		if (loginEvent.isCancelled()) {
 			if (loginEvent.reason != null) {
@@ -953,16 +956,21 @@ public class ParfaitAuth {
 		if (accountData._id != null) {
 			if (ParfaitAuth.authorisedUUID.get(player.getUniqueId()) != null) {
 				Account oldAccount = ParfaitAuth.authorisedUUID.get(player.getUniqueId());
-				Server.getInstance().getPluginManager()
-						.callEvent(new TemporaryUUIDAccountDeletedEvent(oldAccount, accountData));
+				server.getPluginManager().callEvent(new TemporaryUUIDAccountDeletedEvent(oldAccount, accountData));
 				ParfaitAuth.deleteAccountBy_Id(oldAccount._id);
 			}
 		}
 
 		ParfaitAuth.authorisedUUID.remove(player.getUniqueId());
 
+		String oldName = player.getName();
+
 		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);
+
+		// 인증전 닉네임 .dat 파일 삭제
+		server.getScheduler().scheduleAsyncTask(
+				new FileDeleteTask(server.getDataPath() + "players/" + oldName.toLowerCase() + ".dat"));
 
 		// 계정자료에 지정된 게임모드와 권한을 부여
 		accountData.applyAccountType(player);
@@ -993,11 +1001,12 @@ public class ParfaitAuth {
 	 */
 	public static boolean authorizationUUID(Player player, Account accountData) {
 		ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+		Server server = Server.getInstance();
 
 		// 차단된 계정이면 킥처리
 		if (accountData.isBanned()) {
-			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period",
-					accountData.getUnblockPeriod().replace("%cause", accountData.banCause)), false);
+			player.kick(plugin.getMessage("kick-account-is-banned").replace("%period", accountData.getUnblockPeriod())
+					.replace("%cause", accountData.banCause == null ? "" : accountData.banCause), false);
 			return true;
 		}
 
@@ -1008,8 +1017,14 @@ public class ParfaitAuth {
 		ParfaitAuth.unauthorised.remove(player.getUniqueId());
 		ParfaitAuth.authorisedUUID.put(player.getUniqueId(), accountData);
 
+		String oldName = player.getName();
+
 		// 닉네임을 계정자료에 있는 닉네임으로 변경합니다.
 		changePlayerName(player, accountData.nickname);
+
+		// 인증전 닉네임 .dat 파일 삭제
+		server.getScheduler().scheduleAsyncTask(
+				new FileDeleteTask(server.getDataPath() + "players/" + oldName.toLowerCase() + ".dat"));
 
 		// 계정자료에 지정된 권한을 부여
 		accountData.applyAccountType(player);
@@ -1042,7 +1057,7 @@ public class ParfaitAuth {
 
 		// DB에 계정정보를 업로드합니다.
 		if (async) {
-			accountData.upload();
+			accountData.upload(true);
 		} else {
 			ParfaitAuth.updateAccount(uuid, accountData.convertToDocument());
 		}

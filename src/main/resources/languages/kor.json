@@ -93,6 +93,8 @@
 	"kick-authorization-failed": "기초인증정보 획득에 실패했습니다. 관리자에게 문의해주세요.",
 	"kick-account-has-banned": "계정이 차단되었습니다. 관리자에게 문의해주세요.",
 
+	"ban-cause-bruteforce": "암호 무작위대입 획득방지",
+
 	"commands-auth": "인증",
 	"commands-auth-permission": "parfaitauth.commands.auth",
 	"commands-auth-description": "인증체계와 관련된 설명을 표시합니다.",

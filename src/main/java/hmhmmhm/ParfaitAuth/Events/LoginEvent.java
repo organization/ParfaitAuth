@@ -14,14 +14,16 @@ public class LoginEvent extends Event implements Cancellable {
 	public String reason = null;
 
 	public boolean isCancelled = false;
+	public boolean isUUIDToId = false;
 
 	public static HandlerList getHandlers() {
 		return handlers;
 	}
 
-	public LoginEvent(Player player, Account account) {
+	public LoginEvent(Player player, Account account, boolean isUUIDToId) {
 		this.player = player;
 		this.account = account;
+		this.isUUIDToId = isUUIDToId;
 	}
 
 	public Player getPlayer() {
@@ -30,6 +32,10 @@ public class LoginEvent extends Event implements Cancellable {
 
 	public Account getAccount() {
 		return this.account;
+	}
+
+	public boolean isUUIDToId() {
+		return this.isCancelled;
 	}
 
 	public boolean isCancelled() {
