@@ -41,14 +41,14 @@ public class AccountCommand extends ParfaitAuthCommand {
 			// 계정 유형 아이디
 			if (args[0].equals(this.getMessage(this.commandKey + "-sub-type"))) {
 				// 계정 유형 아이디 1 의 형식이 아닐경우
-				if (args.length < 2) {
+				if (args.length < 3) {
 					SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-type-help-");
 					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
 					task.setHandler(handler);
 					return true;
 				}
 
-				int accounttype = Integer.getInteger(args[2]);
+				int accounttype = Integer.valueOf(args[2]);
 
 				// 계정 유형 맞는지 확인
 				switch (accounttype) {

@@ -28,7 +28,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 		// f <필터> <검색어>
 
 		if (command.getName().toLowerCase() == this.commandName) {
-			if (args.length < 2) {
+			if (args.length < 1) {
 				SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
 				TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
 				task.setHandler(handler);
@@ -37,6 +37,12 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 			// /f 아이디 검색어
 			if (args[0].equals(this.getMessage(this.commandKey + "-sub-id"))) {
+				if (args.length < 2) {
+					SendMessageTask task = new SendMessageTask(sender, this.commandKey + "-help-");
+					TaskHandler handler = this.getServer().getScheduler().scheduleRepeatingTask(task, 10);
+					task.setHandler(handler);
+					return true;
+				}
 
 				// 접속중인 유저중 해당 아이디가 있나 확인
 				Account findOnlineAccount = null;
@@ -64,6 +70,10 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 
 			// /f 닉네임 검색어
 			if (args[0].equals(this.getMessage(this.commandKey + "-sub-nick"))) {
+				String searchKeyword = null;
+				if (args.length > 1)
+					searchKeyword = args[1];
+
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 온라인 상태인 유저목록 순회
@@ -71,6 +81,12 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 					Player player = entry.getValue();
 
 					// 검색어가 닉네임에 포함되는지 체크
+					if (searchKeyword == null) {
+						int identifier = PlayerIdentifier.put(player.getUniqueId());
+						list.add("[" + identifier + "] " + player.getName() + " ");
+						continue;
+					}
+
 					if (player.getName().split(args[1]).length == 2) {
 						int identifier = PlayerIdentifier.put(player.getUniqueId());
 						list.add("[" + identifier + "] " + player.getName() + " ");
