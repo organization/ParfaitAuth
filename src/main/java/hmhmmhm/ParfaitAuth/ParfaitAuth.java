@@ -741,21 +741,48 @@ public class ParfaitAuth {
 	/**
 	 * DB에 저장되어있는 계정 유형 통계를 표시합니다.
 	 * 
-	 * @return List<Document>
+	 * @return ArrayList<Integer>
 	 */
-	public static List<Document> getAccountStatistics() {
+	public static ArrayList<Integer> getAccountStatistics() {
 		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
 		if (!ParfaitAuth.checkClientOnline())
 			return null;
 
 		MongoDatabase db = MongoDBLib.getDatabase();
 
-		// accountType 키의 밸류값이 어떤게 있는지에 대한 통계를 가져옵니다.
-		List<Document> documents = db.getCollection(ParfaitAuth.accountCollectionName)
-				.aggregate(asList(new Document("$group",
-						new Document("accountType", "$borough").append("count", new Document("$sum", 1)))))
+		int fullAccountCount = 0;
+		int uuidAccountCount = 0;
+		int idAccountCount = 0;
+
+		// FULL ACCOUNT COUNT
+		List<Document> fullAccount = db.getCollection(ParfaitAuth.accountCollectionName)
+				.aggregate(asList(
+						new Document("$group", new Document("_id", "").append("count", new Document("$sum", 1)))))
 				.into(new ArrayList<Document>());
-		return documents;
+
+		Document fullAccountAggregate = (fullAccount.size() == 0) ? null : fullAccount.get(0);
+		if (fullAccountAggregate != null)
+			fullAccountCount = (int) fullAccountAggregate.get("count");
+
+		// UUID ACCOUNT
+		List<Document> uuidAccount = db.getCollection(ParfaitAuth.accountCollectionName)
+				.aggregate(asList(new Document("$match", new Document("id", null)),
+						new Document("$group",
+								new Document("_id", "accountType").append("count", new Document("$sum", 1)))))
+				.into(new ArrayList<Document>());
+
+		Document uuidAccountAggregate = (uuidAccount.size() == 0) ? null : uuidAccount.get(0);
+		if (uuidAccountAggregate != null)
+			uuidAccountCount = (int) uuidAccountAggregate.get("count");
+
+		idAccountCount = fullAccountCount - uuidAccountCount;
+
+		ArrayList<Integer> list = new ArrayList<>();
+		list.add(fullAccountCount);
+		list.add(uuidAccountCount);
+		list.add(idAccountCount);
+
+		return list;
 	}
 
 	/**

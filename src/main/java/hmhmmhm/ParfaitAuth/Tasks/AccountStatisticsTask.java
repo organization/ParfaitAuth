@@ -1,5 +1,6 @@
 package hmhmmhm.ParfaitAuth.Tasks;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.Document;
@@ -12,7 +13,8 @@ import hmhmmhm.ParfaitAuth.ParfaitAuthPlugin;
 
 public class AccountStatisticsTask extends AsyncTask {
 	private String sender;
-	private List<Document> documents;
+	private ArrayList<Integer> list;
+	private boolean isFailed = false;
 
 	public AccountStatisticsTask(String sender) {
 		this.sender = sender;
@@ -20,7 +22,11 @@ public class AccountStatisticsTask extends AsyncTask {
 
 	@Override
 	public void onRun() {
-		this.documents = ParfaitAuth.getAccountStatistics();
+		try {
+			this.list = ParfaitAuth.getAccountStatistics();
+		} catch (Exception e) {
+			this.isFailed = true;
+		}
 	}
 
 	public void onCompletion(Server server) {
@@ -32,8 +38,15 @@ public class AccountStatisticsTask extends AsyncTask {
 
 		player.sendMessage(plugin.getMessage("status-show-account-statistics"));
 
-		// TODO 다듬어야함
-		for (Document document : this.documents)
-			player.sendMessage(document.toJson());
+		if (isFailed) {
+			player.sendMessage(plugin.getMessage("error-account-statistics-task-failed"));
+			return;
+		}
+
+		player.sendMessage(plugin.getMessage("info-server-full-account-count").replace("%fullcount",
+				String.valueOf(this.list.get(0))));
+		player.sendMessage(plugin.getMessage("info-server-type-account-count")
+				.replace("%uuidcount", String.valueOf(this.list.get(1)))
+				.replace("%idcount", String.valueOf(this.list.get(2))));
 	}
 }
