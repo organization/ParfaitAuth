@@ -154,7 +154,7 @@
 	"commands-register-usage": "/register <ID> <PW>",
 
 	"commands-register-help-1": "* /register <ID> <PW> <NAME>",
-	"commands-register-help-2": "* ID is available in English and a number _ and must be 3-15 digits.,
+	"commands-register-help-2": "* ID is available in English and a number _ and must be 3-15 digits.",
 	"commands-register-help-3": "* Nickname is available in English and numbers, and must be 2-10.",
 	"commands-register-help-4": "* If the id already signed up, It will be rejected.",
 	"commands-register-help-5": "* Password can be used up to 6-40 characters.",
