@@ -77,9 +77,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 				ArrayList<String> list = new ArrayList<String>();
 
 				// 온라인 상태인 유저목록 순회
-				for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
-					Player player = entry.getValue();
-
+				for (Player player : this.getServer().getOnlinePlayers().values()) {
 					// 검색어가 닉네임에 포함되는지 체크
 					if (searchKeyword == null) {
 						int identifier = PlayerIdentifier.put(player.getUniqueId());
@@ -175,9 +173,7 @@ public class AccountFindCommand extends ParfaitAuthCommand {
 			if (args[0].equals(this.getMessage(this.commandKey + "-sub-diff"))) {
 				ArrayList<String> list = new ArrayList<String>();
 
-				for (Entry<String, Player> entry : this.getServer().getOnlinePlayers().entrySet()) {
-					Player player = entry.getValue();
-
+				for (Player player : this.getServer().getOnlinePlayers().values()) {
 					int diff = ParfaitAuth.getNickNameDifficult(player.getName());
 
 					if (diff != 0) {
