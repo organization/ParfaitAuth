@@ -68,7 +68,7 @@ public class EventHandler implements Listener {
 		switch (packet.pid()) {
 		case ProtocolInfo.LOGIN_PACKET:
 			// 비인가자 닉네임 unauthorized_0 과 같이 변경
-			if (packet instanceof LoginPacket) {
+			if (packet instanceof LoginPacket)
 				if (ParfaitAuth.unauthorizedUserCount != 0) {
 					boolean needToClear = true;
 					for (Player player : this.getServer().getOnlinePlayers().values()) {
@@ -80,8 +80,7 @@ public class EventHandler implements Listener {
 					if (needToClear)
 						ParfaitAuth.unauthorizedUserCount = 0;
 				}
-				((LoginPacket) packet).username = "unauthorized_" + ParfaitAuth.unauthorizedUserCount++;
-			}
+			((LoginPacket) packet).username = "unauthorized_" + ParfaitAuth.unauthorizedUserCount++;
 			break;
 		}
 	}

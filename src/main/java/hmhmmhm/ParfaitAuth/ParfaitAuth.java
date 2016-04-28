@@ -470,6 +470,10 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static LinkedHashMap<String, Long> getBannedAddress() {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
 		LinkedHashMap<String, Long> list = new LinkedHashMap<>();
 
 		MongoDatabase db = MongoDBLib.getDatabase();
@@ -505,6 +509,10 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static int addBannedAddress(String address, Long period) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
 		// bannedaddress 리스트를 가져옵니다.
 		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
 
@@ -535,6 +543,10 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static int deleteBannedAddress(String address) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환합니다.
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
 		// bannedaddress 리스트를 가져옵니다.
 		LinkedHashMap<String, Long> originList = ParfaitAuth.getBannedAddress();
 
@@ -569,6 +581,10 @@ public class ParfaitAuth {
 	 * @return
 	 */
 	public static int pushNotification(Document serverDocument, String serverUUID, String identifier, Object object) {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return ParfaitAuth.CLIENT_IS_DEAD;
+
 		String updated = (String) serverDocument.get("updated");
 
 		// 해당 타임스탬프가 존재하지 않는다면 반환합니다.
@@ -601,6 +617,10 @@ public class ParfaitAuth {
 	}
 
 	public static ArrayList<Event> pullNotification() {
+		// 클라이언트가 오프라인상태일때 작업하지 않고 반환
+		if (!ParfaitAuth.checkClientOnline())
+			return null;
+
 		UUID serverUUID = ParfaitAuth.getParfaitAuthUUID();
 
 		MongoDatabase db = MongoDBLib.getDatabase();

@@ -19,6 +19,7 @@ import cn.nukkit.event.Event;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.scheduler.Task;
+import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.TextFormat;
 import hmhmmhm.ParfaitAuth.EventHandler;
@@ -90,6 +91,31 @@ public class ParfaitAuthPlugin extends PluginBase {
 		this.accountDataUploader();
 	}
 
+	private void dbOfflineFallback() {
+		Task task = new Task() {
+			@Override
+			public void onRun(int currentTick) {
+				if (ParfaitAuth.checkClientOnline()) {
+					ParfaitAuthPlugin plugin = ParfaitAuthPlugin.getPlugin();
+					plugin.getLogger().info(plugin.getMessage("status-detected-db-online"));
+
+					// 데이터베이스 버전 체크 및 기반컬렉션과 도큐먼트 배치
+					plugin.initialDatabase();
+
+					// 차단해야하는 IP명부 가져오기 및 확인
+					plugin.getBannedAddress();
+
+					// 서버상태 문서에 적힐 외부 아이피를 확인
+					plugin.getExternalAddress();
+
+					this.cancel();
+				}
+			}
+		};
+		TaskHandler handler = this.getServer().getScheduler().scheduleDelayedRepeatingTask(task, 100, 100);
+		task.setHandler(handler);
+	}
+
 	private void accountDataUploader() {
 		this.getServer().getScheduler().scheduleDelayedRepeatingTask(new Task() {
 			@Override
@@ -115,7 +141,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 	/**
 	 * 서버상태 문서에 적힐 외부 아이피를 비동기로 AWS에서 가져옵니다.
 	 */
-	private void getExternalAddress() {
+	public void getExternalAddress() {
 		this.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
 			String address = null;
 
@@ -170,7 +196,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 	/**
 	 * DB에서 이전에 차단된 네트워크 주소 명단을 받아 램으로 불러옵니다.
 	 */
-	private void getBannedAddress() {
+	public void getBannedAddress() {
 		this.getServer().getScheduler().scheduleAsyncTask(new AsyncTask() {
 			private LinkedHashMap<String, Long> list = null;
 
@@ -232,13 +258,15 @@ public class ParfaitAuthPlugin extends PluginBase {
 	 * DB에 필수컬렉션과 필수문서가 만들어져있는지 확인후 없으면 생성합니다.<br>
 	 * 만약 DB 버전이 플러그인에 내장된 DB버전보다 높거나 낮으면 그사항을 알립니다.
 	 */
-	private void initialDatabase() {
+	public void initialDatabase() {
 		ParfaitAuth.parfaitAuthUUID = UUID.fromString((String) this.getSettings().get("server-uuid"));
 		ParfaitAuth.randomName = this.getRandomName();
 
 		switch (ParfaitAuth.initialDatabase()) {
 		case ParfaitAuth.CLIENT_IS_DEAD:
 			this.getLogger().emergency(this.getMessage("caution-client-is-dead"));
+			this.getLogger().emergency(this.getMessage("error-db-has-offline-waiting-for-reconnect"));
+			this.dbOfflineFallback();
 			break;
 		case ParfaitAuth.CAUTION_PLUGIN_IS_OUTDATE:
 			this.getLogger().info(this.getMessage("caution-plugin-is-outdate"));
@@ -250,6 +278,7 @@ public class ParfaitAuthPlugin extends PluginBase {
 			this.getLogger().info(this.getMessage("status-database-check-all-green"));
 			break;
 		}
+
 	}
 
 	@Override

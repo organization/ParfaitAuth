@@ -16,6 +16,7 @@
 	"status-start-show-user-identifier-list": "* 포함된 유저 명단을 표시합니다.",
 	"status-start-the-async-db-request": "* DB에 비동기로 정보를 요청합니다...",
 	"status-start-wait-db-response-about-login": "* 로그인정보를 DB가 전송하길 기다리는 중입니다.",
+	"status-detected-db-online": "* DB가 활성화됨을 감지했습니다. 활성화 진행중..",
 
 	"error-no-exist-mongodb": "* MongoDBLib 플러그인이 없습니다! 활성화 불가!",
 	"error-in-game-user-only": "* 게임내에 접속한 사용자만 사용가능합니다.",
@@ -50,6 +51,7 @@
 	"error-unregister-is-cancelled-by-other-plugin": "* 다른 플러그인에 의해서 탈퇴가 거부되었습니다.",
 	"error-builder-cant-change-other-player-gamemode": "* 게임모드 권한을 타인에게 적용할 수 없습니다.",
 	"error-account-statistics-task-failed": "* 계정 통계를 내는중 예상하지 못한 문제가 발생했습니다.",
+	"error-db-has-offline-waiting-for-reconnect": "* DB가 현재 오프라인 상태입니다. 활성화 대기 중...",
 
 	"caution-client-is-dead": "* 주의! DB연결이 오프라인 상태입니다!! 계정연동 유지불가!",
 	"caution-plugin-is-outdate" : "* 주의! DB버전보다 플러그인이 버전이 낮습니다! 호환성을 체크하세요!",

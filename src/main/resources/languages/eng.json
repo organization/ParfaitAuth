@@ -16,6 +16,7 @@
 	"status-start-show-user-identifier-list": "* Displays a list of users contained.",
 	"status-start-the-async-db-request": "* Request information asynchronously in the DB ...",
 	"status-start-wait-db-response-about-login": "Waiting for the transfer of login information from the DB.",
+	"status-detected-db-online": "* Program has detected that DB online. Activation in progress..",
 
 	"error-no-exist-mongodb": "* This plugin is need MongoDBLib plugin ! Plugin disabled!",
 	"error-in-game-user-only": "* Only in game user can do this command.",
@@ -50,6 +51,7 @@
 	"error-unregister-is-cancelled-by-other-plugin": "* Denied Unregister by other plug-ins.",
 	"error-builder-cant-change-other-player-gamemode": "* Game Mode privilege can not apply to others.",
 	"error-account-statistics-task-failed": "* An unexpected problem occurred that the account statistics",
+	"error-db-has-offline-waiting-for-reconnect": "* DB is currently offline. Activating standby...",
 
 	"caution-client-is-dead": "* CAUTION! The DB connection is offline! Can not account maintenance interlock!",
 	"caution-plugin-is-outdate" : "* CAUTION! This plug-in version is lower than the DB version! Please Check compatibility!",
