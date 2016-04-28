@@ -1167,6 +1167,8 @@ public class ParfaitAuth {
 		} catch (IllegalStateException e) {
 			// 아예 실패하면 false를 반환합니다.
 			return false;
+		} catch(Exception e){
+			return false;
 		}
 	}
 
