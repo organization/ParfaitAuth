@@ -1256,9 +1256,9 @@ public class ParfaitAuth {
 	}
 
 	/**
-	 * 해당 문자열을 닉네임으로 사용가능한지 확인합니다.
+	 * 해당 문자열을 패스워드로 사용가능한지 확인합니다.
 	 * 
-	 * @param id
+	 * @param pw
 	 * @return boolean
 	 */
 	public static boolean checkRightPassword(String pw) {
