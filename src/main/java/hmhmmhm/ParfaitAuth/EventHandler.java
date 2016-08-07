@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
-import cn.nukkit.event.TranslationContainer;
+import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
